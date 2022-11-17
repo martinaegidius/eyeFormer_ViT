@@ -26,6 +26,7 @@ class eyeFormer_ViT(nn.Module):
             self.clsdecoder = nn.Linear(self.d_model,4,bias=True)
             self.DEBUG = False
             
+            
         def switch_debug(self):
             self.DEBUG = not self.DEBUG
             if(self.DEBUG==True):
@@ -35,37 +36,43 @@ class eyeFormer_ViT(nn.Module):
             
             
         def forward(self,x,src_padding_mask=None):    
-            if x.dim()==1: #fix for batch-size 1 
+            if x.dim()==1: #fix for batch-size = 1 
                 x = x.unsqueeze(0)
+            if src_padding_mask.dim()==1: #fix for batch-size = 1
+                src_padding_mask = src_padding_mask.unsqueeze(0)
             
             bs = x.shape[0]
+            #print("Registered batchsize: ",bs)
 
             if src_padding_mask==None: 
                 src_padding_mask = torch.zeros(bs,x.shape[1]).to(dtype=torch.bool)
             
             clsmask = torch.zeros(bs,1).to(dtype=torch.bool)
+            #print("\n Src_padding_mask shape: ",src_padding_mask.shape)
+            #print("\n CLS-mask shape: ",clsmask.shape)
             mask = torch.cat((clsmask,src_padding_mask[:,:].reshape(bs,32)),1) #unmask cls-token
            
             x = x* math.sqrt(self.d_model) #as this in torch tutorial but dont know why
             x = torch.cat((self.cls_token.expand(x.shape[0],1,self.d_model),x),1) #concat along sequence-dimension. Copy bs times
             if self.DEBUG==True:
-                print("2: scaled and cat with CLS:\n",x,x.shape)
+                print("2: scaled and cat with CLS:\n",x.shape)
             x = self.pos_encoder(x)
             if self.DEBUG==True:
-                print("3: positionally encoded: \n",x,x.shape)
+                print("3: positionally encoded: \n",x.shape)
             
             #print("Src_padding mask is: ",src_padding_mask)
             #print("pos encoding shape: ",x.shape)
             output = self.encoder(x,mask)
             if self.DEBUG==True:
-                print("4: Transformer encoder output:\n",output)
+                print("4: Transformer encoder output:\n",output.shape)
             #print("encoder output:\n",output)
             #print("Encoder output shape:\n",output.shape)
             #print("Same as input :-)")
            
             output = self.clsdecoder(output[:,0,:]) #batch-first is true. Picks encoded cls-token-vals for the batch.
             if self.DEBUG==True:
-                print("5: linear layer based on CLS-token output: \n",output)
+                print("5: linear layer based on CLS-token output: \n",output.shape)
+            
             
             return output
             
@@ -236,7 +243,8 @@ def pascalACC(preds,labels): #TODO: does not work for batched input. Fix
 
 
 if __name__ == "__main__":
-    model = eyeFormer_ViT()
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model = eyeFormer_ViT().to(device)
     model.switch_debug()
     deep_seq = torch.rand(2,32,770)
     model(deep_seq)

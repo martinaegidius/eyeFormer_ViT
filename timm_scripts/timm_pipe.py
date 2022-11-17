@@ -17,6 +17,7 @@ import torch.nn as nn
 import ViT_model as vm
 from tqdm import tqdm
 #import handle_pascal as hdl
+from load_POET_timm import pascalET
 
 
 
@@ -120,7 +121,8 @@ class PASCALdataset(Dataset):
         self.sTransform = sTransform
         self.imTransform = imTransform
         self.deep_representation = None
-        self.ViT_model = timm.create_model('vit_base_patch16_224',pretrained=True,num_classes=0, global_pool='') 
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.ViT_model = timm.create_model('vit_base_patch16_224',pretrained=True,num_classes=0, global_pool='').to(device)
         
     def __len__(self): 
         return len(self.ABDset)
@@ -314,20 +316,25 @@ class rescale_coords(object):
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 classes = ["aeroplane","bicycle","boat","cat","cow","diningtable","dog","horse","motorbike","sofa"]
-GENERATE_DATASET = False
+GENERATE_DATASET = True
 classesOC = [0]
 classString = classes[classesOC[0]]
 timm_root = os.path.dirname(__file__)
 BATCH_SZ = 2
 NLAYERS = 1
 NHEADS = 1
-EPOCHS = 2000
+EPOCHS = 200
 NUM_IN_OVERFIT = 2
 DROPOUT = 0.0
 LR_FACTOR = 1
-NUM_WARMUP = EPOCHS*(1/3)*(NUM_IN_OVERFIT//BATCH_SZ) #constant 30% warmup-rate
+EPOCH_STEPS = NUM_IN_OVERFIT//BATCH_SZ
+if EPOCH_STEPS == 0: 
+    EPOCH_STEPS = 1
+NUM_WARMUP = int(EPOCHS*(1/3))*EPOCH_STEPS #constant 30% warmup-rate
+#NUM_WARMUP = 1
 BETA = 1
-OVERFIT=False
+OVERFIT=True
+EVAL = 0 #flag which is set for model evaluation, ie. final model. Set 1 if it is final model.
 
    
 
@@ -337,10 +344,10 @@ OVERFIT=False
 
     
 if(GENERATE_DATASET == True or GENERATE_DATASET==None):
-    dataFrame = PASCALdataset()
+    dataFrame = pascalET()
     #root_dir = os.path.dirname(__file__) + "/../eyeFormer/Data/POETdataset/PascalImages/"
-    root_dir = os.path.join(os.path.expanduser('~'),"/home/max/Documents/s194119/Bachelor/Data/POETdataset/PascalImages/")
-    split_root_dir = os.path.join(os.path.expanduser('~'),"/home/max/Documents/s194119/Bachelor/")
+    root_dir = os.path.join(os.path.expanduser('~'),"/home/max/Documents/s194119/New_bachelor/Data/POETdataset/PascalImages/")
+    split_root_dir = os.path.join(os.path.expanduser('~'),"/home/max/Documents/s194119/New_bachelor")
     
     SignalTrans = torchvision.transforms.Compose(
         [torchvision.transforms.Lambda(tensorPad())])
@@ -366,10 +373,18 @@ if(GENERATE_DATASET == True or GENERATE_DATASET==None):
 if(GENERATE_DATASET == False):
     train,test = load_split(classString,timm_root)  
     print("Succesfully read data from binary")
-    
+ 
+#FOR DEBUGGING
+train = torch.utils.data.Subset(train,[0,1,2])
+
 
 #make dataloaders of chosen split
 trainloader = DataLoader(train,batch_size=BATCH_SZ,shuffle=True,num_workers=0)
+#FOR DEBUGGING
+#for i, data in enumerate(trainloader):
+#    if i==1:
+#        DEBUGSAMPLE = data
+
 testloader = DataLoader(test,batch_size=BATCH_SZ,shuffle=True,num_workers=0)
 
 if NUM_IN_OVERFIT==None and OVERFIT==True: #only if no cmd-argv provided
@@ -391,31 +406,31 @@ if(OVERFIT): #CREATES TRAIN AND VALIDATION-SPLIT
     print("Valloader of constant length {}".format(valIDX.shape[0]))
 
 
-for i in range(1): #get first sample for debugging
-    data = next(iter(trainloader))
-    signal = data["signal"]
-    mask = data["mask"]
-    output = data["image"].squeeze(1) #ViT output. Now has dimensions [batch_sz,197,768]. Check for batches aswell.
-    im = data["orgimage"] #normalized and reshaped squared original image
+# for i in range(1): #get first sample for debugging
+#     data = next(iter(trainloader))
+#     signal = data["signal"]
+#     mask = data["mask"]
+#     output = data["image"].squeeze(1) #ViT output. Now has dimensions [batch_sz,197,768]. Check for batches aswell.
+#     im = data["orgimage"] #normalized and reshaped squared original image
 
     
-#------------------------------------FOR UNBATCHED INPUT FOR DEBUGGING. ALL FUNCTIONS ONLY TAKE FIRST IMAGE IN BATCH
+# ------------------------------------FOR UNBATCHED INPUT FOR DEBUGGING. ALL FUNCTIONS ONLY TAKE FIRST IMAGE IN BATCH
 # #SHOW SQUARE-RESHAPED IMG 
-#plt.figure(0)    
-#plt.imshow(im[0].squeeze(0).permute(1,2,0))
-#plt.title("Image used in ViT")
+# plt.figure(0)    
+# plt.imshow(im[0].squeeze(0).permute(1,2,0))
+# plt.title("Image used in ViT")
 
 
 # #SAMPLE SQUARE BACK TO ORG SIZE
-#plt.figure(1)
-#size = (int(data["size"][0,1].item()),int(data["size"][0,0].item())) #get original image shape. Remember: DS is in H,W and resize uses W,H
-#sampled_back_image = torchvision.transforms.ToPILImage()(im[0].squeeze(0)) #convert to PIL-format.
-#sampled_back_image = sampled_back_image.resize(size,Image.BILINEAR) #reshape back to org size
-#plt.imshow(sampled_back_image)
-#plt.title("Resampled image")
+# plt.figure(1)
+# size = (int(data["size"][0,1].item()),int(data["size"][0,0].item())) #get original image shape. Remember: DS is in H,W and resize uses W,H
+# sampled_back_image = torchvision.transforms.ToPILImage()(im[0].squeeze(0)) #convert to PIL-format.
+# sampled_back_image = sampled_back_image.resize(size,Image.BILINEAR) #reshape back to org size
+# plt.imshow(sampled_back_image)
+# plt.title("Resampled image")
     
      
-output_no_cls = output[0,1:,:]
+# output_no_cls = output[0,1:,:]
 def get_deep_seq(sample,get_feature_map=False):
     """
     Function which takes an eye signal for an image, and finds the corresponding deep-feature-values in the feature_map
@@ -438,17 +453,20 @@ def get_deep_seq(sample,get_feature_map=False):
         A batch of deep-feature-representations with dimensionality [batch_sz, seq_len, 2+768]. This is input to transformer architecture. 2+ is x,y. 
     featuremap_holder_l: a list
     """
-    signal = data["signal"]
-    BATCH_SZ = signal.shape[0]
-    featuremap = data["image"]
-    size = data["size"]
+    signal = sample["signal"].to(device)
+    if signal.ndim==2: #fix single batches which come without batch. Should not be an issue using trainloader
+        signal = signal.unsqueeze(0)
+        
+    BSZ = signal.shape[0]
+    featuremap = sample["image"].to(device)
+    size = sample["size"].to(device)
     CLS = featuremap[:,:,0,:] #pull out cls-tokens. Gets all batches, size [batch_sz,1,1,768]
     featuremap_noCLS = featuremap[:,:,1:,:]
-    featuremap_noCLS = featuremap_noCLS.view(BATCH_SZ,14,14,768)
+    featuremap_noCLS = featuremap_noCLS.view(BSZ,14,14,768)
     featuremap_perm = featuremap_noCLS.permute(0,-1,1,2) #bilinear interp runs over last two dimensions. Therefore permute to [batch_sz,768,x,y]
-    holder_t = torch.zeros(BATCH_SZ,signal.shape[1],featuremap.shape[-1]+2)
+    holder_t = torch.zeros(BSZ,signal.shape[1],featuremap.shape[-1]+2).to(device)
     featuremap_holder_l = []
-    for i in range(BATCH_SZ):
+    for i in range(BSZ):
         sizes = (int(size[i][1].item()),int(size[i][0].item())) #x,y. Remember data["batch"] is h,w
         featuremap_intpl = F.interpolate(featuremap_perm[i].unsqueeze(0),sizes,mode='bilinear') #interpolate tensor. Sadly cant be done outside of loop, as sizes to interpolate to have to be constant (cant be tensor)
         featuremap_intpl = featuremap_intpl.permute(0,2,3,1) #get back to format [batch_sz,x,y,embed_dim]
@@ -457,22 +475,22 @@ def get_deep_seq(sample,get_feature_map=False):
         x = signal[i,:,0].to(dtype=torch.long)
         y = signal[i,:,1].to(dtype=torch.long)
         holder_slice = featuremap_intpl[(slice(None),x,y,slice(None))] #returns sliced featuremap. Format: [1,(seq_len),768]
-        #print(holder_t.shape)
+     #   print(holder_t.shape)
         holder_t[i,:,2:] = holder_slice
-        
+    #print("Shape after loop",holder_t.shape)    
     #concat CLS and normalized x,y
     #normalize x and y to be between 0 and 1 
     norm_sig = F.normalize(signal,p=2,dim=1) #each feature column is normalized per entry to fit in unit-interval. 
     holder_t[:,:,0] = norm_sig[:,:,0] #fill in x-coords
     holder_t[:,:,1] = norm_sig[:,:,1] #fill in y-coords aswell. Resultant format: channel 0: y, channel 1: x,[batch,y,x] 
-
+    #print("Shape after app. xy",holder_t.shape)
     
     if(get_feature_map==True):
         return holder_t,featuremap_holder_l
     else:
         return holder_t
 
-deep_seq,featuremaps = get_deep_seq(data,get_feature_map=True)
+#deep_seq,featuremaps = get_deep_seq(data,get_feature_map=True)
 
 def check_correctness_batch_interp(featuremap,deep_seq,signal,mask,printVals = False):
     """
@@ -518,18 +536,18 @@ def check_correctness_batch_interp(featuremap,deep_seq,signal,mask,printVals = F
                     return -1 #exit with failure
     return 0 #exit with success
                 
-check_correctness_batch_interp(featuremaps,deep_seq,signal,mask,printVals=False)            
+#check_correctness_batch_interp(featuremaps,deep_seq,signal,mask,printVals=False)            
 
 
-featuresNP = featuremaps[0].squeeze(0).detach().cpu().numpy()
-featuremap0 = featuresNP[:,:,0].T #plt wants transpose. Your handling is correct
-featuresIM = np.array(Image.fromarray(featuremap0)) #zeroth channel for checking
-plt.figure(123123)
-plt.imshow(featuresIM)
+#featuresNP = featuremaps[0].squeeze(0).detach().cpu().numpy()
+#featuremap0 = featuresNP[:,:,0].T #plt wants transpose. Your handling is correct
+#featuresIM = np.array(Image.fromarray(featuremap0)) #zeroth channel for checking
+#plt.figure(123123)
+#plt.imshow(featuresIM)
 
 
-model = vm.eyeFormer_ViT(dropout=DROPOUT,n_layers=NLAYERS,num_heads=NHEADS)
-model(deep_seq,mask)
+model = vm.eyeFormer_ViT(dropout=DROPOUT,n_layers=NLAYERS,num_heads=NHEADS).to(device)
+#model(deep_seq,mask)
 model_opt = vm.NoamOpt(model.d_model,LR_FACTOR,NUM_WARMUP,torch.optim.Adam(model.parameters(), lr=0, betas=(0.9, 0.98), eps=1e-9))
 loss_fn = nn.SmoothL1Loss(beta=BETA) #default: mean and beta=1.0
 
@@ -548,9 +566,10 @@ def train_one_epoch(model,loss,trainloader,negative_print=False) -> float:
     for i, data in enumerate(trainloader):
         counter += 1
         model_opt.optimizer.zero_grad() #reset grads
-        target = data["target"]
-        mask = data["mask"]
-        dSignal = get_deep_seq(data["signal"])
+        target = data["target"].to(device)
+        mask = data["mask"].to(device)
+        signal = data["signal"].to(device)
+        dSignal = get_deep_seq(data)
         #print("Mask:\n",data["mask"])
         #print("Input: \n",data["signal"])
         #print("Goal is: \n",data["target"])
@@ -609,7 +628,8 @@ def train_one_epoch_w_val(model,loss,trainloader,valloader,negative_print=False,
             counter += 1 
             target = data["target"]
             mask = data["mask"]
-            dSignal = get_deep_seq(data["signal"])
+            signal = data["signal"]
+            dSignal = get_deep_seq(data)
             outputs = model(dSignal,mask)
             #sOutputs, sTargets = scaleBackCoords(outputs, target, imsz)
             noTrue,noFalse,IOUli_v = vm.pascalACC(outputs,target)
@@ -635,7 +655,7 @@ def train_one_epoch_w_val(model,loss,trainloader,valloader,negative_print=False,
         model_opt.optimizer.zero_grad() #reset grads
         target = data["target"]
         mask = data["mask"]
-        dSignal = get_deep_seq(data["signal"])
+        dSignal = get_deep_seq(data)
         
         #print("Mask:\n",data["mask"])
         #print("Input: \n",data["signal"])
@@ -730,6 +750,307 @@ for epoch in (pbar:=tqdm(range(EPOCHS))):
     
 
 
+def save_split(trainloader,valloader,classString,root_dir,params):
+    """
+    Simple function for saving filenames of images used in train- and val-split respectively for ensuring reproducibility
+    Args: 
+        trainloader (pyTorch dataloader)
+        valloader (pyTorch dataloader)
+        classString: string, name descriptor of class of investigation
+        root_dir: usually os.path.dirname(__file__)
+        
+    Returns: 
+        None
+        
+    """
+    path = root_dir + "/" + classString + "/nL_" + str(params[0]) +"_nH_" + str(params[1])+"/"
+    if not os.path.exists(path):
+        os.mkdir(path)
+        print("Created dir in: ",path)
+    trainlist = []
+    vallist = []
+    for i,data in enumerate(trainloader):
+        trainlist.append(data["file"][0])
+    for i, data in enumerate(valloader):
+        vallist.append(data["file"][0])
+    s = path+classString+"_train_split_len_"+str(len(trainloader.dataset))+".pth"
+    torch.save(trainlist,s)
+    s = path+classString+"_val_split_len_"+str(len(valloader.dataset))+".pth"
+    torch.save(vallist,s)
+    
+
+def save_epochs(loss,acc,classString,root_dir,mode,params):
+    path = root_dir + "/"+classString + "/"
+    if not os.path.exists(path):
+        os.mkdir(path)
+        print("Created dir in: ",path)
+    path += "nL_" + str(params[0]) +"_nH_" + str(params[1]) +"/"
+    if not os.path.exists(path):
+        os.mkdir(path)
+        print("Created subdir in: ",path)
+    
+    if(mode=="eval"):
+        path += "eval/"
+        if not os.path.exists(path):
+            os.mkdir(path)
+            print("Created subdir in: ",path)
+        torch.save(loss,path+classString+"_"+mode+"_losses.pth")
+        print("Saved loss results to: ",path+classString+"_"+mode+"_losses.pth")
+        torch.save(acc,path+"/"+classString+"_"+mode+"_acc.pth")
+        print("Saved accuracy results to: ",path+classString+"_"+mode+"_acc.pth")
+    else:
+        torch.save(loss,path+classString+"_"+mode+"_losses.pth")
+        print("Saved loss results to: ",path+classString+"_"+mode+"_losses.pth")
+        torch.save(acc,path+"/"+classString+"_"+mode+"_acc.pth")
+        print("Saved accuracy results to: ",path+classString+"_"+mode+"_acc.pth")
+        
+    return
+
+def save_IOU(IOU_li,classString,root_dir,params,mode):
+    path = root_dir + "/"+classString+"/"
+    if not os.path.exists(path):
+        os.mkdir(path)
+        print("Created dir in: ",path)
+    path += "nL_" + str(params[0]) +"_nH_" + str(params[1]) +"/"+mode+"/"
+    if not os.path.exists(path):
+        os.mkdir(path)
+        print("Created subdir in: ",path)
+        
+    torch.save(IOU_li,path+"epochIOU.pth")
+    print("Wrote epoch IOU's to scratch in :",path)
+    return None
+
+def save_model(model,classString,root_dir,params,mode):
+    path = root_dir + "/" + classString+"/"
+    if not os.path.exists(path):
+        os.mkdir(path)
+        print("Created dir in: ",path)
+    path += "nL_" + str(params[0]) +"_nH_" + str(params[1]) +"/"+mode+"/"
+    if not os.path.exists(path):
+        os.mkdir(path)
+        print("Created subdir in: ",path)
+    torch.save(model.state_dict(),path+"model.pth")
+    print("Wrote finished model to scratch in :",path)
+    return None
+
+if(EVAL==0):
+    save_epochs(epochLossLI,epochAccLI,classString,timm_root,mode="result",params=[NLAYERS,NHEADS])
+    save_IOU(trainIOU,classString,timm_root,params=[NLAYERS,NHEADS],mode="result")
+    save_model(model,classString,timm_root,params=[NLAYERS,NHEADS],mode="result")
+
+if(EVAL==1):
+    save_epochs(epochLossLI,epochAccLI,classString,timm_root,mode="eval",params=[NLAYERS,NHEADS])
+    save_IOU(trainIOU,classString,timm_root,params=[NLAYERS,NHEADS],mode="eval")
+    save_model(model,classString,timm_root,params=[NLAYERS,NHEADS],mode="eval")
+    
+
+if(OVERFIT==True and EVAL==0):
+    save_epochs(epochValLossLI,epochValAccLI,classString,timm_root,mode="val",params=[NLAYERS,NHEADS])
+    save_split(trainloader,valloader,classString,timm_root,params=[NLAYERS,NHEADS])
+    print("\nWrote train-val-split to scratch.\n")
+    
+
+def get_mean_model(trainloader): 
+    """
+    Batch-robust mean-calculator. 
+        Input: dataloader structure of batched or unbatched input
+        ---------------------------------------------------------
+        Output: tensor, shape [1,4]
+    """
+    mean_vals = torch.zeros(1,4)
+    for i, data in enumerate(trainloader): #get batch of training data
+        for j in range(data["target"].shape[0]): #loop over batch-dimension
+            mean_vals += data["target"][j]
+    mean_vals /= len(trainloader.dataset)
+    return mean_vals
+
+    
+
+    
+def get_median_model(trainloader): #NEED TO FIX FOR BATCHES 
+    """
+    Batch-robust median-calculator. 
+        Input: dataloader structure of batched or unbatched input
+        ---------------------------------------------------------
+        Output: tensor, shape [1,4]
+    """
+    holder_t = torch.zeros(len(trainloader.dataset),4)
+    idx_space = 0
+    for i, data in enumerate(trainloader):
+        for j in range(data["target"].shape[0]):
+            holder_t[j+idx_space] = data["target"][j]
+        idx_space += j+1 #to ensure support for random and non-equal batch-sizes
+    median_t,_ = torch.median(holder_t,dim=0,keepdim=True)
+    #if want debug: return t_holder
+    return median_t
+    
+#h1.remove()
+#h2.remove()   
+#h3.remove()
+#h4.remove()
+#h5.remove()
+#h6.remove()
+
+
+
+
+#---------------------TEST AND EVAL -------------#
+paramsString = timm_root +"/"+ classString + "/nL_" + str(NLAYERS) +"_nH_" + str(NHEADS)+"/" #for saving to correct dirs
+
+#1. TEST-LOOP ON TRAIN-SET
+trainsettestLosses = []
+IOU_tr_li = []
+
+#eval on TRAIN SET 
+meanModel = get_mean_model(trainloader)
+medianModel = get_median_model(trainloader)
+
+model.eval()
+
+print("Entered evaluation-phase.")
+if(OVERFIT):
+    print("Model parameters:\n tL: {}\n vL: {}\nlrf: {}\n num_warmup: {}\n Dropout: {}\n Beta: {}\n NHEADS: {}\n NLAYERS: {}".format(NUM_IN_OVERFIT,len(valIDX),LR_FACTOR,NUM_WARMUP,DROPOUT,BETA,NHEADS,NLAYERS))
+else:
+    print("Model parameters:\n tL: {} \nlrf: {}\n num_warmup: {}\n Dropout: {}\n Beta: {}\n NHEADS: {}\n NLAYERS: {}".format(NUM_IN_OVERFIT,LR_FACTOR,NUM_WARMUP,DROPOUT,BETA,NHEADS,NLAYERS))
+
+print("Evaluating overfit on ALL {} train instances".format(len(trainloader.dataset)))
+
+no_overfit_correct = 0
+no_overfit_false = 0
+no_mean_correct = 0
+no_mean_false = 0
+no_med_correct = 0
+no_med_false = 0
+train_save_struct = []
+
+with torch.no_grad():
+    for i, data in enumerate(trainloader):
+        signal = data["signal"]
+        dSignal = get_deep_seq(data)
+        target = data["target"]
+        mask = data["mask"]
+        size = data["size"]
+        name = data["file"]
+        output = model(dSignal,mask)
+        batchloss = loss_fn(target,output) #L1 LOSS. Mode: "mean"
+       # batchloss = ops.generalized_box_iou_loss(output.to(dtype=torch.float32),target.to(dtype=torch.float32))
+        
+        accScores = vm.pascalACC(output,target)
+        no_overfit_correct += accScores[0]
+        no_overfit_false += accScores[1]
+        IOU = accScores[2] #for batches is a list
+        IOU_tr_li += IOU #concat lists 
+        for i in range(len(IOU)):
+            if(IOU[i]>0.5):
+                train_save_struct.append([name,str(1),IOU[i],target,output,size]) #filename, pred-status: correct(1):false(0), IOU-value, ground-truth, prediction-value 
+            else:
+                train_save_struct.append([name,str(0),IOU[i],target,output,size])
+        print("Filename: {}\n Target: {}\n Prediction: {}\n Loss: {}\n IOU: {}".format(data["file"],data["target"],output,batchloss,IOU))
+        trainsettestLosses.append(batchloss)
+        
+        #fix meanModel to have as many entrys as target-tensor: 
+        n_in_batch = target.shape[0]
+        meanModel_tmp = meanModel.repeat(n_in_batch,1) #make n_in_batch copies along batch-dimension
+        medianModel_tmp = medianModel.repeat(n_in_batch,1)
+        
+        accScores = vm.pascalACC(meanModel_tmp,target)
+        no_mean_correct += accScores[0]
+        no_mean_false += accScores[1]
+        
+        accScores = vm.pascalACC(medianModel_tmp,target)
+        no_med_correct += accScores[0]
+        no_med_false += accScores[1]
+        
+    print("---------------------------EVAL on ALL {} overfit-train-images---------------------------".format(len(trainloader.dataset)))    
+    print("\nTransformer accuracy with PASCAL-criterium on overfit set: {}/{}, percentage: {}".format(no_overfit_correct,no_overfit_false+no_overfit_correct,no_overfit_correct/(no_overfit_false+no_overfit_correct)))    
+    print("\nMean model accuracy with PASCAL-criterium on overfit set: {}/{}, percentage: {}".format(no_mean_correct,no_mean_false+no_mean_correct,no_mean_correct/(no_mean_false+no_mean_correct)))
+    print("\nMedian model accuracy with PASCAL-criterium on overfit set: {}/{}, percentage: {}".format(no_med_correct,no_med_false+no_med_correct,no_med_correct/(no_med_false+no_med_correct)))
+    print("\nMean IOU is {}".format(sum(IOU_tr_li)/len(IOU_tr_li)))
+    if(EVAL==0):
+        torch.save(train_save_struct,paramsString+classString+"_"+"test_on_train_results.pth")
+        print("\n   Results saved to file: ",paramsString+classString+"/"+classString+"_"+"test_on_train_results.pth")
+    else: 
+        torch.save(train_save_struct,paramsString+"eval/"+classString+"_"+"test_on_train_results.pth")
+        print("\n   Results saved to file: ",paramsString+"eval/"+classString+"/"+classString+"_"+"test_on_train_results.pth")
+        
+    
+"""
+#2. TEST-LOOP ON TEST-SET
+no_test_correct = 0 
+no_test_false = 0
+no_test_mean_correct = 0 
+no_test_mean_false = 0
+no_test_median_correct = 0
+no_test_median_false = 0
+testlosses = []
+correct_false_list = []
+IOU_te_li = []
+
+# meanModel = get_mean_model(oTrainLoader)
+# medianModel = get_median_model(oTrainLoader)
+
+model.eval()
+with torch.no_grad():
+    running_loss = 0 
+    for i, data in enumerate(testloader):
+        signal = data["signal"]
+        dSignal = get_deep_seq(data)
+        target = data["target"]
+        mask = data["mask"]
+        name = data["file"]
+        size = data["size"]
+        output = model(dSignal,mask)
+        batchloss = loss_fn(target,output) #L1 Loss
+        #batchloss = ops.generalized_box_iou_loss(output.to(dtype=torch.float32),target.to(dtype=torch.float32))
+        running_loss += batchloss.item()
+        testlosses.append(batchloss.item())
+        accScores = vm.pascalACC(output,target)
+        IOU = accScores[2] #for batches is a list
+        IOU_te_li += IOU #list concatenation
+        for i in range(len(IOU)): 
+            if(IOU[i]>0.5):
+                correct_false_list.append([name,str(1),IOU[i],target,output,size]) #filename, pred-status: correct(1):false(0), IOU-value, ground-truth, prediction-value 
+            else:
+                correct_false_list.append([name,str(0),IOU[i],target,output,size])
+            
+        
+        no_test_correct += accScores[0]        
+        no_test_false += accScores[1]
+        
+        n_in_batch = target.shape[0]
+        meanModel_tmp = meanModel.repeat(n_in_batch,1) #make n_in_batch copies along batch-dimension
+        medianModel_tmp = medianModel.repeat(n_in_batch,1)
+        accScores = vm.pascalACC(meanModel_tmp,target)
+        
+        no_test_mean_correct += accScores[0]
+        no_test_mean_false += accScores[1]
+        
+        accScores = vm.pascalACC(medianModel_tmp,target)
+        no_test_median_correct += accScores[0]
+        no_test_median_false += accScores[1]
+        
+        if i!=0 and i%100==0:
+            #note that running_loss is not used for anything else than printing.
+            print("L1-loss on every over batch {}:{}: {}\n".format(i-100,i,running_loss/100))
+            running_loss = 0 
+            
+
+
+testmeanAcc = no_test_mean_correct/(no_test_mean_false+no_test_mean_correct)
+testmedianAcc = no_test_median_correct/(no_test_median_false+no_test_median_correct)
+
+print("---------------EVAL on ALL {} test-images---------------".format(len(testloader.dataset)))
+print("\nTransformer accuracy with PASCAL-criterium: {}/{}, percentage: {}".format(no_test_correct,no_test_false+no_test_correct,no_test_correct/(no_test_false+no_test_correct)))    
+print("\nMean model accuracy with PASCAL-criterium: {}/{}, percentage: {}".format(no_test_mean_correct,no_test_mean_false+no_test_mean_correct,testmeanAcc))    
+print("\nMedian model accuracy with PASCAL-criterium: {}/{}, percentage: {}".format(no_test_median_correct,no_test_median_false+no_test_median_correct,testmedianAcc))    
+print("\nMean IOU is {}".format(sum(IOU_te_li)/len(IOU_te_li)))
+if(EVAL==0):
+    torch.save(correct_false_list,paramsString+classString+"_"+"test_on_test_results.pth")
+    print("\n   Results saved to file: ",paramsString+classString+"/"+classString+"_"+"test_on_test_results.pth")
+else:    
+    torch.save(correct_false_list,paramsString+"eval/"+classString+"_"+"test_on_test_results.pth")
+    print("\n   Results saved to file: ",paramsString+"eval/"+classString+"/"+classString+"_"+"test_on_test_results.pth")
+
 
 
 
@@ -745,7 +1066,7 @@ for epoch in (pbar:=tqdm(range(EPOCHS))):
 
 
 ###-----------------------------------Plots from here------------------------------------------------
-"""
+
 full_embedded_im = output_no_cls.view(1,14,14,768)
 #SINGLE CHANNEL PLOT
 CH_NO = 0
@@ -833,4 +1154,5 @@ def plot_mean_latent_space(df_rep,im_rescaled):
 
 get_first_n_features_plot_dual_pane(full_embedded_im,sampled_back_image,9)
 plot_mean_latent_space(full_embedded_im,sampled_back_image)
+
 """
