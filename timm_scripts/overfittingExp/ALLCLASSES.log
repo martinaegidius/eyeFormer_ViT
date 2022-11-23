@@ -1,0 +1,16 @@
+FOUND DEVICE:  cuda:0
+Total length is:  6270
+Overwrote trainloader with overfit-set of length 36
+Valloader of constant length 395
+-----------------------------------------------------------------------------
+Model parameters:
+ tL: 36
+ vL: 395
+lrf: 1
+NEPOCHS: 500
+ num_warmup: 498
+ Dropout: 0.0
+ Beta: 1
+ NHEADS: 2
+ NLAYERS: 6
+ACTUAL TRAINLOADER LENS 5 36

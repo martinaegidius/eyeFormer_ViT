@@ -775,10 +775,10 @@ def train_one_epoch_w_val(model,loss,trainloader,valloader,negative_print=False,
 
 print("-----------------------------------------------------------------------------")
 if(OVERFIT):
-    print("Model parameters:\n tL: {}\n vL: {}\nlrf: {}\nNEPOCHS: {}\n num_warmup: {}\n Dropout: {}\n Beta: {}\n NHEADS: {}\n NLAYERS: {}".format(NUM_IN_OVERFIT,len(valIDX),LR_FACTOR,EPOCHS,NUM_WARMUP,DROPOUT,BETA,NHEADS,NLAYERS))
+    print("Model parameters:\n tL: {}\n vL: {}\nlrf: {}\nNEPOCHS: {}\n num_warmup: {}\n Dropout: {}\n Beta: {}\n NHEADS: {}\n NLAYERS: {} \n BATCH-SIZE: {}".format(NUM_IN_OVERFIT,len(valIDX),LR_FACTOR,EPOCHS,NUM_WARMUP,DROPOUT,BETA,NHEADS,NLAYERS,BATCH_SZ))
     print("ACTUAL TRAINLOADER LENS",len(trainloader),len(trainloader.dataset))
 else:
-    print("Model parameters:\n tL: {}\n \nlrf: {}\nNEPOCHS: {}\n num_warmup: {}\n Dropout: {}\n Beta: {}\n NHEADS: {}\n NLAYERS: {}".format(NUM_IN_OVERFIT,LR_FACTOR,EPOCHS,NUM_WARMUP,DROPOUT,BETA,NHEADS,NLAYERS))
+    print("Model parameters:\n tL: {}\n \nlrf: {}\nNEPOCHS: {}\n num_warmup: {}\n Dropout: {}\n Beta: {}\n NHEADS: {}\n NLAYERS: {}\n BATCH-SIZE: {}".format(NUM_IN_OVERFIT,LR_FACTOR,EPOCHS,NUM_WARMUP,DROPOUT,BETA,NHEADS,NLAYERS,BATCH_SZ))
     
 #def train_number_of_epochs(EPOCHS,model,loss,trainloader,oTrainLoader,overfit=False,negative_print=False):
 epoch_number = 0
