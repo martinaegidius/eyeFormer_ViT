@@ -1,0 +1,6 @@
+Loaded dependency [python3/3.10.2]: gcc/10.3.0-binutils-2.36.1
+Loaded module: python3/3.10.2
+
+Loading python3/3.10.2
+  Loading requirement: gcc/10.3.0-binutils-2.36.1
+  0%|          | 0/500 [00:00<?, ?it/s]  0%|          | 0/500 [01:57<?, ?it/s,  | avg train loss 31.6715 | train acc: 0.0000 | avg val loss: 28.3399 | avg val acc: 0.0000 | Mean Train IOU: 0.0000 | Mean Val IOU: 0.0000 |]  0%|          | 1/500 [01:57<16:15:10, 117.26s/it,  | avg train loss 31.6715 | train acc: 0.0000 | avg val loss: 28.3399 | avg val acc: 0.0000 | Mean Train IOU: 0.0000 | Mean Val IOU: 0.0000 |]
