@@ -32,6 +32,7 @@ from load_POET_timm import pascalET
 #    classChoice = None
 #    pass
 classChoice = [x for x in range(10)]
+#classChoice = [0]
 
 SAVEDSET = False #flag for defining if data-sets are saved to scratch after dataloader generation. For ViT false because big files. 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -236,7 +237,6 @@ def get_balanced_permutation(nsamples,NUM_IN_OVERFIT,valsize=100):
     h = [torch.Generator() for i in range(len(classesOC))]
     for i in range(len(classesOC)):
         h[i].manual_seed(i)
-        
     ofIDX = torch.zeros(0).to(torch.int32)
     valIDX = torch.zeros(0).to(torch.int32)
     offset = 0
@@ -244,7 +244,7 @@ def get_balanced_permutation(nsamples,NUM_IN_OVERFIT,valsize=100):
         idx = torch.randperm(int(nsamples[num]),generator=h[num])
         t_idx = idx + offset #add per-class offset for classwise indexing
         idx = t_idx[:classwise_nsamples[num]]
-        vidx = t_idx[classwise_nsamples[num]:int(valsize/len(nsamples))]
+        vidx = t_idx[classwise_nsamples[num]:classwise_nsamples[num]+int(valsize/len(nsamples))]
         ofIDX = torch.cat((ofIDX,idx),0)
         valIDX = torch.cat((valIDX,vidx),0)
         offset += instance
@@ -453,7 +453,9 @@ g.manual_seed(8)
 
 if(OVERFIT): #CREATES TRAIN AND VALIDATION-SPLIT 
      #new mode for getting representative subsample: 
-    ofIDX,valIDX,NUM_IN_OVERFIT = get_balanced_permutation(nsamples,NUM_IN_OVERFIT,valsize=100)
+    ofIDX,valIDX,NUM_IN_OVERFIT = get_balanced_permutation(nsamples,NUM_IN_OVERFIT,valsize=60)
+    #print(valIDX)
+    #print("valIDX shape: ",valIDX.shape)
     
     #IDX = torch.randperm(len(train),generator=g[0])#[:NUM_IN_OVERFIT].unsqueeze(1) #random permutation, followed by sampling and unsqueezing
     #ofIDX = IDX[:NUM_IN_OVERFIT].unsqueeze(1)
@@ -755,10 +757,10 @@ def train_one_epoch_w_val(model,loss,trainloader,valloader,negative_print=False,
         nn.utils.clip_grad_value_(model.parameters(), clip_value=0.5) #experimentary
         model_opt.step()
     
-    if(DEBUG==True):
-        print("t holder becomes: \n",tIOUli_holder)
-        print("\nsum becomes",sum(tIOUli_holder))
-        print("\nLen becomes",len(tIOUli_holder))
+    #if(DEBUG==True):
+        #print("t holder becomes: \n",tIOUli_holder)
+        #print("\nsum becomes",sum(tIOUli_holder))
+        #print("\nLen becomes",len(tIOUli_holder))
     IOU_mt = sum(tIOUli_holder)/len(tIOUli_holder)        
     
     
@@ -801,7 +803,10 @@ torch.autograd.set_detect_anomaly(True)
 for epoch in (pbar:=tqdm(range(EPOCHS))):
     try:        
         if(OVERFIT):
-            epochLoss, correct_count, false_count,target,signal,mask,epochAcc,model,valLoss,valAcc,IOU_t,IOU_v = train_one_epoch_w_val(model,loss_fn,trainloader,valloader,negative_print=False)
+            if(epoch==0):
+                epochLoss, correct_count, false_count,target,signal,mask,epochAcc,model,valLoss,valAcc,IOU_t,IOU_v = train_one_epoch_w_val(model,loss_fn,trainloader,valloader,negative_print=False,DEBUG=True)
+            else: 
+                epochLoss, correct_count, false_count,target,signal,mask,epochAcc,model,valLoss,valAcc,IOU_t,IOU_v = train_one_epoch_w_val(model,loss_fn,trainloader,valloader,negative_print=False)
             tmpStr = f" | avg train loss {epochLoss:.4f} | train acc: {epochAcc:.4f} | avg val loss: {valLoss:.4f} | avg val acc: {valAcc:.4f} | Mean Train IOU: {IOU_t:.4f} | Mean Val IOU: {IOU_v:.4f} |"
             epochValAccLI.append(valAcc)
             epochValLossLI.append(valLoss)
@@ -1071,7 +1076,7 @@ testlosses = []
 correct_false_list = []
 IOU_te_li = []
 
-
+""" #freezes from here-on for some reason
 model.eval()
 with torch.no_grad():
     running_loss = 0 
@@ -1134,8 +1139,7 @@ else:
     torch.save(correct_false_list,paramsString+"eval/"+classString+"_"+"test_on_test_results.pth")
     print("\n   Results saved to file: ",paramsString+"eval/"+classString+"/"+classString+"_"+"test_on_test_results.pth")
 
-
-
+"""
 
 
 
