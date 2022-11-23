@@ -182,6 +182,7 @@ def get_split(root_dir,classesOC):
     classlist = ["aeroplane","bicycle","boat","cat","cow","diningtable","dog","horse","motorbike","sofa"]
 
     training_data = []
+    training_len_list = []
     for classes in classesOC: #loop saves in list of lists format
         train_filename = split_dir + classlist[classes]+"_Rbbfix.txt"
         with open(train_filename) as file:
@@ -191,6 +192,7 @@ def get_split(root_dir,classesOC):
             lines[i] = classlist[classes]+"_"+lines[i]+".jpg"
             
         training_data.append(lines)
+        training_len_list.append(len(lines))
         
     test_data = []
     for classes in classesOC: 
@@ -210,7 +212,7 @@ def get_split(root_dir,classesOC):
         train = [*train,*training_data[i]]
         test = [*test,*test_data[i]]        
          
-    return train,test
+    return train,test,training_len_list
 
 def load_split(className,root_dir):
     #loads earlier saved splits from disk. 
@@ -273,7 +275,33 @@ class tensorPad(object):
         sample["signal"] = xtmp
         sample["mask"] = maskTensor
         return sample
+
+def get_balanced_permutation(nsamples,NUM_IN_OVERFIT):
+    sample_perc = [x/sum(nsamples) for x in nsamples] #get percentage-distribution 
+    if(len(nsamples)>1):
+        classwise_nsamples = [math.ceil(x*NUM_IN_OVERFIT) for x in sample_perc] #get number of samples per class
+        NUM_IN_OVERFIT = sum(classwise_nsamples) #overwrite NUM_IN_OVERFIT, as you use math.ceil
+    else: 
+        classwise_nsamples = [NUM_IN_OVERFIT]
         
+    h = [torch.Generator() for i in range(len(classesOC))]
+    for i in range(len(classesOC)):
+        h[i].manual_seed(i)
+        
+    ofIDX = torch.zeros(0).to(torch.int32)
+    valIDX = torch.zeros(0).to(torch.int32)
+    offset = 0
+    for num,instance in enumerate(nsamples):
+        idx = torch.randperm(int(nsamples[num]),generator=h[num])
+        t_idx = idx + offset #add per-class offset for classwise indexing
+        idx = t_idx[:classwise_nsamples[num]]
+        vidx = t_idx[classwise_nsamples[num]:]
+        ofIDX = torch.cat((ofIDX,idx),0)
+        valIDX = torch.cat((valIDX,vidx),0)
+        offset += instance
+        
+    return ofIDX,valIDX,NUM_IN_OVERFIT
+
 class rescale_coords(object):
     """
     Args: 
@@ -317,14 +345,19 @@ class rescale_coords(object):
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 classes = ["aeroplane","bicycle","boat","cat","cow","diningtable","dog","horse","motorbike","sofa"]
 GENERATE_DATASET = True
-classesOC = [0]
-classString = classes[classesOC[0]]
+if((len(classesOC)>1) and (len(classesOC)<10)):
+    classString = "multiple_classes"
+elif(len(classesOC)==10):
+    classString = "all_classes"
+else: 
+    classString = classes[classesOC[0]]
+
 timm_root = os.path.dirname(__file__)
 BATCH_SZ = 1
 NLAYERS = 3
 NHEADS = 1
 EPOCHS = 600
-NUM_IN_OVERFIT = 2
+NUM_IN_OVERFIT = 30
 DROPOUT = 0.0
 LR_FACTOR = 1
 EPOCH_STEPS = NUM_IN_OVERFIT//BATCH_SZ
@@ -375,7 +408,6 @@ if(GENERATE_DATASET == False):
     print("Succesfully read data from binary")
  
 #FOR DEBUGGING
-train = torch.utils.data.Subset(train,[0,1,2])
 
 
 #make dataloaders of chosen split
@@ -395,6 +427,8 @@ g = torch.Generator()
 g.manual_seed(8)
 
 if(OVERFIT): #CREATES TRAIN AND VALIDATION-SPLIT 
+    ofIDX,valIDX,NUM_IN_OVERFIT = get_balanced_permutation(nsamples,NUM_IN_OVERFIT)
+    
     IDX = torch.randperm(len(train),generator=g)#[:NUM_IN_OVERFIT].unsqueeze(1) #random permutation, followed by sampling and unsqueezing
     ofIDX = IDX[:NUM_IN_OVERFIT].unsqueeze(1)
     valIDX = IDX[NUM_IN_OVERFIT:NUM_IN_OVERFIT+17].unsqueeze(1) #17 because the smallest train-set has length 33=max(L)+17.

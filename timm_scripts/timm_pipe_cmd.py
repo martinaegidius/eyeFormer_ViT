@@ -225,6 +225,33 @@ def get_split(root_dir,classesOC):
          
     return train,test,n_train_samples
 
+def get_balanced_permutation(nsamples,NUM_IN_OVERFIT,valsize=100):
+    sample_perc = [x/sum(nsamples) for x in nsamples] #get percentage-distribution 
+    if(len(nsamples)>1):
+        classwise_nsamples = [math.ceil(x*NUM_IN_OVERFIT) for x in sample_perc] #get number of samples per class
+        NUM_IN_OVERFIT = sum(classwise_nsamples) #overwrite NUM_IN_OVERFIT, as you use math.ceil
+    else: 
+        classwise_nsamples = [NUM_IN_OVERFIT]
+        
+    h = [torch.Generator() for i in range(len(classesOC))]
+    for i in range(len(classesOC)):
+        h[i].manual_seed(i)
+        
+    ofIDX = torch.zeros(0).to(torch.int32)
+    valIDX = torch.zeros(0).to(torch.int32)
+    offset = 0
+    for num,instance in enumerate(nsamples):
+        idx = torch.randperm(int(nsamples[num]),generator=h[num])
+        t_idx = idx + offset #add per-class offset for classwise indexing
+        idx = t_idx[:classwise_nsamples[num]]
+        vidx = t_idx[classwise_nsamples[num]:int(valsize/len(nsamples))]
+        ofIDX = torch.cat((ofIDX,idx),0)
+        valIDX = torch.cat((valIDX,vidx),0)
+        offset += instance
+        
+    return ofIDX,valIDX,NUM_IN_OVERFIT
+
+
 def load_split(className,root_dir):
     #loads earlier saved splits from disk. 
     #Arg: className (e.g. "airplane")
@@ -347,7 +374,7 @@ elif(len(classesOC)==10):
 else: 
     classString = classes[classesOC[0]]
 
-BATCH_SZ = 8
+BATCH_SZ = 1
 # #RUN_FROM_COMMANDLINE. Class at top of programme.
 NUM_IN_OVERFIT = int(sys.argv[2]) #NUM-IN-OVERFIT EQUALS LEN(TRAIN) IF OVERFIT == False
 NLAYERS = int(sys.argv[3])
@@ -426,28 +453,7 @@ g.manual_seed(8)
 
 if(OVERFIT): #CREATES TRAIN AND VALIDATION-SPLIT 
      #new mode for getting representative subsample: 
-    sample_perc = [x/sum(nsamples) for x in nsamples] #get percentage-distribution 
-    if(len(nsamples)>1):
-        classwise_nsamples = [math.ceil(x*NUM_IN_OVERFIT) for x in sample_perc] #get number of samples per class
-        NUM_IN_OVERFIT = sum(classwise_nsamples) #overwrite NUM_IN_OVERFIT, as you use math.ceil
-    else: 
-        classwise_nsamples = [NUM_IN_OVERFIT]
-        
-    h = [torch.Generator() for i in range(len(classesOC))]
-    for i in range(len(classesOC)):
-        h[i].manual_seed(i)
-        
-    ofIDX = torch.zeros(0).to(torch.int32)
-    valIDX = torch.zeros(0).to(torch.int32)
-    offset = 0
-    for num,instance in enumerate(nsamples):
-        idx = torch.randperm(int(nsamples[num]-1),generator=h[num])
-        t_idx = idx + offset #add offset for later indexing
-        idx = t_idx[:classwise_nsamples[num]]
-        vidx = t_idx[classwise_nsamples[num]:]
-        ofIDX = torch.cat((ofIDX,idx),0)
-        valIDX = torch.cat((valIDX,vidx),0)
-        offset += instance
+    ofIDX,valIDX,NUM_IN_OVERFIT = get_balanced_permutation(nsamples,NUM_IN_OVERFIT,valsize=100)
     
     #IDX = torch.randperm(len(train),generator=g[0])#[:NUM_IN_OVERFIT].unsqueeze(1) #random permutation, followed by sampling and unsqueezing
     #ofIDX = IDX[:NUM_IN_OVERFIT].unsqueeze(1)
