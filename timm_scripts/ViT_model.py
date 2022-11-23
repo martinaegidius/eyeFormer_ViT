@@ -230,8 +230,8 @@ def pascalACC(preds,labels): #TODO: does not work for batched input. Fix
     #print(torch.diagonal(IOU_tmp))
     
     for i in range(BSZ): #get pascal-criterium accuraccy
-        pred_tmp = preds[i,:].unsqueeze(0)
-        label_tmp = labels[i,:].unsqueeze(0)
+        pred_tmp = preds[i,:]#.unsqueeze(0)
+        label_tmp = labels[i,:]#.unsqueeze(0)
         IOU = ops.box_iou(pred_tmp,label_tmp)
         IOU_li.append(IOU.item())
         if(IOU>0.5):
@@ -240,6 +240,119 @@ def pascalACC(preds,labels): #TODO: does not work for batched input. Fix
             no_false += 1
 
     return no_corr,no_false,IOU_li
+
+class get_center(object):
+    """
+    Gets center x, y and bbox w, h from a batched target sequence
+    Parameters
+    ----------
+    targets : batched torch tensor
+        contains batched target x0,y0,x1,y1.
+
+    Returns
+    -------
+    xywh : torch tensor
+        bbox cx,cy,w,h
+
+    """
+    def __call__(self,sample):
+        targets = sample["target"]
+        xywh = torch.zeros(4)
+        #w = torch.zeros(targets.shape[0],dtype=torch.int32)
+        #h = torch.zeros(targets.shape[0],dtype=torch.int32)
+        
+        xywh[0]  = torch.div(targets[2]+targets[0],2)
+        xywh[1] = torch.div(targets[-1]+targets[1],2)
+        xywh[2] = targets[2]-targets[0]
+        xywh[3] = targets[-1]-targets[1]
+        
+        sample["target"] = xywh
+        return sample
+
+
+class center_to_box(object):
+    """
+    Scales center-prediction cx,cy,w,h back to x0,y0,y1,y2
+
+    Parameters
+    ----------
+    targets : batched torch tensor
+        Format center x, center y, width and height of box
+
+    Returns
+    -------
+    box_t : batched torch tensor
+        Format lower left corner, upper right corner, [x0,y0,x1,y1]
+        
+    """
+    #if targets.ndim==1:
+    #    targets = targets.unsqueeze(0)
+    def __call__(self,sample):
+        targets = sample["target"]    
+        box_t = torch.zeros(4)
+        box_t[0] = targets[0]-torch.div(targets[2],2) #x0
+        box_t[1] = targets[1]-torch.div(targets[3],2) #y0
+        box_t[2] = targets[0]+torch.div(targets[2],2) #x1
+        box_t[3] = targets[1]+torch.div(targets[3],2) #y2
+        sample["target"] = box_t
+        return sample
+
+def get_center_fun(targets):
+    """
+    Gets center x, y and bbox w, h from a batched target sequence
+    Parameters
+    ----------
+    targets : batched torch tensor
+        contains batched target x0,y0,x1,y1.
+
+    Returns
+    -------
+    xywh : torch tensor
+        bbox cx,cy,w,h
+
+    """
+    if targets.ndim==2:
+        targets = targets.unsqueeze(1)
+    xywh = torch.zeros(targets.shape[0],1,4,requires_grad=True)
+
+    #w = torch.zeros(targets.shape[0],dtype=torch.int32)
+    #h = torch.zeros(targets.shape[0],dtype=torch.int32)
+    
+    xywh[:,0,0]  = torch.div(targets[:,0,2]+targets[:,0,0],2)
+    xywh[:,0,1] = torch.div(targets[:,0,-1]+targets[:,0,1],2)
+    xywh[:,0,2] = targets[:,0,2]-targets[:,0,0]
+    xywh[:,0,3] = targets[:,0,-1]-targets[:,0,1]
+    
+    return xywh
+
+
+class t_center_to_box_fun(object):
+    """
+    Scales center-prediction cx,cy,w,h back to x0,y0,y1,y2
+
+    Parameters
+    ----------
+    targets : batched torch tensor
+        Format center x, center y, width and height of box
+
+    Returns
+    -------
+    box_t : batched torch tensor
+        Format lower left corner, upper right corner, [x0,y0,x1,y1]
+        
+    """
+
+    def __call__(self,target):
+
+        if targets.ndim==2:
+            targets = targets.unsqueeze(1)
+        targets = targets
+        box_t = torch.zeros(targets.shape[0],1,4,requires_grad=True)
+        box_t[:,0,0] = targets[:,0,0]-torch.div(targets[:,0,2],2) #x0
+        box_t[:,0,1] = targets[:,0,1]-torch.div(targets[:,0,3],2) #y0
+        box_t[:,0,2] = targets[:,0,0]+torch.div(targets[:,0,2],2) #x1
+        box_t[:,0,3] = targets[:,0,1]+torch.div(targets[:,0,3],2) #y2
+        return box_t
 
 
 if __name__ == "__main__":

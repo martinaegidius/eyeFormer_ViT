@@ -347,7 +347,7 @@ elif(len(classesOC)==10):
 else: 
     classString = classes[classesOC[0]]
 
-BATCH_SZ = 8
+BATCH_SZ = 2
 # #RUN_FROM_COMMANDLINE. Class at top of programme.
 NUM_IN_OVERFIT = int(sys.argv[2]) #NUM-IN-OVERFIT EQUALS LEN(TRAIN) IF OVERFIT == False
 NLAYERS = int(sys.argv[3])
@@ -382,7 +382,7 @@ if(GENERATE_DATASET == True or GENERATE_DATASET==None):
     split_root_dir = os.path.join(os.path.expanduser('~'),"BA/eyeFormer")
     
     SignalTrans = torchvision.transforms.Compose(
-        [torchvision.transforms.Lambda(tensorPad())])
+        [torchvision.transforms.Lambda(tensorPad()),torchvision.transforms.Lambda(vm.get_center())])
         #,torchvision.transforms.Lambda(rescale_coords())]) #transforms.Lambda(tensor_pad() also a possibility, but is probably unecc.
     
     ImTrans = torchvision.transforms.Compose([torchvision.transforms.Resize((224,224),torchvision.transforms.InterpolationMode.BILINEAR),
@@ -401,7 +401,9 @@ if(GENERATE_DATASET == True or GENERATE_DATASET==None):
         torch.save(train,timm_root+"/datasets/"+classString+"Train.pt")
         torch.save(test,timm_root+"/datasets/"+classString+"Test.pt")
         print("................. Wrote datasets for ",classString,"to disk ....................")
-        
+
+target_b2c = torchvision.transforms.Compose([torchvision.transforms.Lambda(vm.get_center)])        
+target_c2b = torchvision.transforms.Compose([torchvision.transforms.Lambda(vm.center_to_box)])
 
 if(GENERATE_DATASET == False):
     train,test = load_split(classString,timm_root)  
@@ -453,6 +455,7 @@ if(OVERFIT): #CREATES TRAIN AND VALIDATION-SPLIT
     #ofIDX = IDX[:NUM_IN_OVERFIT].unsqueeze(1)
     #valIDX = IDX[NUM_IN_OVERFIT:NUM_IN_OVERFIT+17].unsqueeze(1) #17 because the smallest train-set has length 33=max(L)+17.
     overfitSet = torch.utils.data.Subset(train,ofIDX)
+    valIDX = valIDX[:80]
     valSet = torch.utils.data.Subset(train,valIDX)
     trainloader = DataLoader(overfitSet,batch_size=BATCH_SZ,shuffle=True,num_workers=0,generator=g)
     print("Overwrote trainloader with overfit-set of length {}".format(ofIDX.shape[0]))
@@ -614,6 +617,8 @@ def check_correctness_batch_interp(featuremap,deep_seq,signal,mask,printVals = F
 
 
 model = vm.eyeFormer_ViT(dropout=DROPOUT,n_layers=NLAYERS,num_heads=NHEADS).to(device)
+#model = (model).to(device) #try parallelization nn.DataParallel
+
 #model(deep_seq,mask)
 model_opt = vm.NoamOpt(model.d_model,LR_FACTOR,NUM_WARMUP,torch.optim.Adam(model.parameters(), lr=0, betas=(0.9, 0.98), eps=1e-9))
 loss_fn = nn.SmoothL1Loss(beta=BETA) #default: mean and beta=1.0
@@ -642,13 +647,19 @@ def train_one_epoch(model,loss,trainloader,negative_print=False) -> float:
         #print("Goal is: \n",data["target"])
         outputs = model(dSignal,mask)
         
+        #rescale norm coords
+        outputs_centered = target_c2b(outputs)
+        target_centered = target_c2b(target)
+        #old
+        #target_centered = vm.center_to_box_fun(target)
+
         #PASCAL CRITERIUM
-        noTrue,noFalse,IOU_li = vm.pascalACC(outputs,target)
+        noTrue,noFalse,IOU_li = vm.pascalACC(outputs_centered,target_centered)
         tIOUli_holder = tIOUli_holder + IOU_li
         correct_count += noTrue
         false_count += noFalse
         
-        loss = loss_fn(outputs,target) #L1 LOSS
+        loss = loss_fn(outputs_centered,target_centered) #L1 LOSS
         #loss = ops.generalized_box_iou_loss(output,target)
         loss.backward()
         running_loss += loss.item() #is complete EPOCHLOSS
@@ -699,7 +710,13 @@ def train_one_epoch_w_val(model,loss,trainloader,valloader,negative_print=False,
             dSignal = get_deep_seq(data).to(device)
             outputs = model(dSignal,mask)
             #sOutputs, sTargets = scaleBackCoords(outputs, target, imsz)
-            noTrue,noFalse,IOUli_v = vm.pascalACC(outputs,target)
+            #scale back to corner-coords
+            #outputs_centered = vm.center_to_box_fun(outputs)
+            #target_centered = vm.center_to_box_fun(target.unsqueeze(1))
+            outputs_centered = target_c2b(outputs)
+            target_centered = target_c2b(target)
+
+            noTrue,noFalse,IOUli_v = vm.pascalACC(outputs_centered,target_centered)
             
             vIOUli_holder = vIOUli_holder+IOUli_v 
             #PASCAL CRITERIUM
@@ -708,7 +725,7 @@ def train_one_epoch_w_val(model,loss,trainloader,valloader,negative_print=False,
             false_val_count += noFalse
             
             
-            loss = loss_fn(outputs,target) #L1 LOSS. Mode: "mean"
+            loss = loss_fn(outputs_centered.to(dtype=torch.float32),target_centered.to(dtype=torch.float32)) #L1 LOSS. Mode: "mean"
             #loss = ops.generalized_box_iou_loss(outputs.to(dtype=torch.float32),target.to(dtype=torch.float32))
             
             val_loss += loss.item() #is complete EPOCHLOSS
@@ -729,10 +746,15 @@ def train_one_epoch_w_val(model,loss,trainloader,valloader,negative_print=False,
         #print("Goal is: \n",data["target"])
         outputs = model(dSignal,mask)
         
+        #outputs_centered = vm.center_to_box_fun(outputs)
+        #target_centered = vm.center_to_box_fun(target.unsqueeze(1))
+
+        outputs_centered = target_c2b(outputs)
+        target_centered = target_c2b(target)
         
         #PASCAL CRITERIUM
         #sOutputs, sTargets = scaleBackCoords(outputs, target, imsz) #with rescaling. Proved to be uneccesarry
-        noTrue,noFalse,IOUli_t = vm.pascalACC(outputs,target)
+        noTrue,noFalse,IOUli_t = vm.pascalACC(outputs_centered,target_centered)
         #print("\nScaled pascalACC returns:\n",pascalACC(sOutputs,sTargets))
         #print("\nOriginal pascalACC returns:\n",pascalACC(outputs,target))
         #print("\ngetIOU function returns:\n",getIOU(outputs,target,sensitivity=0.5))
@@ -742,7 +764,7 @@ def train_one_epoch_w_val(model,loss,trainloader,valloader,negative_print=False,
         false_count += noFalse
         
         
-        loss = loss_fn(outputs,target) #SMOOTH L1. Mode: mean
+        loss = loss_fn(outputs_centered.to(dtype=torch.float32),target_centered.to(dtype=torch.float32)) #L1 LOSS. Mode: "mean"
         #loss = ops.generalized_box_iou(outputs.to(dtype=torch.float64),target.to(dtype=torch.float64))
         running_loss += loss.item() #is complete EPOCHLOSS
         loss.backward()
@@ -977,8 +999,8 @@ trainsettestLosses = []
 IOU_tr_li = []
 
 #eval on TRAIN SET 
-meanModel = get_mean_model(trainloader)
-medianModel = get_median_model(trainloader)
+meanModel = vm.center_to_box_fun(get_mean_model(trainloader))
+medianModel = vm.center_to_box_fun(get_median_model(trainloader))
 
 model.eval()
 
@@ -1008,19 +1030,23 @@ with torch.no_grad():
         size = data["size"]
         name = data["file"]
         output = model(dSignal,mask)
-        batchloss = loss_fn(target,output) #L1 LOSS. Mode: "mean"
        # batchloss = ops.generalized_box_iou_loss(output.to(dtype=torch.float32),target.to(dtype=torch.float32))
+        #outputs_centered = vm.center_to_box_fun(output)
+        #target_centered = vm.center_to_box_fun(target.unsqueeze(1))
+        outputs_centered = target_c2b(output)
+        target_centered = target_c2b(target)
+        batchloss = loss_fn(outputs_centered.to(dtype=torch.float32),target_centered.to(dtype=torch.float32)) #L1 LOSS. Mode: "mean"
         
-        accScores = vm.pascalACC(output,target)
+        accScores = vm.pascalACC(outputs_centered,target_centered)
         no_overfit_correct += accScores[0]
         no_overfit_false += accScores[1]
         IOU = accScores[2] #for batches is a list
         IOU_tr_li += IOU #concat lists 
         for i in range(len(IOU)):
             if(IOU[i]>0.5):
-                train_save_struct.append([name,str(1),IOU[i],target,output,size]) #filename, pred-status: correct(1):false(0), IOU-value, ground-truth, prediction-value 
+                train_save_struct.append([name,str(1),IOU[i],target_centered,output,size]) #filename, pred-status: correct(1):false(0), IOU-value, ground-truth, prediction-value 
             else:
-                train_save_struct.append([name,str(0),IOU[i],target,output,size])
+                train_save_struct.append([name,str(0),IOU[i],target_centered,output,size])
         print("Filename: {}\n Target: {}\n Prediction: {}\n Loss: {}\n IOU: {}".format(data["file"],data["target"],output,batchloss,IOU))
         trainsettestLosses.append(batchloss)
         
@@ -1029,11 +1055,11 @@ with torch.no_grad():
         meanModel_tmp = meanModel.repeat(n_in_batch,1).to(device) #make n_in_batch copies along batch-dimension
         medianModel_tmp = medianModel.repeat(n_in_batch,1).to(device)
         
-        accScores = vm.pascalACC(meanModel_tmp,target)
+        accScores = vm.pascalACC(meanModel_tmp,target_centered)
         no_mean_correct += accScores[0]
         no_mean_false += accScores[1]
         
-        accScores = vm.pascalACC(medianModel_tmp,target)
+        accScores = vm.pascalACC(medianModel_tmp,target_centered)
         no_med_correct += accScores[0]
         no_med_false += accScores[1]
         
@@ -1077,7 +1103,14 @@ with torch.no_grad():
         name = data["file"]
         size = data["size"]
         output = model(dSignal,mask)
-        batchloss = loss_fn(target,output) #L1 Loss
+
+        #output_decentered = vm.center_to_box_fun(output)
+        #target_decentered = vm.center_to_box_fun(target.unsqueeze(1))
+        outputs_decentered = target_c2b(output)
+        target_decentered = target_c2b(target)
+
+        batchloss = loss_fn(outputs_decentered.to(dtype=torch.float32),target_decentered.to(dtype=torch.float32)) #L1 LOSS. Mode: "mean"
+             #L1 Loss
         #batchloss = ops.generalized_box_iou_loss(output.to(dtype=torch.float32),target.to(dtype=torch.float32))
         running_loss += batchloss.item()
         testlosses.append(batchloss.item())
@@ -1086,9 +1119,9 @@ with torch.no_grad():
         IOU_te_li += IOU #list concatenation
         for i in range(len(IOU)): 
             if(IOU[i]>0.5):
-                correct_false_list.append([name,str(1),IOU[i],target,output,size]) #filename, pred-status: correct(1):false(0), IOU-value, ground-truth, prediction-value 
+                correct_false_list.append([name,str(1),IOU[i],target_decentered,output,size]) #filename, pred-status: correct(1):false(0), IOU-value, ground-truth, prediction-value 
             else:
-                correct_false_list.append([name,str(0),IOU[i],target,output,size])
+                correct_false_list.append([name,str(0),IOU[i],target_decentered,output,size])
             
         
         no_test_correct += accScores[0]        
@@ -1097,12 +1130,12 @@ with torch.no_grad():
         n_in_batch = target.shape[0]
         meanModel_tmp = meanModel.repeat(n_in_batch,1).to(device) #make n_in_batch copies along batch-dimension
         medianModel_tmp = medianModel.repeat(n_in_batch,1).to(device)
-        accScores = vm.pascalACC(meanModel_tmp,target)
+        accScores = vm.pascalACC(meanModel_tmp,target_decentered)
         
         no_test_mean_correct += accScores[0]
         no_test_mean_false += accScores[1]
         
-        accScores = vm.pascalACC(medianModel_tmp,target)
+        accScores = vm.pascalACC(medianModel_tmp,target_decentered)
         no_test_median_correct += accScores[0]
         no_test_median_false += accScores[1]
         
