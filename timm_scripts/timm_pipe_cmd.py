@@ -16,9 +16,25 @@ import matplotlib as mpl
 import torch.nn as nn
 import ViT_model as vm
 from tqdm import tqdm
+import sys
 #import handle_pascal as hdl
 from load_POET_timm import pascalET
 
+###CALL WITH SYSTEM ARGUMENTS
+#arg 1: classChoice
+#arg 2: NUM_IN_OVERFIT
+#arg 3: NUM_LAYERS
+#arg 4: NUM_HEADS
+ 
+try:
+    classChoice = int(sys.argv[1])
+except:
+    classChoice = None
+    pass
+
+SAVEDSET = False #flag for defining if data-sets are saved to scratch after dataloader generation. For ViT false because big files. 
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+print("FOUND DEVICE: ",device)
 
 
 def generate_DS(dataFrame,classes=[x for x in range(10)]):
@@ -121,8 +137,8 @@ class PASCALdataset(Dataset):
         self.sTransform = sTransform
         self.imTransform = imTransform
         self.deep_representation = None
-        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.ViT_model = timm.create_model('vit_base_patch16_224',pretrained=True,num_classes=0, global_pool='').to(device)
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.ViT_model = timm.create_model('vit_base_patch16_224',pretrained=True,num_classes=0, global_pool='')
         
     def __len__(self): 
         return len(self.ABDset)
@@ -140,16 +156,17 @@ class PASCALdataset(Dataset):
         
        
         if(SINGLE_PARTICIPANT==True):
-            signals = self.eyeData[idx][0] #participant zero only
+            signals = self.eyeData[idx][0]#participant zero only
         
         else: 
             signals = self.eyeData[idx,:]
         
-
+        classL = self.classlabels[idx]
         
         targets = self.targets[idx,:]
+        size = self.imdims[idx]
         
-        sample = {"signal": signals,"target": targets,"file": filename, "index": idx,"size":self.imdims[idx],"class":self.classlabels[idx],"mask":None,"image":image,"orgimage":image}
+        sample = {"signal": signals,"target": targets,"file": filename, "index": idx,"size":size,"class":classL,"mask":None,"image":image,"orgimage":image}
         
         if self.sTransform: 
             sample = self.sTransform(sample)
@@ -316,25 +333,42 @@ class rescale_coords(object):
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 classes = ["aeroplane","bicycle","boat","cat","cow","diningtable","dog","horse","motorbike","sofa"]
+if(classChoice!=None):
+    classesOC = [classChoice]
+else:
+    print("No selection of data provided. Used cats.")
+    classesOC = [3]
+    classChoice = 3
+
+torch.manual_seed(9)
+###SCRIPT PARAMETERS###
 GENERATE_DATASET = True
-classesOC = [0]
-classString = classes[classesOC[0]]
+classString = classes[classChoice]
 timm_root = os.path.dirname(__file__)
-BATCH_SZ = 1
-NLAYERS = 3
-NHEADS = 1
-EPOCHS = 600
-NUM_IN_OVERFIT = 2
+
+
+BATCH_SZ = 4
+# #RUN_FROM_COMMANDLINE. Class at top of programme.
+NUM_IN_OVERFIT = int(sys.argv[2]) #NUM-IN-OVERFIT EQUALS LEN(TRAIN) IF OVERFIT == False
+NLAYERS = int(sys.argv[3])
+NHEADS = int(sys.argv[4])
+EPOCHS = int(sys.argv[5])
+EVAL = int(sys.argv[6])
+
+#NLAYERS = 3
+#NHEADS = 1
+#EPOCHS = 600
+#NUM_IN_OVERFIT = 2
 DROPOUT = 0.0
 LR_FACTOR = 1
 EPOCH_STEPS = NUM_IN_OVERFIT//BATCH_SZ
 if EPOCH_STEPS == 0: 
     EPOCH_STEPS = 1
 NUM_WARMUP = int(EPOCHS*(1/3))*EPOCH_STEPS #constant 30% warmup-rate
-#NUM_WARMUP = 1
+
 BETA = 1
 OVERFIT=True
-EVAL = 0 #flag which is set for model evaluation, ie. final model. Set 1 if it is final model.
+#EVAL = 0 #flag which is set for model evaluation, ie. final model. Set 1 if it is final model.
 
    
 
@@ -365,27 +399,25 @@ if(GENERATE_DATASET == True or GENERATE_DATASET==None):
     train = torch.utils.data.Subset(fullDataset,trainIDX)
     test = torch.utils.data.Subset(fullDataset,testIDX)
     #save generated splits to scratch
-    torch.save(train,timm_root+"/datasets/"+classString+"Train.pt")
-    torch.save(test,timm_root+"/datasets/"+classString+"Test.pt")
-    print("................. Wrote datasets for ",classString,"to disk ....................")
-    
+    if(SAVEDSET == True):
+        torch.save(train,timm_root+"/datasets/"+classString+"Train.pt")
+        torch.save(test,timm_root+"/datasets/"+classString+"Test.pt")
+        print("................. Wrote datasets for ",classString,"to disk ....................")
+        
 
 if(GENERATE_DATASET == False):
     train,test = load_split(classString,timm_root)  
     print("Succesfully read data from binary")
  
-#FOR DEBUGGING
-train = torch.utils.data.Subset(train,[0,1,2])
-
 
 #make dataloaders of chosen split
-trainloader = DataLoader(train,batch_size=BATCH_SZ,shuffle=True,num_workers=8)
+trainloader = DataLoader(train,batch_size=BATCH_SZ,shuffle=True,num_workers=1)
 #FOR DEBUGGING
 #for i, data in enumerate(trainloader):
 #    if i==1:
 #        DEBUGSAMPLE = data
 
-testloader = DataLoader(test,batch_size=BATCH_SZ,shuffle=True,num_workers=8)
+testloader = DataLoader(test,batch_size=BATCH_SZ,shuffle=True,num_workers=1)
 
 if NUM_IN_OVERFIT==None and OVERFIT==True: #only if no cmd-argv provided
     NUM_IN_OVERFIT=16
@@ -400,9 +432,9 @@ if(OVERFIT): #CREATES TRAIN AND VALIDATION-SPLIT
     valIDX = IDX[NUM_IN_OVERFIT:NUM_IN_OVERFIT+17].unsqueeze(1) #17 because the smallest train-set has length 33=max(L)+17.
     overfitSet = torch.utils.data.Subset(train,ofIDX)
     valSet = torch.utils.data.Subset(train,valIDX)
-    trainloader = DataLoader(overfitSet,batch_size=BATCH_SZ,shuffle=True,num_workers=8,generator=g)
+    trainloader = DataLoader(overfitSet,batch_size=BATCH_SZ,shuffle=True,num_workers=1,generator=g)
     print("Overwrote trainloader with overfit-set of length {}".format(ofIDX.shape[0]))
-    valloader = DataLoader(valSet,batch_size=BATCH_SZ,shuffle=True,num_workers=8,generator=g)
+    valloader = DataLoader(valSet,batch_size=BATCH_SZ,shuffle=True,num_workers=1,generator=g)
     print("Valloader of constant length {}".format(valIDX.shape[0]))
 
 
@@ -569,7 +601,7 @@ def train_one_epoch(model,loss,trainloader,negative_print=False) -> float:
         target = data["target"].to(device)
         mask = data["mask"].to(device)
         signal = data["signal"].to(device)
-        dSignal = get_deep_seq(data)
+        dSignal = get_deep_seq(data).to(device)
         #print("Mask:\n",data["mask"])
         #print("Input: \n",data["signal"])
         #print("Goal is: \n",data["target"])
@@ -626,10 +658,10 @@ def train_one_epoch_w_val(model,loss,trainloader,valloader,negative_print=False,
     with torch.no_grad():
         for i, data in enumerate(valloader):
             counter += 1 
-            target = data["target"]
-            mask = data["mask"]
-            signal = data["signal"]
-            dSignal = get_deep_seq(data)
+            target = data["target"].to(device)
+            mask = data["mask"].to(device)
+            signal = data["signal"].to(device)
+            dSignal = get_deep_seq(data).to(device)
             outputs = model(dSignal,mask)
             #sOutputs, sTargets = scaleBackCoords(outputs, target, imsz)
             noTrue,noFalse,IOUli_v = vm.pascalACC(outputs,target)
@@ -653,9 +685,9 @@ def train_one_epoch_w_val(model,loss,trainloader,valloader,negative_print=False,
     for i, data in enumerate(trainloader):
         counter += 1
         model_opt.optimizer.zero_grad() #reset grads
-        target = data["target"]
-        mask = data["mask"]
-        dSignal = get_deep_seq(data)
+        target = data["target"].to(device)
+        mask = data["mask"].to(device)
+        dSignal = get_deep_seq(data).to(device)
         
         #print("Mask:\n",data["mask"])
         #print("Input: \n",data["signal"])
@@ -763,7 +795,7 @@ def save_split(trainloader,valloader,classString,root_dir,params):
         None
         
     """
-    path = root_dir + "/" + classString + "/nL_" + str(params[0]) +"_nH_" + str(params[1])+"/"
+    path = root_dir + "/" + classString + "/L_" + str(params[-1])+"_nL_" + str(params[0]) +"_nH_" + str(params[1])+"/"
     if not os.path.exists(path):
         os.mkdir(path)
         print("Created dir in: ",path)
@@ -784,7 +816,7 @@ def save_epochs(loss,acc,classString,root_dir,mode,params):
     if not os.path.exists(path):
         os.mkdir(path)
         print("Created dir in: ",path)
-    path += "nL_" + str(params[0]) +"_nH_" + str(params[1]) +"/"
+    path += "L_"+str(params[-1]) +"_nL_" + str(params[0]) +"_nH_" + str(params[1]) +"/"
     if not os.path.exists(path):
         os.mkdir(path)
         print("Created subdir in: ",path)
@@ -809,13 +841,17 @@ def save_epochs(loss,acc,classString,root_dir,mode,params):
 def save_IOU(IOU_li,classString,root_dir,params,mode):
     path = root_dir + "/"+classString+"/"
     if not os.path.exists(path):
+        print("PATH DID NOT EXIST",path)
         os.mkdir(path)
         print("Created dir in: ",path)
-    path += "nL_" + str(params[0]) +"_nH_" + str(params[1]) +"/"+mode+"/"
+    path +=  "L_"+str(params[-1]) +"_nL_" + str(params[0]) +"_nH_" + str(params[1]) +"/" #
     if not os.path.exists(path):
         os.mkdir(path)
         print("Created subdir in: ",path)
-        
+    path += mode+"/"
+    if not os.path.exists(path):
+        os.mkdir(path)
+        print("Created subdir in: ",path)
     torch.save(IOU_li,path+"epochIOU.pth")
     print("Wrote epoch IOU's to scratch in :",path)
     return None
@@ -825,7 +861,7 @@ def save_model(model,classString,root_dir,params,mode):
     if not os.path.exists(path):
         os.mkdir(path)
         print("Created dir in: ",path)
-    path += "nL_" + str(params[0]) +"_nH_" + str(params[1]) +"/"+mode+"/"
+    path += "L_"+str(params[-1]) +"_nL_" + str(params[0]) +"_nH_" + str(params[1]) +"/" +mode+"/"
     if not os.path.exists(path):
         os.mkdir(path)
         print("Created subdir in: ",path)
@@ -834,19 +870,19 @@ def save_model(model,classString,root_dir,params,mode):
     return None
 
 if(EVAL==0):
-    save_epochs(epochLossLI,epochAccLI,classString,timm_root,mode="result",params=[NLAYERS,NHEADS])
-    save_IOU(trainIOU,classString,timm_root,params=[NLAYERS,NHEADS],mode="result")
-    save_model(model,classString,timm_root,params=[NLAYERS,NHEADS],mode="result")
+    save_epochs(epochLossLI,epochAccLI,classString,timm_root,mode="result_L"+str(len(trainloader.dataset)),params=[NLAYERS,NHEADS])
+    save_IOU(trainIOU,classString,timm_root,params=[NLAYERS,NHEADS,NUM_IN_OVERFIT],mode="result"+str(len(trainloader.dataset)))
+    #save_model(model,classString,timm_root,params=[NLAYERS,NHEADS],mode="result")
 
 if(EVAL==1):
-    save_epochs(epochLossLI,epochAccLI,classString,timm_root,mode="eval",params=[NLAYERS,NHEADS])
-    save_IOU(trainIOU,classString,timm_root,params=[NLAYERS,NHEADS],mode="eval")
-    save_model(model,classString,timm_root,params=[NLAYERS,NHEADS],mode="eval")
+    save_epochs(epochLossLI,epochAccLI,classString,timm_root,mode="eval_L"+str(len(trainloader.dataset)),params=[NLAYERS,NHEADS])
+    save_IOU(trainIOU,classString,timm_root,params=[NLAYERS,NHEADS,NUM_IN_OVERFIT],mode="eval"+str(len(trainloader.dataset)))
+    #save_model(model,classString,timm_root,params=[NLAYERS,NHEADS],mode="eval")
     
 
 if(OVERFIT==True and EVAL==0):
-    save_epochs(epochValLossLI,epochValAccLI,classString,timm_root,mode="val",params=[NLAYERS,NHEADS])
-    save_split(trainloader,valloader,classString,timm_root,params=[NLAYERS,NHEADS])
+    save_epochs(epochValLossLI,epochValAccLI,classString,timm_root,mode="val"+str(len(trainloader.dataset)),params=[NLAYERS,NHEADS])
+    save_split(trainloader,valloader,classString,timm_root,params=[NLAYERS,NHEADS,NUM_IN_OVERFIT])
     print("\nWrote train-val-split to scratch.\n")
     
 
@@ -895,7 +931,10 @@ def get_median_model(trainloader): #NEED TO FIX FOR BATCHES
 
 
 #---------------------TEST AND EVAL -------------#
-paramsString = timm_root +"/"+ classString + "/nL_" + str(NLAYERS) +"_nH_" + str(NHEADS)+"/" #for saving to correct dirs
+if OVERFIT:
+    paramsString = timm_root +"/"+ classString + "/L_" +str(NUM_IN_OVERFIT) +"_nL_" + str(NLAYERS) +"_nH_" + str(NHEADS)+"/" #for saving to correct dirs
+else:
+    paramsString = timm_root +"/"+ classString + "/nL_" + str(NLAYERS) +"_nH_" + str(NHEADS)+"/" #for saving to correct dirs
 
 #1. TEST-LOOP ON TRAIN-SET
 trainsettestLosses = []
@@ -910,6 +949,7 @@ model.eval()
 print("Entered evaluation-phase.")
 if(OVERFIT):
     print("Model parameters:\n tL: {}\n vL: {}\nlrf: {}\n num_warmup: {}\n Dropout: {}\n Beta: {}\n NHEADS: {}\n NLAYERS: {}".format(NUM_IN_OVERFIT,len(valIDX),LR_FACTOR,NUM_WARMUP,DROPOUT,BETA,NHEADS,NLAYERS))
+    #print("Model parameters:\n tL: {} \nlrf: {}\n num_warmup: {}\n Dropout: {}\n Beta: {}\n NHEADS: {}\n NLAYERS: {}".format(NUM_IN_OVERFIT,LR_FACTOR,NUM_WARMUP,DROPOUT,BETA,NHEADS,NLAYERS)) #running overfit-set without validation for speediness
 else:
     print("Model parameters:\n tL: {} \nlrf: {}\n num_warmup: {}\n Dropout: {}\n Beta: {}\n NHEADS: {}\n NLAYERS: {}".format(NUM_IN_OVERFIT,LR_FACTOR,NUM_WARMUP,DROPOUT,BETA,NHEADS,NLAYERS))
 
@@ -925,10 +965,10 @@ train_save_struct = []
 
 with torch.no_grad():
     for i, data in enumerate(trainloader):
-        signal = data["signal"]
-        dSignal = get_deep_seq(data)
-        target = data["target"]
-        mask = data["mask"]
+        signal = data["signal"].to(device)
+        dSignal = get_deep_seq(data).to(device)
+        target = data["target"].to(device)
+        mask = data["mask"].to(device)
         size = data["size"]
         name = data["file"]
         output = model(dSignal,mask)
@@ -950,8 +990,8 @@ with torch.no_grad():
         
         #fix meanModel to have as many entrys as target-tensor: 
         n_in_batch = target.shape[0]
-        meanModel_tmp = meanModel.repeat(n_in_batch,1) #make n_in_batch copies along batch-dimension
-        medianModel_tmp = medianModel.repeat(n_in_batch,1)
+        meanModel_tmp = meanModel.repeat(n_in_batch,1).to(device) #make n_in_batch copies along batch-dimension
+        medianModel_tmp = medianModel.repeat(n_in_batch,1).to(device)
         
         accScores = vm.pascalACC(meanModel_tmp,target)
         no_mean_correct += accScores[0]

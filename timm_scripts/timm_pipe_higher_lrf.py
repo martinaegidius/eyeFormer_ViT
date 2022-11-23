@@ -320,13 +320,13 @@ GENERATE_DATASET = True
 classesOC = [0]
 classString = classes[classesOC[0]]
 timm_root = os.path.dirname(__file__)
-BATCH_SZ = 1
+BATCH_SZ = 4
 NLAYERS = 3
 NHEADS = 1
-EPOCHS = 600
+EPOCHS = 1000
 NUM_IN_OVERFIT = 2
 DROPOUT = 0.0
-LR_FACTOR = 1
+LR_FACTOR = 10
 EPOCH_STEPS = NUM_IN_OVERFIT//BATCH_SZ
 if EPOCH_STEPS == 0: 
     EPOCH_STEPS = 1
@@ -379,13 +379,13 @@ train = torch.utils.data.Subset(train,[0,1,2])
 
 
 #make dataloaders of chosen split
-trainloader = DataLoader(train,batch_size=BATCH_SZ,shuffle=True,num_workers=8)
+trainloader = DataLoader(train,batch_size=BATCH_SZ,shuffle=True,num_workers=0)
 #FOR DEBUGGING
 #for i, data in enumerate(trainloader):
 #    if i==1:
 #        DEBUGSAMPLE = data
 
-testloader = DataLoader(test,batch_size=BATCH_SZ,shuffle=True,num_workers=8)
+testloader = DataLoader(test,batch_size=BATCH_SZ,shuffle=True,num_workers=0)
 
 if NUM_IN_OVERFIT==None and OVERFIT==True: #only if no cmd-argv provided
     NUM_IN_OVERFIT=16
@@ -400,9 +400,9 @@ if(OVERFIT): #CREATES TRAIN AND VALIDATION-SPLIT
     valIDX = IDX[NUM_IN_OVERFIT:NUM_IN_OVERFIT+17].unsqueeze(1) #17 because the smallest train-set has length 33=max(L)+17.
     overfitSet = torch.utils.data.Subset(train,ofIDX)
     valSet = torch.utils.data.Subset(train,valIDX)
-    trainloader = DataLoader(overfitSet,batch_size=BATCH_SZ,shuffle=True,num_workers=8,generator=g)
+    trainloader = DataLoader(overfitSet,batch_size=BATCH_SZ,shuffle=True,num_workers=0,generator=g)
     print("Overwrote trainloader with overfit-set of length {}".format(ofIDX.shape[0]))
-    valloader = DataLoader(valSet,batch_size=BATCH_SZ,shuffle=True,num_workers=8,generator=g)
+    valloader = DataLoader(valSet,batch_size=BATCH_SZ,shuffle=True,num_workers=0,generator=g)
     print("Valloader of constant length {}".format(valIDX.shape[0]))
 
 

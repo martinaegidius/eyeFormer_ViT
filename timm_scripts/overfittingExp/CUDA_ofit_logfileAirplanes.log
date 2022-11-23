@@ -1,0 +1,507 @@
+FOUND DEVICE:  cuda:0
+Total length is:  666
+Overwrote trainloader with overfit-set of length 2
+Valloader of constant length 17
+-----------------------------------------------------------------------------
+Model parameters:
+ tL: 2
+ vL: 17
+lrf: 1
+NEPOCHS: 800
+ num_warmup: 266
+ Dropout: 0.0
+ Beta: 1
+ NHEADS: 1
+ NLAYERS: 3
+Manual early stopping triggered
+Created subdir in:  /zhome/ba/f/147212/BA/eyeFormer_ViT/timm_scripts/aeroplane/L_1_nL_3_nH_1/
+Saved loss results to:  /zhome/ba/f/147212/BA/eyeFormer_ViT/timm_scripts/aeroplane/L_1_nL_3_nH_1/aeroplane_eval_L2_losses.pth
+Saved accuracy results to:  /zhome/ba/f/147212/BA/eyeFormer_ViT/timm_scripts/aeroplane/L_1_nL_3_nH_1/aeroplane_eval_L2_acc.pth
+Created subdir in:  /zhome/ba/f/147212/BA/eyeFormer_ViT/timm_scripts/aeroplane/L_2_nL_3_nH_1/
+Created subdir in:  /zhome/ba/f/147212/BA/eyeFormer_ViT/timm_scripts/aeroplane/L_2_nL_3_nH_1/eval2/
+Wrote epoch IOU's to scratch in : /zhome/ba/f/147212/BA/eyeFormer_ViT/timm_scripts/aeroplane/L_2_nL_3_nH_1/eval2/
+Entered evaluation-phase.
+Model parameters:
+ tL: 2
+ vL: 17
+lrf: 1
+ num_warmup: 266
+ Dropout: 0.0
+ Beta: 1
+ NHEADS: 1
+ NLAYERS: 3
+Evaluating overfit on ALL 2 train instances
+Filename: ['aeroplane_2011_000531.jpg', 'aeroplane_2009_002393.jpg']
+ Target: tensor([[  1., 102., 500., 311.],
+        [219.,  87., 345., 136.]], dtype=torch.float64)
+ Prediction: tensor([[2.1812, 7.4011, 7.2107, 8.2723],
+        [5.3212, 7.4994, 7.3051, 8.8873]], device='cuda:0')
+ Loss: 205.66050294041634
+ IOU: [0.0, 0.0]
+---------------------------EVAL on ALL 2 overfit-train-images---------------------------
+
+Transformer accuracy with PASCAL-criterium on overfit set: 0/2, percentage: 0.0
+
+Mean model accuracy with PASCAL-criterium on overfit set: 0/2, percentage: 0.0
+
+Median model accuracy with PASCAL-criterium on overfit set: 0/2, percentage: 0.0
+
+Mean IOU is 0.0
+FOUND DEVICE:  cuda:0
+Total length is:  666
+Overwrote trainloader with overfit-set of length 2
+Valloader of constant length 17
+-----------------------------------------------------------------------------
+Model parameters:
+ tL: 2
+ vL: 17
+lrf: 1
+NEPOCHS: 800
+ num_warmup: 266
+ Dropout: 0.0
+ Beta: 1
+ NHEADS: 1
+ NLAYERS: 3
+FOUND DEVICE:  cuda:0
+Total length is:  666
+Overwrote trainloader with overfit-set of length 4
+Valloader of constant length 17
+-----------------------------------------------------------------------------
+Model parameters:
+ tL: 4
+ vL: 17
+lrf: 1
+NEPOCHS: 800
+ num_warmup: 266
+ Dropout: 0.0
+ Beta: 1
+ NHEADS: 1
+ NLAYERS: 3
+FOUND DEVICE:  cuda:0
+Total length is:  666
+FOUND DEVICE:  cuda:0
+Total length is:  666
+Overwrote trainloader with overfit-set of length 2
+Valloader of constant length 17
+-----------------------------------------------------------------------------
+Model parameters:
+ tL: 2
+ vL: 17
+lrf: 1
+NEPOCHS: 800
+ num_warmup: 266
+ Dropout: 0.0
+ Beta: 1
+ NHEADS: 1
+ NLAYERS: 3
+Manual early stopping triggered
+Saved loss results to:  /zhome/ba/f/147212/BA/eyeFormer_ViT/timm_scripts/aeroplane/L_1_nL_3_nH_1/aeroplane_result_L2_losses.pth
+Saved accuracy results to:  /zhome/ba/f/147212/BA/eyeFormer_ViT/timm_scripts/aeroplane/L_1_nL_3_nH_1/aeroplane_result_L2_acc.pth
+Wrote epoch IOU's to scratch in : /zhome/ba/f/147212/BA/eyeFormer_ViT/timm_scripts/aeroplane/L_2_nL_3_nH_1/result2/
+Saved loss results to:  /zhome/ba/f/147212/BA/eyeFormer_ViT/timm_scripts/aeroplane/L_1_nL_3_nH_1/aeroplane_val2_losses.pth
+Saved accuracy results to:  /zhome/ba/f/147212/BA/eyeFormer_ViT/timm_scripts/aeroplane/L_1_nL_3_nH_1/aeroplane_val2_acc.pth
+FOUND DEVICE:  cuda:0
+Total length is:  666
+Overwrote trainloader with overfit-set of length 2
+Valloader of constant length 17
+-----------------------------------------------------------------------------
+Model parameters:
+ tL: 2
+ vL: 17
+lrf: 1
+NEPOCHS: 800
+ num_warmup: 266
+ Dropout: 0.0
+ Beta: 1
+ NHEADS: 1
+ NLAYERS: 3
+Saved loss results to:  /zhome/ba/f/147212/BA/eyeFormer_ViT/timm_scripts/aeroplane/L_1_nL_3_nH_1/aeroplane_result_L2_losses.pth
+Saved accuracy results to:  /zhome/ba/f/147212/BA/eyeFormer_ViT/timm_scripts/aeroplane/L_1_nL_3_nH_1/aeroplane_result_L2_acc.pth
+Wrote epoch IOU's to scratch in : /zhome/ba/f/147212/BA/eyeFormer_ViT/timm_scripts/aeroplane/L_2_nL_3_nH_1/result2/
+Saved loss results to:  /zhome/ba/f/147212/BA/eyeFormer_ViT/timm_scripts/aeroplane/L_1_nL_3_nH_1/aeroplane_val2_losses.pth
+Saved accuracy results to:  /zhome/ba/f/147212/BA/eyeFormer_ViT/timm_scripts/aeroplane/L_1_nL_3_nH_1/aeroplane_val2_acc.pth
+
+Wrote train-val-split to scratch.
+
+Entered evaluation-phase.
+Model parameters:
+ tL: 2
+ vL: 17
+lrf: 1
+ num_warmup: 266
+ Dropout: 0.0
+ Beta: 1
+ NHEADS: 1
+ NLAYERS: 3
+Evaluating overfit on ALL 2 train instances
+Filename: ['aeroplane_2011_000531.jpg', 'aeroplane_2009_002393.jpg']
+ Target: tensor([[  1., 102., 500., 311.],
+        [219.,  87., 345., 136.]], dtype=torch.float64)
+ Prediction: tensor([[  1.0729, 101.8562, 500.8150, 311.6871],
+        [218.8055,  87.0796, 346.3219, 137.0018]], device='cuda:0')
+ Loss: 0.24086484740655933
+ IOU: [0.9942710615009055, 0.9667576439823876]
+---------------------------EVAL on ALL 2 overfit-train-images---------------------------
+
+Transformer accuracy with PASCAL-criterium on overfit set: 2/2, percentage: 1.0
+
+Mean model accuracy with PASCAL-criterium on overfit set: 0/2, percentage: 0.0
+
+Median model accuracy with PASCAL-criterium on overfit set: 0/2, percentage: 0.0
+
+Mean IOU is 0.9805143527416466
+
+   Results saved to file:  /zhome/ba/f/147212/BA/eyeFormer_ViT/timm_scripts/aeroplane/L_2_nL_3_nH_1/aeroplane/aeroplane_test_on_train_results.pth
+FOUND DEVICE:  cuda:0
+Total length is:  666
+Overwrote trainloader with overfit-set of length 4
+Valloader of constant length 17
+-----------------------------------------------------------------------------
+Model parameters:
+ tL: 4
+ vL: 17
+lrf: 1
+NEPOCHS: 800
+ num_warmup: 266
+ Dropout: 0.0
+ Beta: 1
+ NHEADS: 1
+ NLAYERS: 3
+Saved loss results to:  /zhome/ba/f/147212/BA/eyeFormer_ViT/timm_scripts/aeroplane/L_1_nL_3_nH_1/aeroplane_result_L4_losses.pth
+Saved accuracy results to:  /zhome/ba/f/147212/BA/eyeFormer_ViT/timm_scripts/aeroplane/L_1_nL_3_nH_1/aeroplane_result_L4_acc.pth
+Created subdir in:  /zhome/ba/f/147212/BA/eyeFormer_ViT/timm_scripts/aeroplane/L_4_nL_3_nH_1/
+Created subdir in:  /zhome/ba/f/147212/BA/eyeFormer_ViT/timm_scripts/aeroplane/L_4_nL_3_nH_1/result4/
+Wrote epoch IOU's to scratch in : /zhome/ba/f/147212/BA/eyeFormer_ViT/timm_scripts/aeroplane/L_4_nL_3_nH_1/result4/
+Saved loss results to:  /zhome/ba/f/147212/BA/eyeFormer_ViT/timm_scripts/aeroplane/L_1_nL_3_nH_1/aeroplane_val4_losses.pth
+Saved accuracy results to:  /zhome/ba/f/147212/BA/eyeFormer_ViT/timm_scripts/aeroplane/L_1_nL_3_nH_1/aeroplane_val4_acc.pth
+
+Wrote train-val-split to scratch.
+
+Entered evaluation-phase.
+Model parameters:
+ tL: 4
+ vL: 17
+lrf: 1
+ num_warmup: 266
+ Dropout: 0.0
+ Beta: 1
+ NHEADS: 1
+ NLAYERS: 3
+Evaluating overfit on ALL 4 train instances
+Filename: ['aeroplane_2009_002393.jpg', 'aeroplane_2011_000481.jpg', 'aeroplane_2011_000531.jpg', 'aeroplane_2009_002191.jpg']
+ Target: tensor([[219.,  87., 345., 136.],
+        [188.,  85., 302., 211.],
+        [  1., 102., 500., 311.],
+        [ 19., 129., 469., 250.]], dtype=torch.float64)
+ Prediction: tensor([[ 2.1324e+02,  9.1484e+01,  3.4932e+02,  1.3413e+02],
+        [ 1.8888e+02,  8.7481e+01,  3.0787e+02,  2.1258e+02],
+        [-4.6360e-01,  1.1261e+02,  5.0243e+02,  3.1243e+02],
+        [ 1.4989e+01,  1.2842e+02,  4.8301e+02,  2.5245e+02]], device='cuda:0')
+ Loss: 3.5208977253714693
+ IOU: [0.8136822490677891, 0.914597302697958, 0.935830647242116, 0.9379885988142579]
+---------------------------EVAL on ALL 4 overfit-train-images---------------------------
+
+Transformer accuracy with PASCAL-criterium on overfit set: 4/4, percentage: 1.0
+
+Mean model accuracy with PASCAL-criterium on overfit set: 0/4, percentage: 0.0
+
+Median model accuracy with PASCAL-criterium on overfit set: 0/4, percentage: 0.0
+
+Mean IOU is 0.9005246994555303
+
+   Results saved to file:  /zhome/ba/f/147212/BA/eyeFormer_ViT/timm_scripts/aeroplane/L_4_nL_3_nH_1/aeroplane/aeroplane_test_on_train_results.pth
+FOUND DEVICE:  cuda:0
+Total length is:  666
+Overwrote trainloader with overfit-set of length 8
+Valloader of constant length 17
+-----------------------------------------------------------------------------
+Model parameters:
+ tL: 8
+ vL: 17
+lrf: 1
+NEPOCHS: 800
+ num_warmup: 532
+ Dropout: 0.0
+ Beta: 1
+ NHEADS: 1
+ NLAYERS: 3
+Saved loss results to:  /zhome/ba/f/147212/BA/eyeFormer_ViT/timm_scripts/aeroplane/L_1_nL_3_nH_1/aeroplane_result_L8_losses.pth
+Saved accuracy results to:  /zhome/ba/f/147212/BA/eyeFormer_ViT/timm_scripts/aeroplane/L_1_nL_3_nH_1/aeroplane_result_L8_acc.pth
+Created subdir in:  /zhome/ba/f/147212/BA/eyeFormer_ViT/timm_scripts/aeroplane/L_8_nL_3_nH_1/
+Created subdir in:  /zhome/ba/f/147212/BA/eyeFormer_ViT/timm_scripts/aeroplane/L_8_nL_3_nH_1/result8/
+Wrote epoch IOU's to scratch in : /zhome/ba/f/147212/BA/eyeFormer_ViT/timm_scripts/aeroplane/L_8_nL_3_nH_1/result8/
+Saved loss results to:  /zhome/ba/f/147212/BA/eyeFormer_ViT/timm_scripts/aeroplane/L_1_nL_3_nH_1/aeroplane_val8_losses.pth
+Saved accuracy results to:  /zhome/ba/f/147212/BA/eyeFormer_ViT/timm_scripts/aeroplane/L_1_nL_3_nH_1/aeroplane_val8_acc.pth
+
+Wrote train-val-split to scratch.
+
+Entered evaluation-phase.
+Model parameters:
+ tL: 8
+ vL: 17
+lrf: 1
+ num_warmup: 532
+ Dropout: 0.0
+ Beta: 1
+ NHEADS: 1
+ NLAYERS: 3
+Evaluating overfit on ALL 8 train instances
+Filename: ['aeroplane_2011_000163.jpg', 'aeroplane_2011_000481.jpg', 'aeroplane_2009_002393.jpg', 'aeroplane_2010_005022.jpg']
+ Target: tensor([[164.,  70., 335., 168.],
+        [188.,  85., 302., 211.],
+        [219.,  87., 345., 136.],
+        [ 11.,  63., 491., 235.]], dtype=torch.float64)
+ Prediction: tensor([[ 80.1409,  72.6870, 350.6157, 168.2885],
+        [ 21.6469,  87.6896, 471.8727, 241.5203],
+        [209.1321,  84.3645, 329.5674, 133.7431],
+        [ 21.6913,  87.7281, 472.0580, 241.6091]], device='cuda:0')
+ Loss: 34.70640124526835
+ IOU: [0.6193088171848856, 0.2020750847836096, 0.743350671267769, 0.7754154454644149]
+Filename: ['aeroplane_2009_002191.jpg', 'aeroplane_2011_000531.jpg', 'aeroplane_2011_001624.jpg', 'aeroplane_2008_007579.jpg']
+ Target: tensor([[ 19., 129., 469., 250.],
+        [  1., 102., 500., 311.],
+        [115., 148., 353., 223.],
+        [ 51.,  64., 500., 284.]], dtype=torch.float64)
+ Prediction: tensor([[ 21.6867,  87.7243, 472.0391, 241.6002],
+        [ 89.8862,  94.0414, 462.8109, 224.9586],
+        [ 89.9098,  94.0582, 462.8885, 224.9947],
+        [ 80.1462,  72.6922, 350.6410, 168.3009]], device='cuda:0')
+ Loss: 47.580519676208496
+ IOU: [0.686386007105042, 0.42751009455004935, 0.3655050746463489, 0.26181073556852885]
+---------------------------EVAL on ALL 8 overfit-train-images---------------------------
+
+Transformer accuracy with PASCAL-criterium on overfit set: 4/8, percentage: 0.5
+
+Mean model accuracy with PASCAL-criterium on overfit set: 1/8, percentage: 0.125
+
+Median model accuracy with PASCAL-criterium on overfit set: 1/8, percentage: 0.125
+
+Mean IOU is 0.510170241321331
+
+   Results saved to file:  /zhome/ba/f/147212/BA/eyeFormer_ViT/timm_scripts/aeroplane/L_8_nL_3_nH_1/aeroplane/aeroplane_test_on_train_results.pth
+FOUND DEVICE:  cuda:0
+Total length is:  666
+Overwrote trainloader with overfit-set of length 16
+Valloader of constant length 17
+-----------------------------------------------------------------------------
+Model parameters:
+ tL: 16
+ vL: 17
+lrf: 1
+NEPOCHS: 800
+ num_warmup: 1064
+ Dropout: 0.0
+ Beta: 1
+ NHEADS: 1
+ NLAYERS: 3
+Saved loss results to:  /zhome/ba/f/147212/BA/eyeFormer_ViT/timm_scripts/aeroplane/L_1_nL_3_nH_1/aeroplane_result_L16_losses.pth
+Saved accuracy results to:  /zhome/ba/f/147212/BA/eyeFormer_ViT/timm_scripts/aeroplane/L_1_nL_3_nH_1/aeroplane_result_L16_acc.pth
+Created subdir in:  /zhome/ba/f/147212/BA/eyeFormer_ViT/timm_scripts/aeroplane/L_16_nL_3_nH_1/
+Created subdir in:  /zhome/ba/f/147212/BA/eyeFormer_ViT/timm_scripts/aeroplane/L_16_nL_3_nH_1/result16/
+Wrote epoch IOU's to scratch in : /zhome/ba/f/147212/BA/eyeFormer_ViT/timm_scripts/aeroplane/L_16_nL_3_nH_1/result16/
+Saved loss results to:  /zhome/ba/f/147212/BA/eyeFormer_ViT/timm_scripts/aeroplane/L_1_nL_3_nH_1/aeroplane_val16_losses.pth
+Saved accuracy results to:  /zhome/ba/f/147212/BA/eyeFormer_ViT/timm_scripts/aeroplane/L_1_nL_3_nH_1/aeroplane_val16_acc.pth
+
+Wrote train-val-split to scratch.
+
+Entered evaluation-phase.
+Model parameters:
+ tL: 16
+ vL: 17
+lrf: 1
+ num_warmup: 1064
+ Dropout: 0.0
+ Beta: 1
+ NHEADS: 1
+ NLAYERS: 3
+Evaluating overfit on ALL 16 train instances
+Filename: ['aeroplane_2009_003667.jpg', 'aeroplane_2011_001624.jpg', 'aeroplane_2011_000531.jpg', 'aeroplane_2011_000276.jpg']
+ Target: tensor([[ 23.,  43., 491., 298.],
+        [115., 148., 353., 223.],
+        [  1., 102., 500., 311.],
+        [  1.,  39., 500., 313.]], dtype=torch.float64)
+ Prediction: tensor([[ 16.5794,  51.7713, 499.8481, 306.5680],
+        [121.2572, 145.6521, 365.0847, 221.8367],
+        [  9.0753,  49.7972, 494.9507, 317.0082],
+        [  7.3526,  49.0960, 491.1276, 320.3656]], device='cuda:0')
+ Loss: 9.405211567878723
+ IOU: [0.9056494547183597, 0.8859086402779035, 0.7659700553968452, 0.9100490674408682]
+Filename: ['aeroplane_2010_000295.jpg', 'aeroplane_2010_005632.jpg', 'aeroplane_2010_004991.jpg', 'aeroplane_2008_007579.jpg']
+ Target: tensor([[137., 131., 326., 210.],
+        [ 50., 120., 402., 237.],
+        [163., 140., 358., 212.],
+        [ 51.,  64., 500., 284.]], dtype=torch.float64)
+ Prediction: tensor([[158.4605, 143.2061, 339.6119, 209.8719],
+        [ 44.8184, 125.9091, 411.0732, 239.8513],
+        [148.9833, 147.0707, 348.2893, 213.1691],
+        [ 46.7415,  60.6823, 499.3570, 278.3781]], device='cuda:0')
+ Loss: 6.79212687179097
+ IOU: [0.7051924551891011, 0.8925427355983153, 0.7923751230141872, 0.9498324216304634]
+Filename: ['aeroplane_2010_005022.jpg', 'aeroplane_2011_000163.jpg', 'aeroplane_2009_002393.jpg', 'aeroplane_2008_001719.jpg']
+ Target: tensor([[ 11.,  63., 491., 235.],
+        [164.,  70., 335., 168.],
+        [219.,  87., 345., 136.],
+        [ 49.,  21., 376., 220.]], dtype=torch.float64)
+ Prediction: tensor([[  6.5857,  60.5718, 487.1191, 230.1117],
+        [175.8738,  72.1980, 346.1229, 158.2439],
+        [217.2136,  88.8551, 339.4079, 138.9398],
+        [ 46.7663,  15.3172, 377.4752, 218.7551]], device='cuda:0')
+ Loss: 4.085781008005142
+ IOU: [0.9419937563889752, 0.7729099523040126, 0.8578258727348984, 0.9553838410558859]
+Filename: ['aeroplane_2009_002191.jpg', 'aeroplane_2011_000975.jpg', 'aeroplane_2010_000392.jpg', 'aeroplane_2011_000481.jpg']
+ Target: tensor([[ 19., 129., 469., 250.],
+        [  1.,  46., 428., 373.],
+        [228., 145., 438., 223.],
+        [188.,  85., 302., 211.]], dtype=torch.float64)
+ Prediction: tensor([[ 14.1047, 120.9413, 478.1950, 247.8676],
+        [  5.2355,  47.9000, 445.4657, 328.1493],
+        [217.8894, 144.2040, 445.6526, 220.7515],
+        [185.0955,  95.9399, 303.6827, 207.1722]], device='cuda:0')
+ Loss: 7.807298863568576
+ IOU: [0.8935196264689599, 0.8197920488245831, 0.8883627464327742, 0.8525131073269675]
+---------------------------EVAL on ALL 16 overfit-train-images---------------------------
+
+Transformer accuracy with PASCAL-criterium on overfit set: 16/16, percentage: 1.0
+
+Mean model accuracy with PASCAL-criterium on overfit set: 4/16, percentage: 0.25
+
+Median model accuracy with PASCAL-criterium on overfit set: 3/16, percentage: 0.1875
+
+Mean IOU is 0.8618638065501937
+
+   Results saved to file:  /zhome/ba/f/147212/BA/eyeFormer_ViT/timm_scripts/aeroplane/L_16_nL_3_nH_1/aeroplane/aeroplane_test_on_train_results.pth
+FOUND DEVICE:  cuda:0
+Total length is:  666
+Overwrote trainloader with overfit-set of length 32
+Valloader of constant length 15
+-----------------------------------------------------------------------------
+Model parameters:
+ tL: 32
+ vL: 15
+lrf: 1
+NEPOCHS: 800
+ num_warmup: 2128
+ Dropout: 0.0
+ Beta: 1
+ NHEADS: 1
+ NLAYERS: 3
+Saved loss results to:  /zhome/ba/f/147212/BA/eyeFormer_ViT/timm_scripts/aeroplane/L_1_nL_3_nH_1/aeroplane_result_L32_losses.pth
+Saved accuracy results to:  /zhome/ba/f/147212/BA/eyeFormer_ViT/timm_scripts/aeroplane/L_1_nL_3_nH_1/aeroplane_result_L32_acc.pth
+Created subdir in:  /zhome/ba/f/147212/BA/eyeFormer_ViT/timm_scripts/aeroplane/L_32_nL_3_nH_1/
+Created subdir in:  /zhome/ba/f/147212/BA/eyeFormer_ViT/timm_scripts/aeroplane/L_32_nL_3_nH_1/result32/
+Wrote epoch IOU's to scratch in : /zhome/ba/f/147212/BA/eyeFormer_ViT/timm_scripts/aeroplane/L_32_nL_3_nH_1/result32/
+Saved loss results to:  /zhome/ba/f/147212/BA/eyeFormer_ViT/timm_scripts/aeroplane/L_1_nL_3_nH_1/aeroplane_val32_losses.pth
+Saved accuracy results to:  /zhome/ba/f/147212/BA/eyeFormer_ViT/timm_scripts/aeroplane/L_1_nL_3_nH_1/aeroplane_val32_acc.pth
+
+Wrote train-val-split to scratch.
+
+Entered evaluation-phase.
+Model parameters:
+ tL: 32
+ vL: 15
+lrf: 1
+ num_warmup: 2128
+ Dropout: 0.0
+ Beta: 1
+ NHEADS: 1
+ NLAYERS: 3
+Evaluating overfit on ALL 32 train instances
+Filename: ['aeroplane_2010_004557.jpg', 'aeroplane_2009_002393.jpg', 'aeroplane_2010_000295.jpg', 'aeroplane_2008_008507.jpg']
+ Target: tensor([[154.,  56., 493., 167.],
+        [219.,  87., 345., 136.],
+        [137., 131., 326., 210.],
+        [ 60.,  22., 474., 160.]], dtype=torch.float64)
+ Prediction: tensor([[155.2870,  59.1326, 494.2645, 164.7154],
+        [220.4314,  85.6450, 349.7233, 130.2509],
+        [137.8126, 130.8185, 328.8470, 206.8611],
+        [ 61.1122,  25.2208, 475.8389, 154.6071]], device='cuda:0')
+ Loss: 2.0077984787349124
+ IOU: [0.9442349336253222, 0.8221137226896592, 0.9403522495705589, 0.9311851941173878]
+Filename: ['aeroplane_2009_002191.jpg', 'aeroplane_2011_000975.jpg', 'aeroplane_2010_004888.jpg', 'aeroplane_2011_001624.jpg']
+ Target: tensor([[ 19., 129., 469., 250.],
+        [  1.,  46., 428., 373.],
+        [ 85.,  24., 407., 317.],
+        [115., 148., 353., 223.]], dtype=torch.float64)
+ Prediction: tensor([[ 16.3418, 130.0203, 472.0157, 259.4165],
+        [ -5.6105,  45.0982, 437.8640, 373.7763],
+        [ 84.8607,  24.4280, 409.7713, 328.0316],
+        [114.2038, 147.6020, 354.3632, 224.7143]], device='cuda:0')
+ Loss: 2.854430906170819
+ IOU: [0.9086070440627269, 0.9579353440037441, 0.9536993945662557, 0.9638613175344674]
+Filename: ['aeroplane_2008_005834.jpg', 'aeroplane_2008_006677.jpg', 'aeroplane_2008_000585.jpg', 'aeroplane_2008_001719.jpg']
+ Target: tensor([[  1., 127., 474., 261.],
+        [ 48., 131., 275., 208.],
+        [  1.,   5., 499., 375.],
+        [ 49.,  21., 376., 220.]], dtype=torch.float64)
+ Prediction: tensor([[  0.5276, 130.7669, 474.9731, 262.9864],
+        [ 47.6708, 133.6495, 279.3883, 212.2059],
+        [ -4.1763,   4.3354, 500.3559, 379.5991],
+        [ 50.3898,  22.0469, 381.9514, 230.0474]], device='cuda:0')
+ Loss: 2.588999223350172
+ IOU: [0.9548545830910523, 0.8975357251914634, 0.9732079466302976, 0.9263190965279262]
+Filename: ['aeroplane_2008_008300.jpg', 'aeroplane_2011_000163.jpg', 'aeroplane_2010_005022.jpg', 'aeroplane_2009_004620.jpg']
+ Target: tensor([[ 25., 129., 348., 206.],
+        [164.,  70., 335., 168.],
+        [ 11.,  63., 491., 235.],
+        [ 10.,  69., 486., 313.]], dtype=torch.float64)
+ Prediction: tensor([[ 24.1957, 131.4186, 337.0865, 209.3180],
+        [166.3255,  69.2573, 334.6295, 157.8651],
+        [ 11.9241,  63.4348, 493.7021, 234.8198],
+        [  3.1315,  65.1580, 495.0914, 316.8651]], device='cuda:0')
+ Loss: 3.2303255031339404
+ IOU: [0.8962886991060239, 0.8759129018797455, 0.9889589111907103, 0.9379325138491812]
+Filename: ['aeroplane_2011_000276.jpg', 'aeroplane_2010_004991.jpg', 'aeroplane_2010_002460.jpg', 'aeroplane_2010_000392.jpg']
+ Target: tensor([[  1.,  39., 500., 313.],
+        [163., 140., 358., 212.],
+        [225., 205., 352., 250.],
+        [228., 145., 438., 223.]], dtype=torch.float64)
+ Prediction: tensor([[ -5.2770,  32.8915, 507.5737, 319.2313],
+        [162.5003, 139.4228, 357.0930, 208.1811],
+        [227.1222, 205.3453, 354.5343, 250.1728],
+        [229.9751, 148.4817, 441.9108, 228.2865]], device='cuda:0')
+ Loss: 2.787324297198211
+ IOU: [0.9310615784242655, 0.932829724805233, 0.9531961596511478, 0.8712805512866706]
+Filename: ['aeroplane_2011_001188.jpg', 'aeroplane_2008_002977.jpg', 'aeroplane_2010_005632.jpg', 'aeroplane_2009_002808.jpg']
+ Target: tensor([[170.,  72., 312., 241.],
+        [  1.,   1., 494., 375.],
+        [ 50., 120., 402., 237.],
+        [  2.,  16., 333., 457.]], dtype=torch.float64)
+ Prediction: tensor([[170.7972,  68.8870, 317.6113, 233.1500],
+        [ -4.5543,   1.6299, 499.1146, 378.8111],
+        [ 50.0834, 126.9930, 409.6367, 236.2892],
+        [ -3.3455,  20.6107, 315.9880, 454.8202]], device='cuda:0')
+ Loss: 4.3502704190223085
+ IOU: [0.8972980087637447, 0.9673463123377772, 0.9153820124661727, 0.9193786302233186]
+Filename: ['aeroplane_2010_002892.jpg', 'aeroplane_2011_000531.jpg', 'aeroplane_2011_002552.jpg', 'aeroplane_2008_004899.jpg']
+ Target: tensor([[156., 130., 301., 205.],
+        [  1., 102., 500., 311.],
+        [  1.,   1., 461., 319.],
+        [187., 185., 269., 212.]], dtype=torch.float64)
+ Prediction: tensor([[154.3013, 128.7094, 299.8119, 200.9280],
+        [ -3.9586,  95.9797, 505.8829, 316.4049],
+        [ -6.8030,  -0.7439, 469.1126, 326.3615],
+        [191.1749, 186.2181, 276.2776, 212.6538]], device='cuda:0')
+ Loss: 3.8075859188174945
+ IOU: [0.9121013544267772, 0.928005452391299, 0.9396525524200525, 0.8165482714922735]
+Filename: ['aeroplane_2009_003033.jpg', 'aeroplane_2011_000481.jpg', 'aeroplane_2008_007579.jpg', 'aeroplane_2009_003667.jpg']
+ Target: tensor([[106., 116., 433., 209.],
+        [188.,  85., 302., 211.],
+        [ 51.,  64., 500., 284.],
+        [ 23.,  43., 491., 298.]], dtype=torch.float64)
+ Prediction: tensor([[107.9129, 114.8341, 441.9309, 211.8629],
+        [189.5394,  81.8385, 307.2058, 201.4275],
+        [ 46.9815,  59.4609, 503.4615, 289.0162],
+        [ 16.7472,  32.4585, 495.2905, 301.6896]], device='cuda:0')
+ Loss: 4.260091185569763
+ IOU: [0.9277582785843679, 0.8534360142818177, 0.9426703914696346, 0.9262744025581888]
+---------------------------EVAL on ALL 32 overfit-train-images---------------------------
+
+Transformer accuracy with PASCAL-criterium on overfit set: 32/32, percentage: 1.0
+
+Mean model accuracy with PASCAL-criterium on overfit set: 6/32, percentage: 0.1875
+
+Median model accuracy with PASCAL-criterium on overfit set: 7/32, percentage: 0.21875
+
+Mean IOU is 0.9221006022881021
+
+   Results saved to file:  /zhome/ba/f/147212/BA/eyeFormer_ViT/timm_scripts/aeroplane/L_32_nL_3_nH_1/aeroplane/aeroplane_test_on_train_results.pth

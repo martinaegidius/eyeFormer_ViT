@@ -46,8 +46,8 @@ class eyeFormer_ViT(nn.Module):
 
             if src_padding_mask==None: 
                 src_padding_mask = torch.zeros(bs,x.shape[1]).to(dtype=torch.bool)
-            
-            clsmask = torch.zeros(bs,1).to(dtype=torch.bool)
+            device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+            clsmask = torch.zeros(bs,1).to(dtype=torch.bool).to(device)
             #print("\n Src_padding_mask shape: ",src_padding_mask.shape)
             #print("\n CLS-mask shape: ",clsmask.shape)
             mask = torch.cat((clsmask,src_padding_mask[:,:].reshape(bs,32)),1) #unmask cls-token

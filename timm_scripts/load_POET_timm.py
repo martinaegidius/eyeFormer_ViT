@@ -19,7 +19,7 @@ DEBUG = True
 
 class pascalET():
     classes = ["aeroplane","bicycle","boat","cat","cow","diningtable","dog","horse","motorbike","sofa"]
-    p = os.path.join(os.path.dirname( __file__ ), '..' )
+    p = os.path.join(os.path.expanduser('~'),os.path.join(os.path.dirname( __file__ ), '../../eyeFormer/' ))
     matfiles = []
     etData = []
     eyeData = None

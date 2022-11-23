@@ -1,0 +1,14 @@
+Total length is:  666
+................. Wrote datasets for  aeroplane to disk ....................
+Overwrote trainloader with overfit-set of length 2
+Valloader of constant length 1
+-----------------------------------------------------------------------------
+Model parameters:
+ tL: 2
+ vL: 1
+lrf: 1
+ num_warmup: 666
+ Dropout: 0.0
+ Beta: 1
+ NHEADS: 1
+ NLAYERS: 1
