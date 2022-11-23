@@ -11,9 +11,9 @@
 ### -- specify that the cores must be on the same host --
 #BSUB -R "span[hosts=1]"
 ### -- specify that we need 2GB of memory per core/slot --
-#BSUB -R "rusage[mem=3GB]"
+#BSUB -R "rusage[mem=4GB]"
 ### -- specify that we want the job to get killed if it exceeds 3 GB per core/slot --
-#BSUB -M 3GB
+#BSUB -M 4GB
 ### -- set walltime limit: hh:mm --
 #BSUB -W 24:00
 ### -- set the email address --
@@ -32,6 +32,6 @@
 # here follow the commands you want to execute
 module load python3/3.10.2
 source $HOME/bachelroenv/bin/activate
-python3 vit_callscript.py 0 >> overfittingExp/bigger_overfit_results_BIGGERDSETS.log
+python3 vit_callscript.py 0 >> overfittingExp/ALLCLASSES.log
 
 
