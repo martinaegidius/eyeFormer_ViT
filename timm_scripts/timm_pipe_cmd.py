@@ -26,11 +26,12 @@ from load_POET_timm import pascalET
 #arg 3: NUM_LAYERS
 #arg 4: NUM_HEADS
  
-try:
-    classChoice = int(sys.argv[1])
-except:
-    classChoice = None
-    pass
+#try:
+#    classChoice = int(sys.argv[1])
+#except:
+#    classChoice = None
+#    pass
+classChoice = [x for x in range(10)]
 
 SAVEDSET = False #flag for defining if data-sets are saved to scratch after dataloader generation. For ViT false because big files. 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -38,7 +39,7 @@ print("FOUND DEVICE: ",device)
 
 
 def generate_DS(dataFrame,classes=[x for x in range(10)]):
-    """ Note: as implemented now works for two classes only
+    """
     Args
         classes: list of input-classes of interest {0:"aeroplane",1:"bicycle",2:"boat",3:"cat",4:"cow",5:"diningtable",6:"dog",7:"horse",8:"motorbike",9:"sofa"}   
         If none is provided, fetch all 9 classes
@@ -53,10 +54,18 @@ def generate_DS(dataFrame,classes=[x for x in range(10)]):
     """
     dataFrame.loadmat()
     dataFrame.convert_eyetracking_data(CLEANUP=True,STATS=True)
+    NUMCLASSES = len(classes) 
+    
     
     dslen = 0
+    dslen_li = []
     for CN in classes: 
+        #print(CN)
         dslen += len(dataFrame.etData[CN])
+        dslen_li.append(len(dataFrame.etData[CN]))
+        #print("Total length is ",dslen)
+        
+    #print(dslen_li)
     
     df = np.empty((dslen,8),dtype=object)
     
@@ -76,52 +85,37 @@ def generate_DS(dataFrame,classes=[x for x in range(10)]):
     datalist = []
     for CN in classes:
         datalist.append(dataFrame.etData[CN])
+        #print("DSET {} LENGTH is: ".format(CN),len(dataFrame.etData[CN]))
     
-    for i in range(dslen):
-        if(i<len(datalist[0])):
-            df[i,0] = [dataFrame.etData[classes[0]][i].filename+".jpg"]
-            filenames.append(dataFrame.classes[classes[0]]+"_"+dataFrame.etData[classes[0]][i].filename+".jpg")
-            df[i,1] = dataFrame.etData[classes[0]][i].gtbb
-            df[i,2] = classes[0]
-            targets[i] =  dataFrame.etData[classes[0]][i].gtbb
-            classlabels[i] = classes[0]
-            imdims[i] = dataFrame.etData[classes[0]][i].dimensions[:2] #some classes also have channel-dim
-            for j in range(dataFrame.NUM_TRACKERS):
-                sliceShape = dataFrame.eyeData[classes[0]][i][j][0].shape
-                df[i,3+j] = dataFrame.eyeData[classes[0]][i][j][0] #list items
-                if(sliceShape != (2,0)): #for all non-empty
-                    eyes[i,j,:sliceShape[0],:] = torch.from_numpy(dataFrame.eyeData[classes[0]][i][j][0][-32:].astype(np.int32)) #some entries are in uint16, which torch does not support
-                else: 
-                    eyes[i,j,:,:] = 0.0
-                    #print("error-filled measurement [entryNo,participantNo]: ",i,",",j)
-                    #print(eyes[i,j])
-                
-                    
-                #old: padding too early #eyes[i,j] = zero_pad(dataFrame.eyeData[classes[0]][i][j][0],num_points,-999) #list items
-                
-                
-        else: 
-            nextIdx = i-len(datalist[0])
-            df[i,0] = [dataFrame.etData[classes[1]][nextIdx].filename+".jpg"]
-            filenames.append(dataFrame.classes[classes[1]]+"_"+dataFrame.etData[classes[1]][nextIdx].filename+".jpg")
-            df[i,1] = dataFrame.etData[classes[1]][nextIdx].gtbb
-            targets[i] =  dataFrame.etData[classes[1]][nextIdx].gtbb
-            df[i,2] = classes[1]
-            classlabels[i] = classes[1]
-            imdims[i] = dataFrame.etData[classes[1]][nextIdx].dimensions
-            for j in range(dataFrame.NUM_TRACKERS):
-                sliceShape = dataFrame.eyeData[classes[1]][nextIdx][j][0].shape
-                df[i,3+j] = dataFrame.eyeData[classes[1]][nextIdx][j][0]
-                if(sliceShape != (2,0)): #for empty
-                    eyes[i,j,:sliceShape[0],:] = torch.from_numpy(dataFrame.eyeData[classes[1]][nextIdx][j][0][-32:]) #last 32 points
-                else:
-                    eyes[i,j,:,:] = 0.0
-                
-                #old: padding too early #eyes[i,j] = zero_pad(dataFrame.eyeData[classes[1]][nextIdx][j][0],num_points,-999) #list items
-                
+    idx = 0
+    IDXSHIFTER = 0
+    k = 0
+    for i in range(dslen): 
+        if((i==sum(dslen_li[:k+1])) and (i!=0)): #evaluates to true when class-set k is depleted
+            #print("depleted dataset {} at idx {}".format(k,i))
+            IDXSHIFTER += dslen_li[k]
+            k += 1
             
-        
-        
+        idx = i - IDXSHIFTER
+        df[i,0] = [dataFrame.etData[classes[k]][idx].filename+".jpg"]
+        filenames.append(dataFrame.classes[classes[k]]+"_"+dataFrame.etData[classes[k]][idx].filename+".jpg")
+        df[i,1] = dataFrame.etData[classes[k]][idx].gtbb
+        df[i,2] = classes[k]
+        targets[i] =  dataFrame.etData[classes[k]][idx].gtbb
+        classlabels[i] = classes[k]
+        imdims[i] = dataFrame.etData[classes[k]][idx].dimensions[:2] #some classes also have channel-dim
+        for j in range(dataFrame.NUM_TRACKERS):
+            sliceShape = dataFrame.eyeData[classes[k]][idx][j][0].shape
+            df[i,3+j] = dataFrame.eyeData[classes[k]][idx][j][0] #list items
+            if(sliceShape != (2,0)): #for all non-empty
+                eyes[i,j,:sliceShape[0],:] = torch.from_numpy(dataFrame.eyeData[classes[k]][idx][j][0][-32:].astype(np.int32)) #some entries are in uint16, which torch does not support
+            else: 
+                eyes[i,j,:,:] = 0.0
+                #print("error-filled measurement [entryNo,participantNo]: ",idx,",",j)
+                #print(eyes[i,j])
+            
+            
+            
     print("Total length is: ",dslen)
     
     targetsTensor = torch.from_numpy(targets)
@@ -198,6 +192,7 @@ def get_split(root_dir,classesOC):
     split_dir = root_dir +"/Data/POETdataset/split/"
     classlist = ["aeroplane","bicycle","boat","cat","cow","diningtable","dog","horse","motorbike","sofa"]
 
+    n_train_samples = []
     training_data = []
     for classes in classesOC: #loop saves in list of lists format
         train_filename = split_dir + classlist[classes]+"_Rbbfix.txt"
@@ -208,6 +203,7 @@ def get_split(root_dir,classesOC):
             lines[i] = classlist[classes]+"_"+lines[i]+".jpg"
             
         training_data.append(lines)
+        n_train_samples.append(len(lines))
         
     test_data = []
     for classes in classesOC: 
@@ -227,7 +223,7 @@ def get_split(root_dir,classesOC):
         train = [*train,*training_data[i]]
         test = [*test,*test_data[i]]        
          
-    return train,test
+    return train,test,n_train_samples
 
 def load_split(className,root_dir):
     #loads earlier saved splits from disk. 
@@ -334,20 +330,24 @@ class rescale_coords(object):
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 classes = ["aeroplane","bicycle","boat","cat","cow","diningtable","dog","horse","motorbike","sofa"]
 if(classChoice!=None):
-    classesOC = [classChoice]
+    classesOC = classChoice
 else:
-    print("No selection of data provided. Used cats.")
-    classesOC = [3]
-    classChoice = 3
+    print("No selection of data provided. Used class 3, 2, 1.")
+    classesOC = [3,2,1]
+    #classChoice = 3
 
 torch.manual_seed(9)
 ###SCRIPT PARAMETERS###
 GENERATE_DATASET = True
-classString = classes[classChoice]
 timm_root = os.path.dirname(__file__)
+if((len(classesOC)>1) and (len(classesOC)<10)):
+    classString = "multiple_classes"
+elif(len(classesOC)==10):
+    classString = "all_classes"
+else: 
+    classString = classes[classesOC[0]]
 
-
-BATCH_SZ = 4
+BATCH_SZ = 8
 # #RUN_FROM_COMMANDLINE. Class at top of programme.
 NUM_IN_OVERFIT = int(sys.argv[2]) #NUM-IN-OVERFIT EQUALS LEN(TRAIN) IF OVERFIT == False
 NLAYERS = int(sys.argv[3])
@@ -392,7 +392,7 @@ if(GENERATE_DATASET == True or GENERATE_DATASET==None):
     
     fullDataset = PASCALdataset(dataFrame, root_dir, classesOC,sTransform=SignalTrans,imTransform = ImTrans) #init dataset as torch.Dataset.
     
-    trainLi,testLi = get_split(split_root_dir,classesOC) #get Dimitrios' list of train/test-split.
+    trainLi,testLi,nsamples = get_split(split_root_dir,classesOC) #get Dimitrios' list of train/test-split.
     trainIDX = [fullDataset.filenames.index(i) for i in trainLi] #get indices of corresponding entries in data-structure
     testIDX = [fullDataset.filenames.index(i) for i in testLi]
     #subsample based on IDX
@@ -427,15 +427,52 @@ g = torch.Generator()
 g.manual_seed(8)
 
 if(OVERFIT): #CREATES TRAIN AND VALIDATION-SPLIT 
-    IDX = torch.randperm(len(train),generator=g)#[:NUM_IN_OVERFIT].unsqueeze(1) #random permutation, followed by sampling and unsqueezing
-    ofIDX = IDX[:NUM_IN_OVERFIT].unsqueeze(1)
-    valIDX = IDX[NUM_IN_OVERFIT:NUM_IN_OVERFIT+17].unsqueeze(1) #17 because the smallest train-set has length 33=max(L)+17.
+     #new mode for getting representative subsample: 
+    sample_perc = [x/sum(nsamples) for x in nsamples] #get percentage-distribution 
+    if(len(nsamples)>1):
+        classwise_nsamples = [math.ceil(x*NUM_IN_OVERFIT) for x in sample_perc] #get number of samples per class
+        NUM_IN_OVERFIT = sum(classwise_nsamples) #overwrite NUM_IN_OVERFIT, as you use math.ceil
+    else: 
+        classwise_nsamples = [NUM_IN_OVERFIT]
+        
+    h = [torch.Generator() for i in range(len(classesOC))]
+    for i in range(len(classesOC)):
+        h[i].manual_seed(i)
+        
+    ofIDX = torch.zeros(0).to(torch.int32)
+    valIDX = torch.zeros(0).to(torch.int32)
+    offset = 0
+    for num,instance in enumerate(nsamples):
+        idx = torch.randperm(int(nsamples[num]-1),generator=h[num])
+        t_idx = idx + offset #add offset for later indexing
+        idx = t_idx[:classwise_nsamples[num]]
+        vidx = t_idx[classwise_nsamples[num]:]
+        ofIDX = torch.cat((ofIDX,idx),0)
+        valIDX = torch.cat((valIDX,vidx),0)
+        offset += instance
+    
+    #IDX = torch.randperm(len(train),generator=g[0])#[:NUM_IN_OVERFIT].unsqueeze(1) #random permutation, followed by sampling and unsqueezing
+    #ofIDX = IDX[:NUM_IN_OVERFIT].unsqueeze(1)
+    #valIDX = IDX[NUM_IN_OVERFIT:NUM_IN_OVERFIT+17].unsqueeze(1) #17 because the smallest train-set has length 33=max(L)+17.
     overfitSet = torch.utils.data.Subset(train,ofIDX)
     valSet = torch.utils.data.Subset(train,valIDX)
-    trainloader = DataLoader(overfitSet,batch_size=BATCH_SZ,shuffle=True,num_workers=1,generator=g)
+    trainloader = DataLoader(overfitSet,batch_size=BATCH_SZ,shuffle=True,num_workers=0,generator=g)
     print("Overwrote trainloader with overfit-set of length {}".format(ofIDX.shape[0]))
-    valloader = DataLoader(valSet,batch_size=BATCH_SZ,shuffle=True,num_workers=1,generator=g)
+    valloader = DataLoader(valSet,batch_size=BATCH_SZ,shuffle=True,num_workers=0,generator=g)
     print("Valloader of constant length {}".format(valIDX.shape[0]))
+
+    
+    
+    #old implementation (single-class)
+    #IDX = torch.randperm(len(train),generator=g)#[:NUM_IN_OVERFIT].unsqueeze(1) #random permutation, followed by sampling and unsqueezing
+    #ofIDX = IDX[:NUM_IN_OVERFIT].unsqueeze(1)
+    #valIDX = IDX[NUM_IN_OVERFIT:NUM_IN_OVERFIT+17].unsqueeze(1) #17 because the smallest train-set has length 33=max(L)+17.
+    #overfitSet = torch.utils.data.Subset(train,ofIDX)
+    #valSet = torch.utils.data.Subset(train,valIDX)
+    #trainloader = DataLoader(overfitSet,batch_size=BATCH_SZ,shuffle=True,num_workers=1,generator=g)
+    #print("Overwrote trainloader with overfit-set of length {}".format(ofIDX.shape[0]))
+    #valloader = DataLoader(valSet,batch_size=BATCH_SZ,shuffle=True,num_workers=1,generator=g)
+    #print("Valloader of constant length {}".format(valIDX.shape[0]))
 
 
 # for i in range(1): #get first sample for debugging
@@ -741,6 +778,7 @@ def train_one_epoch_w_val(model,loss,trainloader,valloader,negative_print=False,
 print("-----------------------------------------------------------------------------")
 if(OVERFIT):
     print("Model parameters:\n tL: {}\n vL: {}\nlrf: {}\nNEPOCHS: {}\n num_warmup: {}\n Dropout: {}\n Beta: {}\n NHEADS: {}\n NLAYERS: {}".format(NUM_IN_OVERFIT,len(valIDX),LR_FACTOR,EPOCHS,NUM_WARMUP,DROPOUT,BETA,NHEADS,NLAYERS))
+    print("ACTUAL TRAINLOADER LENS",len(trainloader),len(trainloader.dataset))
 else:
     print("Model parameters:\n tL: {}\n \nlrf: {}\nNEPOCHS: {}\n num_warmup: {}\n Dropout: {}\n Beta: {}\n NHEADS: {}\n NLAYERS: {}".format(NUM_IN_OVERFIT,LR_FACTOR,EPOCHS,NUM_WARMUP,DROPOUT,BETA,NHEADS,NLAYERS))
     
@@ -870,19 +908,19 @@ def save_model(model,classString,root_dir,params,mode):
     return None
 
 if(EVAL==0):
-    save_epochs(epochLossLI,epochAccLI,classString,timm_root,mode="result_L"+str(len(trainloader.dataset)),params=[NLAYERS,NHEADS])
-    save_IOU(trainIOU,classString,timm_root,params=[NLAYERS,NHEADS,NUM_IN_OVERFIT],mode="result"+str(len(trainloader.dataset)))
+    save_epochs(epochLossLI,epochAccLI,classString,timm_root,mode="result",params=[NLAYERS,NHEADS,len(trainloader.dataset)])
+    save_IOU(trainIOU,classString,timm_root,params=[NLAYERS,NHEADS,len(trainloader.dataset)],mode="result")
     #save_model(model,classString,timm_root,params=[NLAYERS,NHEADS],mode="result")
 
 if(EVAL==1):
-    save_epochs(epochLossLI,epochAccLI,classString,timm_root,mode="eval_L"+str(len(trainloader.dataset)),params=[NLAYERS,NHEADS])
-    save_IOU(trainIOU,classString,timm_root,params=[NLAYERS,NHEADS,NUM_IN_OVERFIT],mode="eval"+str(len(trainloader.dataset)))
+    save_epochs(epochLossLI,epochAccLI,classString,timm_root,mode="eval",params=[NLAYERS,NHEADS,len(trainloader.dataset)])
+    save_IOU(trainIOU,classString,timm_root,params=[NLAYERS,NHEADS,len(trainloader.dataset)],mode="eval")
     #save_model(model,classString,timm_root,params=[NLAYERS,NHEADS],mode="eval")
     
 
 if(OVERFIT==True and EVAL==0):
-    save_epochs(epochValLossLI,epochValAccLI,classString,timm_root,mode="val"+str(len(trainloader.dataset)),params=[NLAYERS,NHEADS])
-    save_split(trainloader,valloader,classString,timm_root,params=[NLAYERS,NHEADS,NUM_IN_OVERFIT])
+    save_epochs(epochValLossLI,epochValAccLI,classString,timm_root,mode="val",params=[NLAYERS,NHEADS,len(trainloader.dataset)])
+    save_split(trainloader,valloader,classString,timm_root,params=[NLAYERS,NHEADS,len(trainloader.dataset)])
     print("\nWrote train-val-split to scratch.\n")
     
 
@@ -948,10 +986,10 @@ model.eval()
 
 print("Entered evaluation-phase.")
 if(OVERFIT):
-    print("Model parameters:\n tL: {}\n vL: {}\nlrf: {}\n num_warmup: {}\n Dropout: {}\n Beta: {}\n NHEADS: {}\n NLAYERS: {}".format(NUM_IN_OVERFIT,len(valIDX),LR_FACTOR,NUM_WARMUP,DROPOUT,BETA,NHEADS,NLAYERS))
+    print("Model parameters:\n tL: {}\n vL: {}\nlrf: {}\n num_warmup: {}\n Dropout: {}\n Beta: {}\n NHEADS: {}\n NLAYERS: {}\n BATCH-SIZE: {}".format(NUM_IN_OVERFIT,len(valIDX),LR_FACTOR,NUM_WARMUP,DROPOUT,BETA,NHEADS,NLAYERS,BATCH_SZ))
     #print("Model parameters:\n tL: {} \nlrf: {}\n num_warmup: {}\n Dropout: {}\n Beta: {}\n NHEADS: {}\n NLAYERS: {}".format(NUM_IN_OVERFIT,LR_FACTOR,NUM_WARMUP,DROPOUT,BETA,NHEADS,NLAYERS)) #running overfit-set without validation for speediness
 else:
-    print("Model parameters:\n tL: {} \nlrf: {}\n num_warmup: {}\n Dropout: {}\n Beta: {}\n NHEADS: {}\n NLAYERS: {}".format(NUM_IN_OVERFIT,LR_FACTOR,NUM_WARMUP,DROPOUT,BETA,NHEADS,NLAYERS))
+    print("Model parameters:\n tL: {} \nlrf: {}\n num_warmup: {}\n Dropout: {}\n Beta: {}\n NHEADS: {}\n NLAYERS: {} \n BATCH-SIZE: {}".format(NUM_IN_OVERFIT,LR_FACTOR,NUM_WARMUP,DROPOUT,BETA,NHEADS,NLAYERS,BATCH_SZ))
 
 print("Evaluating overfit on ALL {} train instances".format(len(trainloader.dataset)))
 
@@ -1006,15 +1044,18 @@ with torch.no_grad():
     print("\nMean model accuracy with PASCAL-criterium on overfit set: {}/{}, percentage: {}".format(no_mean_correct,no_mean_false+no_mean_correct,no_mean_correct/(no_mean_false+no_mean_correct)))
     print("\nMedian model accuracy with PASCAL-criterium on overfit set: {}/{}, percentage: {}".format(no_med_correct,no_med_false+no_med_correct,no_med_correct/(no_med_false+no_med_correct)))
     print("\nMean IOU is {}".format(sum(IOU_tr_li)/len(IOU_tr_li)))
+    
+    
     if(EVAL==0):
         torch.save(train_save_struct,paramsString+classString+"_"+"test_on_train_results.pth")
         print("\n   Results saved to file: ",paramsString+classString+"/"+classString+"_"+"test_on_train_results.pth")
     else: 
         torch.save(train_save_struct,paramsString+"eval/"+classString+"_"+"test_on_train_results.pth")
         print("\n   Results saved to file: ",paramsString+"eval/"+classString+"/"+classString+"_"+"test_on_train_results.pth")
+
         
     
-"""
+
 #2. TEST-LOOP ON TEST-SET
 no_test_correct = 0 
 no_test_false = 0
@@ -1026,17 +1067,15 @@ testlosses = []
 correct_false_list = []
 IOU_te_li = []
 
-# meanModel = get_mean_model(oTrainLoader)
-# medianModel = get_median_model(oTrainLoader)
 
 model.eval()
 with torch.no_grad():
     running_loss = 0 
     for i, data in enumerate(testloader):
-        signal = data["signal"]
-        dSignal = get_deep_seq(data)
-        target = data["target"]
-        mask = data["mask"]
+        signal = data["signal"].to(device)
+        dSignal = get_deep_seq(data).to(device)
+        target = data["target"].to(device)
+        mask = data["mask"].to(device)
         name = data["file"]
         size = data["size"]
         output = model(dSignal,mask)
@@ -1058,8 +1097,8 @@ with torch.no_grad():
         no_test_false += accScores[1]
         
         n_in_batch = target.shape[0]
-        meanModel_tmp = meanModel.repeat(n_in_batch,1) #make n_in_batch copies along batch-dimension
-        medianModel_tmp = medianModel.repeat(n_in_batch,1)
+        meanModel_tmp = meanModel.repeat(n_in_batch,1).to(device) #make n_in_batch copies along batch-dimension
+        medianModel_tmp = medianModel.repeat(n_in_batch,1).to(device)
         accScores = vm.pascalACC(meanModel_tmp,target)
         
         no_test_mean_correct += accScores[0]
@@ -1104,7 +1143,7 @@ else:
 
 
 
-
+"""
 ###-----------------------------------Plots from here------------------------------------------------
 
 full_embedded_im = output_no_cls.view(1,14,14,768)
