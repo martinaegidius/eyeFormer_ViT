@@ -53,11 +53,12 @@ class pascalET():
         
         #self.eyeData = 
     
-    def convert_eyetracking_data(self,CLEANUP: bool,STATS: bool,num=[x for x in range(10)]):
+    def convert_eyetracking_data(self,CLEANUP: bool,STATS: bool,num=[x for x in range(10)],mode="mean"):
         """Takes in mat-format and instead makes usable format.
             Args: 
                 CLEANUP: Bool. If true, remove all invalid fixations (outside of image)
                 STATS: Bool. If true, save statistics of eyeTracking-points
+                MODE: String, "both" or "mean"
                 
             Returns: 
                 Nothing. 
@@ -67,10 +68,11 @@ class pascalET():
                     self.eyeData_stats (counts number of fixations in image and in bbox)
                     self.etData.gtbb overwritten with BEST box
                     
+                if mode == "mean"
+                    Gets the mean of LE and RE. self.eyeData becomes [total_num_fix/2, 2]
+                if mode == "both"
+                    Concats LE | RE. self.eyeData. self.eyeData becomes [total_num_fix/2, 4]
         """
-        
-        #self.eyeData = np.empty((self.etData[num].shape[0],self.NUM_TRACKERS,1),dtype=object)
-        #num = [x for x in range(10)] #classes
         
         #get maximal number of images in class for creating arrays which can hold all data: 
         max_dim = 0
@@ -93,13 +95,11 @@ class pascalET():
 
         for cN in num: #class-number
             self.debug_box_BP = [] #reset at every new class
-            for i in range(len(self.etData[cN])):
+            for i in range(len(self.etData[cN])): #per entry loop 
                 im_dims = self.etData[cN][i].dimensions[:2]
                 #print("Im dims: ",im_dims[0],im_dims[1])
                 self.im_dims[cN,i,:] = im_dims[:]
                 self.bboxes[cN,i] = [self.etData[cN][i].gtbb]
-                
-                
                 
                 for k in range(self.NUM_TRACKERS): #loop for every person looking
                     NOFIXES = False 
@@ -108,34 +108,73 @@ class pascalET():
                     #print(cN,i,k)
                     #w_max = self.im_dims[i][1] #for removing irrelevant points
                     #h_max = self.im_dims[i][0]
-                    LP = self.etData[cN][i].fixations[k].imgCoord.fixL.pos[:]
-                    RP = self.etData[cN][i].fixations[k].imgCoord.fixR.pos[:]
-                    BP = np.vstack((LP,RP)) #LP|RP
-                    if(BP.shape[0] == 0 or BP.shape[1]==0):
+                    LP = self.etData[cN][i].fixations[k].imgCoord.fixL.pos[:] #is array
+                    RP = self.etData[cN][i].fixations[k].imgCoord.fixR.pos[:] #is array
+                    if mode=="both":
+                        BP = np.hstack((LP,RP)) #LP|RP
+                        width = 4
+                    if mode=="mean":
+                        BP = (LP+RP)/2 #calculate mean-fixation
+                        width = 2
+                    #if(BP.shape[0] == 0 or BP.shape[1]==0): #old
+                    if BP.ndim==1 or BP.shape[0]==0:
                         NOFIXES = True #necessary flag as array else is (0,2) ie not None even though is empty
+                    if BP.ndim>1: 
+                        if BP.shape[1]==0:
+                            NOFIXES = True
                     
-                    if(CLEANUP == True and NOFIXES == False): #necessary to failcheck; some measurements are erroneus. vstack of two empty arrs gives BP.shape=(2,0)
-                        BP = np.delete(BP,np.where(np.isnan(BP[:,0])),axis=0)
-                        BP = np.delete(BP,np.where(np.isnan(BP[:,1])),axis=0)
+                    if(CLEANUP == True and NOFIXES == False and mode=="mean"): #necessary to failcheck; some measurements are erroneus. vstack of two empty arrs gives BP.shape=(2,0)
+                        #remove all nan-containing rows
+                        BP = np.delete(BP,np.where(np.isnan(BP[:,0])),axis=0) #remove nans
+                        BP = np.delete(BP,np.where(np.isnan(BP[:,1])),axis=0) #remove nans
+                        #remove negative fixes 
                         BP = np.delete(BP,np.where((BP[:,0]<0)),axis=0) #delete all fixations outside of image-quadrant
                         BP = np.delete(BP,np.where((BP[:,1]<0)),axis=0) #delete all fixations outside of image-quadrant
+                        #remove fixes out of image
                         BP = np.delete(BP,np.where((BP[:,0]>im_dims[1])),axis=0) #remove out of images fixes on x-scale. Remember: dimensions are given as [y,x]
                         BP = np.delete(BP,np.where((BP[:,1]>im_dims[0])),axis=0) #remove out of images fixes on y-scale
+                    if(CLEANUP == True and NOFIXES == False and mode=="both"): #necessary to failcheck; some measurements are erroneus. vstack of two empty arrs gives BP.shape=(2,0)
                         
+                        #remove all nan-containing rows
+                        BP = np.delete(BP,np.where(np.isnan(BP[:,0])),axis=0) #remove nans
+                        BP = np.delete(BP,np.where(np.isnan(BP[:,1])),axis=0) #remove nans
+                        BP = np.delete(BP,np.where(np.isnan(BP[:,2])),axis=0) #remove nans
+                        BP = np.delete(BP,np.where(np.isnan(BP[:,3])),axis=0) #remove nans
                         
-                    self.eyeData[cN,i,k] = [BP] #fill with matrix as list #due to variable size    
+                        #remove all negative fixes
+                        BP = np.delete(BP,np.where((BP[:,0]<0)),axis=0) #delete all fixations outside of image-quadrant
+                        BP = np.delete(BP,np.where((BP[:,1]<0)),axis=0) #delete all fixations outside of image-quadrant
+                        BP = np.delete(BP,np.where((BP[:,2]<0)),axis=0) #delete all fixations outside of image-quadrant
+                        BP = np.delete(BP,np.where((BP[:,3]<0)),axis=0) #delete all fixations outside of image-quadrant
+                        
+                        #remove all fixes outside of im
+                        BP = np.delete(BP,np.where((BP[:,0]>im_dims[1])),axis=0) #remove out of images fixes on x-scale. Remember: dimensions are given as [y,x]
+                        BP = np.delete(BP,np.where((BP[:,1]>im_dims[0])),axis=0) #remove out of images fixes on y-scale
+                        BP = np.delete(BP,np.where((BP[:,2]>im_dims[1])),axis=0) #remove out of images fixes on x-scale. Remember: dimensions are given as [y,x]
+                        BP = np.delete(BP,np.where((BP[:,3]>im_dims[0])),axis=0) #remove out of images fixes on y-scale
                     
-                    if(k==0): #create fixArr
-                        if(BP.shape==(2,0)):
+                    self.eyeData[cN,i,k] = [BP] #fill with matrix as list #due to variable size 
+                    #print(self.eyeData[cN,i,k])
+                    #print("BP SHAPE IMAGE {} PARTICIPANT NO {}: {}".format(i,k,BP.shape))
+                    
+                    if(k==0): #create fixArr which is used for calculating statistics 
+                        if BP.shape==(2,0): 
+                            #print("BP SHAPE = (2,0) contains: ",BP)
                             fixArr = copy.deepcopy(np.transpose(BP)) #invalid measurements are for some reason stored as shape (0,2) (transpose of other measurements)
+                        elif BP.ndim==1:
+                            fixArr = np.empty(shape=[0,width])
                         else:
                             fixArr = copy.deepcopy(BP)
                     else:
-                        if(BP.shape[1] == fixArr.shape[1]): #necessary check as None array can not be concat
-                            fixArr = np.vstack((fixArr,BP)) 
-                        else: 
+                        if(BP.ndim>1):
+                            #print("fixArr shape: ",fixArr.shape)
+                            if(BP.shape[1] == fixArr.shape[1]): #necessary check as None array can not be concat
+                                fixArr = np.vstack((fixArr,BP)) 
+                            else: 
+                                pass
+                        else:
                             pass
-                    
+                        
                     del BP 
                 self.debug_box_BP.append(fixArr)
                 #probably this part needs to go into function for itself, and it needs to go out of inner-loop!

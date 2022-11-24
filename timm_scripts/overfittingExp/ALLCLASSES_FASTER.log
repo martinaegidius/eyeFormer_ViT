@@ -1,0 +1,1303 @@
+FOUND DEVICE:  cuda:0
+Total length is:  6270
+Overwrote trainloader with overfit-set of length 36
+Valloader of constant length 60
+-----------------------------------------------------------------------------
+Model parameters:
+ tL: 36
+ vL: 60
+lrf: 1
+NEPOCHS: 500
+ num_warmup: 4980
+ Dropout: 0.0
+ Beta: 1
+ NHEADS: 1
+ NLAYERS: 3 
+ BATCH-SIZE: 1
+ACTUAL TRAINLOADER LENS 36 36
+v holder becomes: 
+ [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+
+sum becomes 0.0
+
+Len becomes60
+Saved loss results to:  /zhome/ba/f/147212/BA/eyeFormer_ViT_t/timm_scripts/all_classes/L_36_nL_3_nH_1/all_classes_result_losses.pth
+Saved accuracy results to:  /zhome/ba/f/147212/BA/eyeFormer_ViT_t/timm_scripts/all_classes/L_36_nL_3_nH_1/all_classes_result_acc.pth
+Wrote epoch IOU's to scratch in : /zhome/ba/f/147212/BA/eyeFormer_ViT_t/timm_scripts/all_classes/L_36_nL_3_nH_1/result/
+Saved loss results to:  /zhome/ba/f/147212/BA/eyeFormer_ViT_t/timm_scripts/all_classes/L_36_nL_3_nH_1/all_classes_val_losses.pth
+Saved accuracy results to:  /zhome/ba/f/147212/BA/eyeFormer_ViT_t/timm_scripts/all_classes/L_36_nL_3_nH_1/all_classes_val_acc.pth
+
+Wrote train-val-split to scratch.
+
+Entered evaluation-phase.
+Model parameters:
+ tL: 36
+ vL: 60
+lrf: 1
+ num_warmup: 4980
+ Dropout: 0.0
+ Beta: 1
+ NHEADS: 1
+ NLAYERS: 3
+ BATCH-SIZE: 1
+Evaluating overfit on ALL 36 train instances
+Filename: ['horse_2010_005174.jpg']
+ Target: tensor([[ 17.,  28., 409., 369.]], dtype=torch.float64)
+ Prediction: tensor([[ 25.1177,  27.2513, 433.5769, 370.7405]], device='cuda:0')
+ Loss: 8.303857057479036
+ IOU: [0.9149670805163402]
+Filename: ['sofa_2008_001869.jpg']
+ Target: tensor([[343., 202., 485., 329.]], dtype=torch.float64)
+ Prediction: tensor([[160.7983, 223.7380, 482.1246, 346.6911]], device='cuda:0')
+ Loss: 55.62656021118164
+ IOU: [0.3413839399594627]
+Filename: ['cat_2008_003114.jpg']
+ Target: tensor([[  1.,   9., 500., 436.]], dtype=torch.float64)
+ Prediction: tensor([[  2.6252,  17.9103, 501.9454, 378.9090]], device='cuda:0')
+ Loss: 16.892995178699493
+ IOU: [0.8399082548935053]
+Filename: ['dog_2010_004749.jpg']
+ Target: tensor([[  1.,   1., 500., 375.]], dtype=torch.float64)
+ Prediction: tensor([[  4.8846,  15.7414, 497.2988, 374.0127]], device='cuda:0')
+ Loss: 5.078631974873133
+ IOU: [0.9453018473219778]
+Filename: ['sofa_2010_006073.jpg']
+ Target: tensor([[112., 155., 358., 260.]], dtype=torch.float64)
+ Prediction: tensor([[131.1078, 168.2829, 376.5071, 264.3643]], device='cuda:0')
+ Loss: 13.315509796142578
+ IOU: [0.7276591769825009]
+Filename: ['boat_2010_002546.jpg']
+ Target: tensor([[ 59.,  50., 173.,  74.]], dtype=torch.float64)
+ Prediction: tensor([[106.5570, 115.0650, 341.9483, 213.6417]], device='cuda:0')
+ Loss: 104.80301284790039
+ IOU: [0.0]
+Filename: ['motorbike_2011_000285.jpg']
+ Target: tensor([[274., 158., 337., 220.]], dtype=torch.float64)
+ Prediction: tensor([[134.3205, 156.6304, 366.4769, 252.1698]], device='cuda:0')
+ Loss: 50.17395782470703
+ IOU: [0.17610386989247379]
+Filename: ['boat_2008_003989.jpg']
+ Target: tensor([[136., 109., 381., 271.]], dtype=torch.float64)
+ Prediction: tensor([[146.7255, 174.4402, 406.4641, 286.7531]], device='cuda:0')
+ Loss: 28.845718383789062
+ IOU: [0.4892139607816157]
+Filename: ['diningtable_2010_005884.jpg']
+ Target: tensor([[ 14., 234., 500., 333.]], dtype=torch.float64)
+ Prediction: tensor([[158.7441, 234.3810, 494.1558, 354.1805]], device='cuda:0')
+ Loss: 42.585326352651464
+ IOU: [0.5990415724824422]
+Filename: ['aeroplane_2010_003723.jpg']
+ Target: tensor([[ 64.,  52., 462., 259.]], dtype=torch.float64)
+ Prediction: tensor([[ 81.0493,  90.0977, 404.5214, 243.9628]], device='cuda:0')
+ Loss: 31.41571617126465
+ IOU: [0.604120191404161]
+Filename: ['bicycle_2008_001914.jpg']
+ Target: tensor([[154., 265., 474., 375.]], dtype=torch.float64)
+ Prediction: tensor([[155.3351, 240.5505, 498.1790, 361.0772]], device='cuda:0')
+ Loss: 15.47159194946289
+ IOU: [0.6669459287670562]
+Filename: ['sofa_2009_001241.jpg']
+ Target: tensor([[  4., 212., 250., 375.]], dtype=torch.float64)
+ Prediction: tensor([[  0.8244, 200.9301, 228.4485, 341.7779]], device='cuda:0')
+ Loss: 16.754781678318977
+ IOU: [0.6769352297986281]
+Filename: ['cat_2008_006868.jpg']
+ Target: tensor([[275.,  93., 371., 216.]], dtype=torch.float64)
+ Prediction: tensor([[100.8679, 106.2766, 366.5389, 219.7943]], device='cuda:0')
+ Loss: 48.41601753234863
+ IOU: [0.3146367403681354]
+Filename: ['aeroplane_2011_000975.jpg']
+ Target: tensor([[  1.,  46., 428., 373.]], dtype=torch.float64)
+ Prediction: tensor([[ 25.0157,  26.8300, 434.2885, 370.6025]], device='cuda:0')
+ Loss: 12.46790599822998
+ IOU: [0.8748877831750512]
+Filename: ['dog_2008_002441.jpg']
+ Target: tensor([[ 48.,  50., 367., 375.]], dtype=torch.float64)
+ Prediction: tensor([[ 45.1679,  79.1612, 345.7502, 375.4149]], device='cuda:0')
+ Loss: 12.957307019387372
+ IOU: [0.8418205415359322]
+Filename: ['horse_2008_007612.jpg']
+ Target: tensor([[141., 220., 333., 433.]], dtype=torch.float64)
+ Prediction: tensor([[136.0641, 207.8938, 339.4602, 435.1095]], device='cuda:0')
+ Loss: 5.9029541015625
+ IOU: [0.8849115365363461]
+Filename: ['diningtable_2008_003534.jpg']
+ Target: tensor([[142., 225., 500., 375.]], dtype=torch.float64)
+ Prediction: tensor([[143.3929, 227.0466, 489.9580, 362.3061]], device='cuda:0')
+ Loss: 6.0438690185546875
+ IOU: [0.8729274944046715]
+Filename: ['cat_2010_002573.jpg']
+ Target: tensor([[ 63.,  79., 342., 352.]], dtype=torch.float64)
+ Prediction: tensor([[ 44.6788,  79.3162, 341.1060, 377.7420]], device='cuda:0')
+ Loss: 10.878211353439838
+ IOU: [0.8540598276531558]
+Filename: ['cow_2010_002905.jpg']
+ Target: tensor([[ 58.,  65., 375., 500.]], dtype=torch.float64)
+ Prediction: tensor([[ 46.1776,  79.1542, 353.2395, 370.7922]], device='cuda:0')
+ Loss: 43.73620128631592
+ IOU: [0.6091788601652799]
+Filename: ['diningtable_2010_001181.jpg']
+ Target: tensor([[  3.,  20., 500., 375.]], dtype=torch.float64)
+ Prediction: tensor([[  4.2353,  16.1214, 498.5989, 375.0566]], device='cuda:0')
+ Loss: 1.2541279792785645
+ IOU: [0.983847312229486]
+Filename: ['cat_2008_003052.jpg']
+ Target: tensor([[ 25.,   1., 427., 273.]], dtype=torch.float64)
+ Prediction: tensor([[ 22.8605,   5.2600, 413.0497, 270.5788]], device='cuda:0')
+ Loss: 5.1927642822265625
+ IOU: [0.9367238695891891]
+Filename: ['dog_2010_000484.jpg']
+ Target: tensor([[ 66.,  98., 267., 449.]], dtype=torch.float64)
+ Prediction: tensor([[ 36.8329,  78.8576, 279.3825, 396.4403]], device='cuda:0')
+ Loss: 27.81293487548828
+ IOU: [0.6848237927134079]
+Filename: ['bicycle_2008_005356.jpg']
+ Target: tensor([[ 61.,  18., 427., 365.]], dtype=torch.float64)
+ Prediction: tensor([[ 21.8703,  21.7562, 448.9648, 368.3286]], device='cuda:0')
+ Loss: 16.544864177703857
+ IOU: [0.8409121994266546]
+Filename: ['motorbike_2010_002991.jpg']
+ Target: tensor([[193., 303., 415., 492.]], dtype=torch.float64)
+ Prediction: tensor([[146.7784, 285.6569, 409.5466, 456.1011]], device='cuda:0')
+ Loss: 25.729270935058594
+ IOU: [0.6186303209219294]
+Filename: ['horse_2010_004477.jpg']
+ Target: tensor([[322., 179., 378., 319.]], dtype=torch.float64)
+ Prediction: tensor([[156.1382, 199.3602, 444.2012, 315.5907]], device='cuda:0')
+ Loss: 63.4581413269043
+ IOU: [0.1869687825821952]
+Filename: ['cat_2008_001741.jpg']
+ Target: tensor([[  6., 102., 450., 292.]], dtype=torch.float64)
+ Prediction: tensor([[ 20.2562,  22.7020, 449.9692, 370.1863]], device='cuda:0')
+ Loss: 42.56023576494772
+ IOU: [0.5370244669176663]
+Filename: ['boat_2009_005268.jpg']
+ Target: tensor([[ 48., 412.,  86., 457.]], dtype=torch.float64)
+ Prediction: tensor([[ 41.0617, 368.8267,  93.9493, 454.3466]], device='cuda:0')
+ Loss: 14.6785888671875
+ IOU: [0.3480208245716386]
+Filename: ['aeroplane_2011_000531.jpg']
+ Target: tensor([[  1., 102., 500., 311.]], dtype=torch.float64)
+ Prediction: tensor([[ 65.8542,  82.7706, 415.6021, 275.8147]], device='cuda:0')
+ Loss: 50.41670036315918
+ IOU: [0.5475884255649202]
+Filename: ['motorbike_2011_002786.jpg']
+ Target: tensor([[ 74.,   1., 383., 319.]], dtype=torch.float64)
+ Prediction: tensor([[ 52.0135,  81.4242, 374.5936, 350.3350]], device='cuda:0')
+ Loss: 35.03801155090332
+ IOU: [0.628678344033401]
+Filename: ['dog_2010_005434.jpg']
+ Target: tensor([[103.,  18., 500., 374.]], dtype=torch.float64)
+ Prediction: tensor([[ 54.5964,  41.3807, 496.6545, 373.9020]], device='cuda:0')
+ Loss: 18.408643349190243
+ IOU: [0.8314858410616122]
+Filename: ['cow_2009_002002.jpg']
+ Target: tensor([[107., 119., 413., 298.]], dtype=torch.float64)
+ Prediction: tensor([[ 64.6436,  83.4967, 424.1811, 291.1474]], device='cuda:0')
+ Loss: 23.473358154296875
+ IOU: [0.6863008383459337]
+Filename: ['dog_2010_000072.jpg']
+ Target: tensor([[117.,  58., 437., 375.]], dtype=torch.float64)
+ Prediction: tensor([[ 22.7095,  24.7737, 442.4153, 370.3392]], device='cuda:0')
+ Loss: 33.89821481704712
+ IOU: [0.6821155613328254]
+Filename: ['bicycle_2008_002894.jpg']
+ Target: tensor([[ 43., 154., 388., 332.]], dtype=torch.float64)
+ Prediction: tensor([[ 53.7645,  80.5308, 393.7243, 335.7283]], device='cuda:0')
+ Loss: 22.921595573425293
+ IOU: [0.6709361377578993]
+Filename: ['dog_2008_000788.jpg']
+ Target: tensor([[  1.,  77., 304., 500.]], dtype=torch.float64)
+ Prediction: tensor([[ 34.6076,  63.0441, 326.3544, 392.1317]], device='cuda:0')
+ Loss: 43.946539878845215
+ IOU: [0.6094985077022145]
+Filename: ['aeroplane_2010_005632.jpg']
+ Target: tensor([[ 50., 120., 402., 237.]], dtype=torch.float64)
+ Prediction: tensor([[ 99.5960, 104.9003, 368.0824, 219.7793]], device='cuda:0')
+ Loss: 28.45850944519043
+ IOU: [0.5921865674161724]
+Filename: ['cat_2011_001414.jpg']
+ Target: tensor([[  2.,  65., 275., 354.]], dtype=torch.float64)
+ Prediction: tensor([[ 33.1696,  51.3877, 362.7681, 386.2239]], device='cuda:0')
+ Loss: 40.693464279174805
+ IOU: [0.5854843824922604]
+---------------------------EVAL on ALL 36 overfit-train-images---------------------------
+
+Transformer accuracy with PASCAL-criterium on overfit set: 29/36, percentage: 0.8055555555555556
+
+Mean model accuracy with PASCAL-criterium on overfit set: 12/36, percentage: 0.3333333333333333
+
+Median model accuracy with PASCAL-criterium on overfit set: 15/36, percentage: 0.4166666666666667
+
+Mean IOU is 0.6445897225360593
+
+   Results saved to file:  /zhome/ba/f/147212/BA/eyeFormer_ViT_t/timm_scripts/all_classes/L_36_nL_3_nH_1/all_classes/all_classes_test_on_train_results.pth
+FOUND DEVICE:  cuda:0
+Total length is:  6270
+Overwrote trainloader with overfit-set of length 64
+Valloader of constant length 60
+-----------------------------------------------------------------------------
+Model parameters:
+ tL: 64
+ vL: 60
+lrf: 1
+NEPOCHS: 500
+ num_warmup: 9960
+ Dropout: 0.0
+ Beta: 1
+ NHEADS: 1
+ NLAYERS: 3 
+ BATCH-SIZE: 1
+ACTUAL TRAINLOADER LENS 64 64
+v holder becomes: 
+ [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+
+sum becomes 0.0
+
+Len becomes60
+Created subdir in:  /zhome/ba/f/147212/BA/eyeFormer_ViT_t/timm_scripts/all_classes/L_64_nL_3_nH_1/
+Saved loss results to:  /zhome/ba/f/147212/BA/eyeFormer_ViT_t/timm_scripts/all_classes/L_64_nL_3_nH_1/all_classes_result_losses.pth
+Saved accuracy results to:  /zhome/ba/f/147212/BA/eyeFormer_ViT_t/timm_scripts/all_classes/L_64_nL_3_nH_1/all_classes_result_acc.pth
+Created subdir in:  /zhome/ba/f/147212/BA/eyeFormer_ViT_t/timm_scripts/all_classes/L_64_nL_3_nH_1/result/
+Wrote epoch IOU's to scratch in : /zhome/ba/f/147212/BA/eyeFormer_ViT_t/timm_scripts/all_classes/L_64_nL_3_nH_1/result/
+Saved loss results to:  /zhome/ba/f/147212/BA/eyeFormer_ViT_t/timm_scripts/all_classes/L_64_nL_3_nH_1/all_classes_val_losses.pth
+Saved accuracy results to:  /zhome/ba/f/147212/BA/eyeFormer_ViT_t/timm_scripts/all_classes/L_64_nL_3_nH_1/all_classes_val_acc.pth
+
+Wrote train-val-split to scratch.
+
+Entered evaluation-phase.
+Model parameters:
+ tL: 64
+ vL: 60
+lrf: 1
+ num_warmup: 9960
+ Dropout: 0.0
+ Beta: 1
+ NHEADS: 1
+ NLAYERS: 3
+ BATCH-SIZE: 1
+Evaluating overfit on ALL 64 train instances
+Filename: ['aeroplane_2010_003723.jpg']
+ Target: tensor([[ 64.,  52., 462., 259.]], dtype=torch.float64)
+ Prediction: tensor([[ 67.7653,  61.3469, 463.4237, 261.9518]], device='cuda:0')
+ Loss: 3.871933937072754
+ IOU: [0.9294615281781671]
+Filename: ['sofa_2009_001241.jpg']
+ Target: tensor([[  4., 212., 250., 375.]], dtype=torch.float64)
+ Prediction: tensor([[  6.1053, 211.7308, 231.7104, 380.0259]], device='cuda:0')
+ Loss: 5.989269896526821
+ IOU: [0.8905620887330385]
+Filename: ['motorbike_2011_002786.jpg']
+ Target: tensor([[ 74.,   1., 383., 319.]], dtype=torch.float64)
+ Prediction: tensor([[ 64.4653,   1.8587, 385.5061, 314.1651]], device='cuda:0')
+ Loss: 3.9361046811899385
+ IOU: [0.9458966208339966]
+Filename: ['diningtable_2011_002348.jpg']
+ Target: tensor([[ 53., 262., 499., 375.]], dtype=torch.float64)
+ Prediction: tensor([[ 42.7650, 266.6400, 481.2343, 377.9746]], device='cuda:0')
+ Loss: 8.403825759887695
+ IOU: [0.8786647621562066]
+Filename: ['dog_2008_000620.jpg']
+ Target: tensor([[205., 208., 327., 337.]], dtype=torch.float64)
+ Prediction: tensor([[189.6983, 219.8459, 298.0811, 330.5446]], device='cuda:0')
+ Loss: 15.130455017089844
+ IOU: [0.5910988189300949]
+Filename: ['bicycle_2008_005356.jpg']
+ Target: tensor([[ 61.,  18., 427., 365.]], dtype=torch.float64)
+ Prediction: tensor([[ 71.5986,  20.2948, 431.4944, 360.7074]], device='cuda:0')
+ Loss: 4.9201130867004395
+ IOU: [0.9412686851016026]
+Filename: ['bicycle_2008_005276.jpg']
+ Target: tensor([[  8., 361.,  77., 461.]], dtype=torch.float64)
+ Prediction: tensor([[  3.7479, 364.5764,  62.7762, 453.2462]], device='cuda:0')
+ Loss: 6.951520919799805
+ IOU: [0.6674418256896226]
+Filename: ['boat_2008_003989.jpg']
+ Target: tensor([[136., 109., 381., 271.]], dtype=torch.float64)
+ Prediction: tensor([[149.9470, 128.6068, 373.3256, 262.8654]], device='cuda:0')
+ Loss: 11.840705871582031
+ IOU: [0.7556183723710685]
+Filename: ['sofa_2010_000691.jpg']
+ Target: tensor([[391., 183., 500., 301.]], dtype=torch.float64)
+ Prediction: tensor([[395.2574, 195.4024, 472.8999, 305.1354]], device='cuda:0')
+ Loss: 11.473827362060547
+ IOU: [0.6219228158622769]
+Filename: ['bicycle_2008_001914.jpg']
+ Target: tensor([[154., 265., 474., 375.]], dtype=torch.float64)
+ Prediction: tensor([[146.6817, 276.8529, 464.4362, 376.0900]], device='cuda:0')
+ Loss: 6.956260681152344
+ IOU: [0.8401689471970528]
+Filename: ['cat_2009_000955.jpg']
+ Target: tensor([[ 79.,   1., 435., 334.]], dtype=torch.float64)
+ Prediction: tensor([[ 80.4147,   4.1218, 430.9087, 333.4054]], device='cuda:0')
+ Loss: 1.8261394287692383
+ IOU: [0.9735459979306225]
+Filename: ['motorbike_2011_000285.jpg']
+ Target: tensor([[274., 158., 337., 220.]], dtype=torch.float64)
+ Prediction: tensor([[257.0460, 159.1434, 319.4604, 211.7628]], device='cuda:0')
+ Loss: 10.468536376953125
+ IOU: [0.4985509260194462]
+Filename: ['dog_2008_000788.jpg']
+ Target: tensor([[  1.,  77., 304., 500.]], dtype=torch.float64)
+ Prediction: tensor([[  1.6743,  86.8647, 288.5224, 503.4415]], device='cuda:0')
+ Loss: 6.877771077624203
+ IOU: [0.9175487356582607]
+Filename: ['diningtable_2009_004032.jpg']
+ Target: tensor([[ 27., 219., 459., 375.]], dtype=torch.float64)
+ Prediction: tensor([[ 28.0784, 221.2389, 463.9084, 354.5309]], device='cuda:0')
+ Loss: 6.673684597015381
+ IOU: [0.8441084289216614]
+Filename: ['dog_2009_000778.jpg']
+ Target: tensor([[ 95.,  11., 362., 441.]], dtype=torch.float64)
+ Prediction: tensor([[ 92.6557,  18.6448, 344.8225, 446.6940]], device='cuda:0')
+ Loss: 7.7151641845703125
+ IOU: [0.9000123719057249]
+Filename: ['dog_2010_003321.jpg']
+ Target: tensor([[129., 112., 246., 272.]], dtype=torch.float64)
+ Prediction: tensor([[129.3814, 122.4077, 240.4268, 249.2306]], device='cuda:0')
+ Loss: 9.33075555053074
+ IOU: [0.7523025122679704]
+Filename: ['aeroplane_2011_000975.jpg']
+ Target: tensor([[  1.,  46., 428., 373.]], dtype=torch.float64)
+ Prediction: tensor([[ -2.6045,  48.2988, 431.8740, 374.5544]], device='cuda:0')
+ Loss: 2.33292019367218
+ IOU: [0.9713785981086582]
+Filename: ['horse_2009_003565.jpg']
+ Target: tensor([[ 39.,  99., 353., 345.]], dtype=torch.float64)
+ Prediction: tensor([[ 35.2295,  92.4056, 355.4138, 344.8108]], device='cuda:0')
+ Loss: 2.82415521889925
+ IOU: [0.9543618745048057]
+Filename: ['cat_2008_006868.jpg']
+ Target: tensor([[275.,  93., 371., 216.]], dtype=torch.float64)
+ Prediction: tensor([[281.7368, 120.5952, 368.5517, 215.2284]], device='cuda:0')
+ Loss: 8.89451505348552
+ IOU: [0.6957625878387605]
+Filename: ['boat_2008_000235.jpg']
+ Target: tensor([[111., 171., 488., 278.]], dtype=torch.float64)
+ Prediction: tensor([[107.8155, 180.8152, 475.9417, 281.9081]], device='cuda:0')
+ Loss: 6.74152946472168
+ IOU: [0.8426982095582267]
+Filename: ['aeroplane_2010_005184.jpg']
+ Target: tensor([[ 53., 120., 350., 242.]], dtype=torch.float64)
+ Prediction: tensor([[ 56.8381, 127.2642, 344.2312, 241.9132]], device='cuda:0')
+ Loss: 3.8437341570679564
+ IOU: [0.9093477564477787]
+Filename: ['cat_2009_000716.jpg']
+ Target: tensor([[ 65.,  69., 468., 332.]], dtype=torch.float64)
+ Prediction: tensor([[ 72.1543,  63.3841, 471.3231, 338.4120]], device='cuda:0')
+ Loss: 5.126341819763184
+ IOU: [0.9323261661630938]
+Filename: ['horse_2010_005174.jpg']
+ Target: tensor([[ 17.,  28., 409., 369.]], dtype=torch.float64)
+ Prediction: tensor([[ 19.8085,  34.7100, 411.9694, 358.1140]], device='cuda:0')
+ Loss: 5.343470096588135
+ IOU: [0.9348876908932027]
+Filename: ['motorbike_2010_002991.jpg']
+ Target: tensor([[193., 303., 415., 492.]], dtype=torch.float64)
+ Prediction: tensor([[182.2613, 319.4221, 381.5192, 501.1294]], device='cuda:0')
+ Loss: 16.942733764648438
+ IOU: [0.7129957567273835]
+Filename: ['motorbike_2008_000203.jpg']
+ Target: tensor([[354., 156., 411., 261.]], dtype=torch.float64)
+ Prediction: tensor([[344.4510, 166.2112, 389.2747, 259.0255]], device='cuda:0')
+ Loss: 10.364997863769531
+ IOU: [0.47647543117375857]
+Filename: ['sofa_2010_006073.jpg']
+ Target: tensor([[112., 155., 358., 260.]], dtype=torch.float64)
+ Prediction: tensor([[114.2407, 133.3919, 374.2398, 259.0347]], device='cuda:0')
+ Loss: 9.763642817735672
+ IOU: [0.7652762755784153]
+Filename: ['cat_2008_003114.jpg']
+ Target: tensor([[  1.,   9., 500., 436.]], dtype=torch.float64)
+ Prediction: tensor([[  4.5617,  34.6092, 481.2152, 448.5844]], device='cuda:0')
+ Loss: 14.635048031806946
+ IOU: [0.8733421527085857]
+Filename: ['horse_2008_005791.jpg']
+ Target: tensor([[  5., 113., 417., 346.]], dtype=torch.float64)
+ Prediction: tensor([[ 21.9258,  55.5082, 404.7155, 366.6210]], device='cuda:0')
+ Loss: 26.330790042877197
+ IOU: [0.7084374768799089]
+Filename: ['dog_2010_004749.jpg']
+ Target: tensor([[  1.,   1., 500., 375.]], dtype=torch.float64)
+ Prediction: tensor([[  4.7855,   6.0764, 498.1599, 381.4339]], device='cuda:0')
+ Loss: 3.7839720249176025
+ IOU: [0.9589945419672865]
+Filename: ['aeroplane_2009_000500.jpg']
+ Target: tensor([[  1., 101., 500., 264.]], dtype=torch.float64)
+ Prediction: tensor([[  6.7955, 108.9442, 495.0175, 265.9212]], device='cuda:0')
+ Loss: 4.660845160484314
+ IOU: [0.9201054551588298]
+Filename: ['horse_2010_004477.jpg']
+ Target: tensor([[322., 179., 378., 319.]], dtype=torch.float64)
+ Prediction: tensor([[310.5686, 186.5861, 365.8644, 302.4388]], device='cuda:0')
+ Loss: 11.428592681884766
+ IOU: [0.554518280692996]
+Filename: ['dog_2008_002441.jpg']
+ Target: tensor([[ 48.,  50., 367., 375.]], dtype=torch.float64)
+ Prediction: tensor([[ 41.8580,  50.3515, 361.8252, 375.5403]], device='cuda:0')
+ Loss: 2.6311275012430997
+ IOU: [0.9625952401630109]
+Filename: ['diningtable_2010_001181.jpg']
+ Target: tensor([[  3.,  20., 500., 375.]], dtype=torch.float64)
+ Prediction: tensor([[  4.1483,  23.3712, 496.4406, 386.7591]], device='cuda:0')
+ Loss: 4.459497451782227
+ IOU: [0.9499530111239478]
+Filename: ['dog_2009_001224.jpg']
+ Target: tensor([[ 78.,  20., 242., 263.]], dtype=torch.float64)
+ Prediction: tensor([[ 73.0221,  23.9832, 252.0285, 264.8397]], device='cuda:0')
+ Loss: 4.707333564758301
+ IOU: [0.8956008084812223]
+Filename: ['aeroplane_2011_000531.jpg']
+ Target: tensor([[  1., 102., 500., 311.]], dtype=torch.float64)
+ Prediction: tensor([[  2.6460, 121.7476, 490.3422, 324.3923]], device='cuda:0')
+ Loss: 10.610917448997498
+ IOU: [0.8328435390936263]
+Filename: ['dog_2010_000484.jpg']
+ Target: tensor([[ 66.,  98., 267., 449.]], dtype=torch.float64)
+ Prediction: tensor([[ 72.1277,  91.1293, 259.4979, 447.9483]], device='cuda:0')
+ Loss: 4.888069152832031
+ IOU: [0.912741519504564]
+Filename: ['dog_2008_003645.jpg']
+ Target: tensor([[  5.,  63., 436., 470.]], dtype=torch.float64)
+ Prediction: tensor([[  9.4153,  74.3240, 410.3775, 477.8706]], device='cuda:0')
+ Loss: 11.808101654052734
+ IOU: [0.8884393255640899]
+Filename: ['cat_2008_007176.jpg']
+ Target: tensor([[ 87.,  82., 425., 246.]], dtype=torch.float64)
+ Prediction: tensor([[ 87.9324,  86.0333, 423.7802, 244.8556]], device='cuda:0')
+ Loss: 1.3330670295108575
+ IOU: [0.9622619463688536]
+Filename: ['diningtable_2008_003534.jpg']
+ Target: tensor([[142., 225., 500., 375.]], dtype=torch.float64)
+ Prediction: tensor([[126.8491, 231.5043, 477.8112, 375.8084]], device='cuda:0')
+ Loss: 10.667669987422414
+ IOU: [0.8580725405810258]
+Filename: ['horse_2008_007612.jpg']
+ Target: tensor([[141., 220., 333., 433.]], dtype=torch.float64)
+ Prediction: tensor([[141.7670, 226.5508, 335.6125, 439.6132]], device='cuda:0')
+ Loss: 3.642686851788312
+ IOU: [0.9242131009065768]
+Filename: ['diningtable_2010_005884.jpg']
+ Target: tensor([[ 14., 234., 500., 333.]], dtype=torch.float64)
+ Prediction: tensor([[ 10.0616, 258.2720, 486.2462, 346.4679]], device='cuda:0')
+ Loss: 13.35804009437561
+ IOU: [0.6437252037256879]
+Filename: ['bicycle_2008_002894.jpg']
+ Target: tensor([[ 43., 154., 388., 332.]], dtype=torch.float64)
+ Prediction: tensor([[ 51.5650, 158.3379, 391.5932, 316.6654]], device='cuda:0')
+ Loss: 7.457676887512207
+ IOU: [0.859436153647101]
+Filename: ['bicycle_2011_002281.jpg']
+ Target: tensor([[298., 218., 432., 434.]], dtype=torch.float64)
+ Prediction: tensor([[284.8908, 234.8752, 402.7864, 434.6055]], device='cuda:0')
+ Loss: 14.470335811492987
+ IOU: [0.6597649957397221]
+Filename: ['boat_2009_005268.jpg']
+ Target: tensor([[ 48., 412.,  86., 457.]], dtype=torch.float64)
+ Prediction: tensor([[ 21.6872, 402.1353,  54.5961, 448.1609]], device='cuda:0')
+ Loss: 18.605136394500732
+ IOU: [0.07987575718055731]
+Filename: ['cat_2010_002573.jpg']
+ Target: tensor([[ 63.,  79., 342., 352.]], dtype=torch.float64)
+ Prediction: tensor([[ 62.7517,  80.8349, 350.9899, 336.7766]], device='cuda:0')
+ Loss: 6.144749776272874
+ IOU: [0.9092887092170266]
+Filename: ['sofa_2011_002965.jpg']
+ Target: tensor([[ 14.,  15., 474., 355.]], dtype=torch.float64)
+ Prediction: tensor([[ 18.1630,  12.2811, 469.4438, 356.5643]], device='cuda:0')
+ Loss: 2.750607490539551
+ IOU: [0.9690685578944863]
+Filename: ['aeroplane_2010_005632.jpg']
+ Target: tensor([[ 50., 120., 402., 237.]], dtype=torch.float64)
+ Prediction: tensor([[ 64.7966, 123.9593, 397.2620, 248.5760]], device='cuda:0')
+ Loss: 8.26746940612793
+ IOU: [0.8345532156741837]
+Filename: ['cow_2009_002002.jpg']
+ Target: tensor([[107., 119., 413., 298.]], dtype=torch.float64)
+ Prediction: tensor([[ 92.7850, 150.2539, 390.3688, 302.6956]], device='cuda:0')
+ Loss: 17.698951721191406
+ IOU: [0.7184743954387341]
+Filename: ['boat_2008_005855.jpg']
+ Target: tensor([[  1., 247., 500., 304.]], dtype=torch.float64)
+ Prediction: tensor([[  1.9481, 253.3404, 490.0843, 319.4795]], device='cuda:0')
+ Loss: 7.6712839886432675
+ IOU: [0.6869271764003403]
+Filename: ['sofa_2008_001869.jpg']
+ Target: tensor([[343., 202., 485., 329.]], dtype=torch.float64)
+ Prediction: tensor([[344.9785, 219.1214, 469.7136, 332.5950]], device='cuda:0')
+ Loss: 8.995323181152344
+ IOU: [0.7415541741452903]
+Filename: ['cat_2008_003052.jpg']
+ Target: tensor([[ 25.,   1., 427., 273.]], dtype=torch.float64)
+ Prediction: tensor([[ 31.6301,  15.3730, 422.7845, 276.3524]], device='cuda:0')
+ Loss: 6.642737627029419
+ IOU: [0.910683387382313]
+Filename: ['cat_2011_001414.jpg']
+ Target: tensor([[  2.,  65., 275., 354.]], dtype=torch.float64)
+ Prediction: tensor([[ -8.4260,  77.8093, 239.5313, 346.3838]], device='cuda:0')
+ Loss: 16.08005380630493
+ IOU: [0.7808698485586396]
+Filename: ['cat_2008_007888.jpg']
+ Target: tensor([[  1.,   1., 500., 312.]], dtype=torch.float64)
+ Prediction: tensor([[  4.1943,  23.1286, 494.9292, 315.9384]], device='cuda:0')
+ Loss: 8.083034873008728
+ IOU: [0.9022257930332171]
+Filename: ['cow_2008_007123.jpg']
+ Target: tensor([[139., 154., 370., 294.]], dtype=torch.float64)
+ Prediction: tensor([[130.8895, 159.7020, 373.6700, 296.4118]], device='cuda:0')
+ Loss: 4.473579406738281
+ IOU: [0.8990135250994478]
+Filename: ['motorbike_2008_007313.jpg']
+ Target: tensor([[ 66., 107., 198., 252.]], dtype=torch.float64)
+ Prediction: tensor([[ 66.7560, 112.5209, 180.6912, 232.7943]], device='cuda:0')
+ Loss: 10.205309152086556
+ IOU: [0.715954298271389]
+Filename: ['aeroplane_2008_002977.jpg']
+ Target: tensor([[  1.,   1., 494., 375.]], dtype=torch.float64)
+ Prediction: tensor([[  2.6191,   2.8523, 491.0047, 376.6214]], device='cuda:0')
+ Loss: 1.522031307220459
+ IOU: [0.9815184852991855]
+Filename: ['boat_2010_002546.jpg']
+ Target: tensor([[ 59.,  50., 173.,  74.]], dtype=torch.float64)
+ Prediction: tensor([[ 84.0373,  68.5893, 209.8233, 108.3904]], device='cuda:0')
+ Loss: 28.210067749023438
+ IOU: [0.06629184861720948]
+Filename: ['dog_2010_004461.jpg']
+ Target: tensor([[210.,   1., 500., 354.]], dtype=torch.float64)
+ Prediction: tensor([[208.7907,   4.1979, 490.7568, 350.3414]], device='cuda:0')
+ Loss: 3.8272451162338257
+ IOU: [0.9454565737599159]
+Filename: ['dog_2010_005434.jpg']
+ Target: tensor([[103.,  18., 500., 374.]], dtype=torch.float64)
+ Prediction: tensor([[132.3053,  14.8302, 497.4359, 380.4790]], device='cuda:0')
+ Loss: 9.879564046859741
+ IOU: [0.8973553632416345]
+Filename: ['cat_2008_005072.jpg']
+ Target: tensor([[  1., 177., 271., 378.]], dtype=torch.float64)
+ Prediction: tensor([[  4.8959, 182.4533, 253.4654, 381.1786]], device='cuda:0')
+ Loss: 7.015602469444275
+ IOU: [0.882797943059062]
+Filename: ['dog_2010_000072.jpg']
+ Target: tensor([[117.,  58., 437., 375.]], dtype=torch.float64)
+ Prediction: tensor([[129.1052,  54.7207, 442.0062, 374.3928]], device='cuda:0')
+ Loss: 4.76876687083859
+ IOU: [0.9362389583977423]
+Filename: ['cow_2010_002905.jpg']
+ Target: tensor([[ 58.,  65., 375., 500.]], dtype=torch.float64)
+ Prediction: tensor([[ 68.5008,  76.0141, 361.2235, 507.1155]], device='cuda:0')
+ Loss: 10.101722717285156
+ IOU: [0.886642329698383]
+Filename: ['bicycle_2008_003072.jpg']
+ Target: tensor([[178., 230., 199., 257.]], dtype=torch.float64)
+ Prediction: tensor([[168.8208, 238.8210, 197.9503, 245.5764]], device='cuda:0')
+ Loss: 7.118366241455078
+ IOU: [0.2142603908319083]
+Filename: ['cat_2008_001741.jpg']
+ Target: tensor([[  6., 102., 450., 292.]], dtype=torch.float64)
+ Prediction: tensor([[ 14.5146, 114.0718, 436.2218, 299.4535]], device='cuda:0')
+ Loss: 9.954519748687744
+ IOU: [0.8574954783440755]
+---------------------------EVAL on ALL 64 overfit-train-images---------------------------
+
+Transformer accuracy with PASCAL-criterium on overfit set: 59/64, percentage: 0.921875
+
+Mean model accuracy with PASCAL-criterium on overfit set: 14/64, percentage: 0.21875
+
+Median model accuracy with PASCAL-criterium on overfit set: 19/64, percentage: 0.296875
+
+Mean IOU is 0.8019574263531669
+
+   Results saved to file:  /zhome/ba/f/147212/BA/eyeFormer_ViT_t/timm_scripts/all_classes/L_64_nL_3_nH_1/all_classes/all_classes_test_on_train_results.pth
+FOUND DEVICE:  cuda:0
+Total length is:  6270
+Overwrote trainloader with overfit-set of length 124
+Valloader of constant length 60
+-----------------------------------------------------------------------------
+Model parameters:
+ tL: 124
+ vL: 60
+lrf: 1
+NEPOCHS: 500
+ num_warmup: 19920
+ Dropout: 0.0
+ Beta: 1
+ NHEADS: 1
+ NLAYERS: 3 
+ BATCH-SIZE: 1
+ACTUAL TRAINLOADER LENS 124 124
+v holder becomes: 
+ [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+
+sum becomes 0.0
+
+Len becomes60
+Created subdir in:  /zhome/ba/f/147212/BA/eyeFormer_ViT_t/timm_scripts/all_classes/L_124_nL_3_nH_1/
+Saved loss results to:  /zhome/ba/f/147212/BA/eyeFormer_ViT_t/timm_scripts/all_classes/L_124_nL_3_nH_1/all_classes_result_losses.pth
+Saved accuracy results to:  /zhome/ba/f/147212/BA/eyeFormer_ViT_t/timm_scripts/all_classes/L_124_nL_3_nH_1/all_classes_result_acc.pth
+Created subdir in:  /zhome/ba/f/147212/BA/eyeFormer_ViT_t/timm_scripts/all_classes/L_124_nL_3_nH_1/result/
+Wrote epoch IOU's to scratch in : /zhome/ba/f/147212/BA/eyeFormer_ViT_t/timm_scripts/all_classes/L_124_nL_3_nH_1/result/
+Saved loss results to:  /zhome/ba/f/147212/BA/eyeFormer_ViT_t/timm_scripts/all_classes/L_124_nL_3_nH_1/all_classes_val_losses.pth
+Saved accuracy results to:  /zhome/ba/f/147212/BA/eyeFormer_ViT_t/timm_scripts/all_classes/L_124_nL_3_nH_1/all_classes_val_acc.pth
+
+Wrote train-val-split to scratch.
+
+Entered evaluation-phase.
+Model parameters:
+ tL: 124
+ vL: 60
+lrf: 1
+ num_warmup: 19920
+ Dropout: 0.0
+ Beta: 1
+ NHEADS: 1
+ NLAYERS: 3
+ BATCH-SIZE: 1
+Evaluating overfit on ALL 124 train instances
+Filename: ['boat_2010_002546.jpg']
+ Target: tensor([[ 59.,  50., 173.,  74.]], dtype=torch.float64)
+ Prediction: tensor([[ 56.8779,  47.3331, 165.1530,  80.3893]], device='cuda:0')
+ Loss: 4.256331443786621
+ IOU: [0.6762246699682131]
+Filename: ['boat_2010_000906.jpg']
+ Target: tensor([[159.,  99., 364., 263.]], dtype=torch.float64)
+ Prediction: tensor([[152.2900,  96.5852, 363.6457, 266.7037]], device='cuda:0')
+ Loss: 2.847820390481502
+ IOU: [0.9319220759628247]
+Filename: ['sofa_2010_004109.jpg']
+ Target: tensor([[248.,  78., 500., 334.]], dtype=torch.float64)
+ Prediction: tensor([[239.6347,  68.5636, 501.6376, 340.2437]], device='cuda:0')
+ Loss: 5.9207305908203125
+ IOU: [0.9063098647570969]
+Filename: ['motorbike_2010_002991.jpg']
+ Target: tensor([[193., 303., 415., 492.]], dtype=torch.float64)
+ Prediction: tensor([[191.8630, 288.4290, 426.0106, 490.9024]], device='cuda:0')
+ Loss: 6.454044342041016
+ IOU: [0.8753892638392141]
+Filename: ['dog_2008_007131.jpg']
+ Target: tensor([[ 90.,  43., 348., 375.]], dtype=torch.float64)
+ Prediction: tensor([[ 82.0809,  41.7649, 336.9636, 375.2227]], device='cuda:0')
+ Loss: 4.678838521358557
+ IOU: [0.9248248678851578]
+Filename: ['boat_2009_001407.jpg']
+ Target: tensor([[ 41.,  18., 304., 415.]], dtype=torch.float64)
+ Prediction: tensor([[ 35.7367,  16.0879, 296.4232, 413.9056]], device='cuda:0')
+ Loss: 3.4616518020629883
+ IOU: [0.9451391116434857]
+Filename: ['dog_2008_000788.jpg']
+ Target: tensor([[  1.,  77., 304., 500.]], dtype=torch.float64)
+ Prediction: tensor([[5.0465e-01, 7.5877e+01, 3.0774e+02, 5.0660e+02]], device='cuda:0')
+ Loss: 2.5215372787122607
+ IOU: [0.9685301519775142]
+Filename: ['boat_2008_005855.jpg']
+ Target: tensor([[  1., 247., 500., 304.]], dtype=torch.float64)
+ Prediction: tensor([[  0.5453, 224.2024, 499.5251, 299.5169]], device='cuda:0')
+ Loss: 6.624191837017195
+ IOU: [0.6571141796318514]
+Filename: ['aeroplane_2009_000500.jpg']
+ Target: tensor([[  1., 101., 500., 264.]], dtype=torch.float64)
+ Prediction: tensor([[ -0.8049,  87.1079, 498.6117, 261.3608]], device='cuda:0')
+ Loss: 4.431112617254257
+ IOU: [0.9010104836221634]
+Filename: ['dog_2008_006032.jpg']
+ Target: tensor([[ 54., 206., 296., 500.]], dtype=torch.float64)
+ Prediction: tensor([[ 58.0922, 184.7955, 315.8441, 493.7137]], device='cuda:0')
+ Loss: 12.356771469116211
+ IOU: [0.8314735681186219]
+Filename: ['bicycle_2011_002281.jpg']
+ Target: tensor([[298., 218., 432., 434.]], dtype=torch.float64)
+ Prediction: tensor([[288.5064, 214.8522, 436.7995, 437.5791]], device='cuda:0')
+ Loss: 4.754978179931641
+ IOU: [0.876324850967756]
+Filename: ['diningtable_2009_000058.jpg']
+ Target: tensor([[  1., 331., 375., 500.]], dtype=torch.float64)
+ Prediction: tensor([[  1.7914, 319.8317, 376.5458, 500.5418]], device='cuda:0')
+ Loss: 3.043517664694498
+ IOU: [0.9295060697625662]
+Filename: ['sofa_2008_001869.jpg']
+ Target: tensor([[343., 202., 485., 329.]], dtype=torch.float64)
+ Prediction: tensor([[333.4386, 201.4389, 487.9379, 331.6988]], device='cuda:0')
+ Loss: 3.4638509883370716
+ IOU: [0.8960972916988548]
+Filename: ['cat_2010_002625.jpg']
+ Target: tensor([[  1., 118., 213., 324.]], dtype=torch.float64)
+ Prediction: tensor([[-1.2993e-01,  1.1187e+02,  2.1479e+02,  3.2704e+02]], device='cuda:0')
+ Loss: 2.5217211544513702
+ IOU: [0.9443887545752674]
+Filename: ['sofa_2008_001660.jpg']
+ Target: tensor([[  1.,  61., 500., 371.]], dtype=torch.float64)
+ Prediction: tensor([[-4.3857e-01,  5.5971e+01,  5.0052e+02,  3.7121e+02]], device='cuda:0')
+ Loss: 1.406259494367987
+ IOU: [0.9795401123603399]
+Filename: ['cat_2010_005821.jpg']
+ Target: tensor([[ 48.,  11., 240., 243.]], dtype=torch.float64)
+ Prediction: tensor([[ 41.0943,   9.5185, 245.2223, 250.2071]], device='cuda:0')
+ Loss: 4.7041356563568115
+ IOU: [0.9066323835102151]
+Filename: ['horse_2008_004354.jpg']
+ Target: tensor([[ 14., 115., 429., 384.]], dtype=torch.float64)
+ Prediction: tensor([[ 12.0106, 107.2600, 430.4047, 381.3236]], device='cuda:0')
+ Loss: 2.9526379108428955
+ IOU: [0.9546281424616601]
+Filename: ['cat_2010_003863.jpg']
+ Target: tensor([[116.,   1., 466., 374.]], dtype=torch.float64)
+ Prediction: tensor([[ 99.9802,  -8.5386, 463.7776, 378.5890]], device='cuda:0')
+ Loss: 7.59244704246521
+ IOU: [0.9156890126635]
+Filename: ['cow_2010_002431.jpg']
+ Target: tensor([[216., 164., 255., 190.]], dtype=torch.float64)
+ Prediction: tensor([[211.2367, 169.6773, 240.7590, 192.8131]], device='cuda:0')
+ Loss: 6.3736724853515625
+ IOU: [0.42146710834256557]
+Filename: ['cat_2009_000955.jpg']
+ Target: tensor([[ 79.,   1., 435., 334.]], dtype=torch.float64)
+ Prediction: tensor([[ 65.1222,  -9.8217, 436.3250, 328.1896]], device='cuda:0')
+ Loss: 7.458742141723633
+ IOU: [0.9132834404254448]
+Filename: ['cat_2010_005072.jpg']
+ Target: tensor([[184., 143., 292., 197.]], dtype=torch.float64)
+ Prediction: tensor([[179.7067, 143.8595, 279.0811, 198.3916]], device='cuda:0')
+ Loss: 4.368309618090279
+ IOU: [0.8151496165746408]
+Filename: ['cat_2008_000306.jpg']
+ Target: tensor([[ 57.,  65., 375., 384.]], dtype=torch.float64)
+ Prediction: tensor([[ 52.6901,  61.6993, 371.3069, 384.4341]], device='cuda:0')
+ Loss: 2.474469639826566
+ IOU: [0.964012690742701]
+Filename: ['cat_2008_004006.jpg']
+ Target: tensor([[  1.,   1., 500., 375.]], dtype=torch.float64)
+ Prediction: tensor([[ -1.4225,  -6.7052, 500.4531, 374.8270]], device='cuda:0')
+ Loss: 2.311336527694948
+ IOU: [0.9737514049751508]
+Filename: ['horse_2008_007612.jpg']
+ Target: tensor([[141., 220., 333., 433.]], dtype=torch.float64)
+ Prediction: tensor([[130.7384, 212.6443, 319.6608, 437.4685]], device='cuda:0')
+ Loss: 8.356266021728516
+ IOU: [0.8397717398380355]
+Filename: ['dog_2010_000484.jpg']
+ Target: tensor([[ 66.,  98., 267., 449.]], dtype=torch.float64)
+ Prediction: tensor([[ 56.2253, 102.5478, 262.0927, 444.7860]], device='cuda:0')
+ Loss: 5.360931396484375
+ IOU: [0.9081707129252413]
+Filename: ['dog_2008_000620.jpg']
+ Target: tensor([[205., 208., 327., 337.]], dtype=torch.float64)
+ Prediction: tensor([[205.6443, 218.0295, 312.6500, 337.5292]], device='cuda:0')
+ Loss: 5.931762124644592
+ IOU: [0.8060037147560812]
+Filename: ['dog_2010_005206.jpg']
+ Target: tensor([[  1., 100., 343., 374.]], dtype=torch.float64)
+ Prediction: tensor([[ -1.3693,  92.8509, 339.2083, 371.6271]], device='cuda:0')
+ Loss: 3.4207334220409393
+ IOU: [0.9491681813840378]
+Filename: ['dog_2010_000127.jpg']
+ Target: tensor([[ 51.,  28., 359., 386.]], dtype=torch.float64)
+ Prediction: tensor([[ 47.3057,  22.8585, 359.1339, 383.8132]], device='cuda:0')
+ Loss: 2.3828971539624035
+ IOU: [0.9678624800801969]
+Filename: ['aeroplane_2009_000133.jpg']
+ Target: tensor([[111., 144., 383., 234.]], dtype=torch.float64)
+ Prediction: tensor([[105.8359, 138.5971, 377.1739, 228.3610]], device='cuda:0')
+ Loss: 5.008028030395508
+ IOU: [0.8511479620628227]
+Filename: ['cow_2009_002002.jpg']
+ Target: tensor([[107., 119., 413., 298.]], dtype=torch.float64)
+ Prediction: tensor([[107.3794, 116.1653, 413.0670, 299.0743]], device='cuda:0')
+ Loss: 0.7458137443245505
+ IOU: [0.9772270679372632]
+Filename: ['aeroplane_2010_004888.jpg']
+ Target: tensor([[ 85.,  24., 407., 317.]], dtype=torch.float64)
+ Prediction: tensor([[ 80.8211,  22.6236, 406.5204, 309.4513]], device='cuda:0')
+ Loss: 2.929771239985712
+ IOU: [0.956152689697302]
+Filename: ['horse_2010_004477.jpg']
+ Target: tensor([[322., 179., 378., 319.]], dtype=torch.float64)
+ Prediction: tensor([[319.0836, 186.5442, 375.1616, 328.7897]], device='cuda:0')
+ Loss: 5.272190093994141
+ IOU: [0.802431033672089]
+Filename: ['aeroplane_2011_000975.jpg']
+ Target: tensor([[  1.,  46., 428., 373.]], dtype=torch.float64)
+ Prediction: tensor([[ -0.4601,  43.9234, 426.0310, 373.8910]], device='cuda:0')
+ Loss: 1.1006704467581585
+ IOU: [0.9831154612318912]
+Filename: ['sofa_2011_002965.jpg']
+ Target: tensor([[ 14.,  15., 474., 355.]], dtype=torch.float64)
+ Prediction: tensor([[  4.6109,   3.9232, 473.8462, 352.0534]], device='cuda:0')
+ Loss: 5.481082547572441
+ IOU: [0.9407052970458081]
+Filename: ['bicycle_2009_001558.jpg']
+ Target: tensor([[ 96.,   1., 311., 500.]], dtype=torch.float64)
+ Prediction: tensor([[ 85.9690,  -6.6156, 307.4530, 502.5858]], device='cuda:0')
+ Loss: 5.444846749305725
+ IOU: [0.9211273395859572]
+Filename: ['motorbike_2008_000203.jpg']
+ Target: tensor([[354., 156., 411., 261.]], dtype=torch.float64)
+ Prediction: tensor([[341.2977, 154.8849, 415.6019, 265.8069]], device='cuda:0')
+ Loss: 5.306556701660156
+ IOU: [0.726161022424634]
+Filename: ['cat_2008_006868.jpg']
+ Target: tensor([[275.,  93., 371., 216.]], dtype=torch.float64)
+ Prediction: tensor([[274.2732,  97.3215, 366.6954, 215.3805]], device='cuda:0')
+ Loss: 2.0205304075498134
+ IOU: [0.9101768944494601]
+Filename: ['motorbike_2008_007313.jpg']
+ Target: tensor([[ 66., 107., 198., 252.]], dtype=torch.float64)
+ Prediction: tensor([[ 56.6351, 104.1735, 188.8254, 250.4193]], device='cuda:0')
+ Loss: 5.236661911010742
+ IOU: [0.8445967745349223]
+Filename: ['dog_2008_003975.jpg']
+ Target: tensor([[  1.,   1., 500., 332.]], dtype=torch.float64)
+ Prediction: tensor([[ -1.3575,  -5.0057, 499.8118, 332.9294]], device='cuda:0')
+ Loss: 1.9531883490271866
+ IOU: [0.9745122201406224]
+Filename: ['horse_2010_005174.jpg']
+ Target: tensor([[ 17.,  28., 409., 369.]], dtype=torch.float64)
+ Prediction: tensor([[ 12.0026,  26.2453, 403.6378, 364.1854]], device='cuda:0')
+ Loss: 3.7322404384613037
+ IOU: [0.9554739861868781]
+Filename: ['cat_2008_003114.jpg']
+ Target: tensor([[  1.,   9., 500., 436.]], dtype=torch.float64)
+ Prediction: tensor([[3.9820e-01, 3.1750e+00, 4.8236e+02, 4.3110e+02]], device='cuda:0')
+ Loss: 6.761721527721621
+ IOU: [0.9400718156360419]
+Filename: ['aeroplane_2008_002977.jpg']
+ Target: tensor([[  1.,   1., 494., 375.]], dtype=torch.float64)
+ Prediction: tensor([[ -1.0526,  -5.4142, 496.7526, 373.8005]], device='cuda:0')
+ Loss: 2.6047012507915497
+ IOU: [0.9705559321492097]
+Filename: ['aeroplane_2009_003033.jpg']
+ Target: tensor([[106., 116., 433., 209.]], dtype=torch.float64)
+ Prediction: tensor([[103.3093, 102.1951, 431.7465, 205.9700]], device='cuda:0')
+ Loss: 4.694774627685547
+ IOU: [0.8329017653838382]
+Filename: ['dog_2008_002441.jpg']
+ Target: tensor([[ 48.,  50., 367., 375.]], dtype=torch.float64)
+ Prediction: tensor([[ 42.5086,  52.9012, 367.5931, 363.5847]], device='cuda:0')
+ Loss: 4.620919517357834
+ IOU: [0.938831413531868]
+Filename: ['cat_2008_004688.jpg']
+ Target: tensor([[  1.,   1., 500., 333.]], dtype=torch.float64)
+ Prediction: tensor([[ -1.5451,  -5.1298, 499.7981, 331.2296]], device='cuda:0')
+ Loss: 2.2414334100903943
+ IOU: [0.9713191517625693]
+Filename: ['dog_2010_003351.jpg']
+ Target: tensor([[156.,   1., 500., 375.]], dtype=torch.float64)
+ Prediction: tensor([[147.3313,  -8.5336, 504.4342, 382.8729]], device='cuda:0')
+ Loss: 7.127364158630371
+ IOU: [0.9204678051394711]
+Filename: ['cat_2008_007176.jpg']
+ Target: tensor([[ 87.,  82., 425., 246.]], dtype=torch.float64)
+ Prediction: tensor([[ 82.1150,  73.3233, 425.8915, 224.6383]], device='cuda:0')
+ Loss: 8.4551989819156
+ IOU: [0.8138543799764615]
+Filename: ['sofa_2009_001190.jpg']
+ Target: tensor([[  1., 145., 500., 375.]], dtype=torch.float64)
+ Prediction: tensor([[  1.5391, 136.4454, 502.3468, 379.9860]], device='cuda:0')
+ Loss: 3.6331902949526143
+ IOU: [0.9390208284452809]
+Filename: ['dog_2010_003321.jpg']
+ Target: tensor([[129., 112., 246., 272.]], dtype=torch.float64)
+ Prediction: tensor([[114.5395, 110.6083, 235.2367, 272.3634]], device='cuda:0')
+ Loss: 6.295365066383965
+ IOU: [0.8000692012018624]
+Filename: ['motorbike_2011_002786.jpg']
+ Target: tensor([[ 74.,   1., 383., 319.]], dtype=torch.float64)
+ Prediction: tensor([[ 68.9802,  -1.6897, 390.0120, 318.7508]], device='cuda:0')
+ Loss: 3.3131230962462723
+ IOU: [0.9537285489396868]
+Filename: ['boat_2009_004078.jpg']
+ Target: tensor([[ 15., 127., 500., 275.]], dtype=torch.float64)
+ Prediction: tensor([[  8.0347,  97.7927, 498.7946, 279.1351]], device='cuda:0')
+ Loss: 9.878264427185059
+ IOU: [0.8029428248443893]
+Filename: ['horse_2009_004262.jpg']
+ Target: tensor([[202.,   1., 500., 333.]], dtype=torch.float64)
+ Prediction: tensor([[197.2693,  -3.5007, 504.2752, 329.7564]], device='cuda:0')
+ Loss: 3.687546133995056
+ IOU: [0.9485945337993441]
+Filename: ['sofa_2008_000704.jpg']
+ Target: tensor([[136., 173., 397., 337.]], dtype=torch.float64)
+ Prediction: tensor([[135.7585, 176.0891, 397.7458, 342.7537]], device='cuda:0')
+ Loss: 2.0375078787328675
+ IOU: [0.9444009534115133]
+Filename: ['cat_2010_000675.jpg']
+ Target: tensor([[  5.,  63., 287., 469.]], dtype=torch.float64)
+ Prediction: tensor([[  1.2516,  64.9782, 294.3065, 484.7200]], device='cuda:0')
+ Loss: 6.688273459672928
+ IOU: [0.9220565855120568]
+Filename: ['cow_2008_007123.jpg']
+ Target: tensor([[139., 154., 370., 294.]], dtype=torch.float64)
+ Prediction: tensor([[137.3136, 154.3866, 369.0201, 300.0193]], device='cuda:0')
+ Loss: 1.8151004798710346
+ IOU: [0.9453565533017835]
+Filename: ['horse_2011_001544.jpg']
+ Target: tensor([[  1.,  38., 422., 370.]], dtype=torch.float64)
+ Prediction: tensor([[ -0.8635,  38.1645, 418.9793, 366.0382]], device='cuda:0')
+ Loss: 1.8398700192210526
+ IOU: [0.9762182981811457]
+Filename: ['cat_2008_005072.jpg']
+ Target: tensor([[  1., 177., 271., 378.]], dtype=torch.float64)
+ Prediction: tensor([[ -1.2758, 174.8195, 268.0616, 375.9735]], device='cuda:0')
+ Loss: 1.8553121984004974
+ IOU: [0.960731468811138]
+Filename: ['dog_2009_000778.jpg']
+ Target: tensor([[ 95.,  11., 362., 441.]], dtype=torch.float64)
+ Prediction: tensor([[ 89.7746,   7.1710, 352.4396, 449.2706]], device='cuda:0')
+ Loss: 6.221344351768494
+ IOU: [0.9206885100143375]
+Filename: ['bicycle_2009_002119.jpg']
+ Target: tensor([[ 37.,  29., 451., 268.]], dtype=torch.float64)
+ Prediction: tensor([[ 33.4469,  18.6946, 449.8618, 261.3783]], device='cuda:0')
+ Loss: 4.904577255249023
+ IOU: [0.9219430873120371]
+Filename: ['cat_2008_003052.jpg']
+ Target: tensor([[ 25.,   1., 427., 273.]], dtype=torch.float64)
+ Prediction: tensor([[ 19.6113,  -2.5214, 427.4899, 271.4668]], device='cuda:0')
+ Loss: 2.2658452559262514
+ IOU: [0.9675835976861517]
+Filename: ['dog_2010_000926.jpg']
+ Target: tensor([[  1.,   1., 403., 309.]], dtype=torch.float64)
+ Prediction: tensor([[ -1.7644, -10.5942, 407.4750, 301.4966]], device='cuda:0')
+ Loss: 6.084253162145615
+ IOU: [0.9239951104131309]
+Filename: ['horse_2011_002730.jpg']
+ Target: tensor([[186., 158., 301., 259.]], dtype=torch.float64)
+ Prediction: tensor([[185.1834, 166.3985, 284.7072, 270.8830]], device='cuda:0')
+ Loss: 8.85194892110303
+ IOU: [0.7100321538502787]
+Filename: ['aeroplane_2008_008507.jpg']
+ Target: tensor([[ 60.,  22., 474., 160.]], dtype=torch.float64)
+ Prediction: tensor([[ 58.8145,  10.1283, 465.9060, 157.2528]], device='cuda:0')
+ Loss: 5.474597215652466
+ IOU: [0.8836982060280847]
+Filename: ['dog_2010_001355.jpg']
+ Target: tensor([[167., 298., 228., 367.]], dtype=torch.float64)
+ Prediction: tensor([[163.5525, 295.8439, 213.2974, 362.0219]], device='cuda:0')
+ Loss: 5.821063995361328
+ IOU: [0.6533104562045976]
+Filename: ['bicycle_2008_003072.jpg']
+ Target: tensor([[178., 230., 199., 257.]], dtype=torch.float64)
+ Prediction: tensor([[171.5397, 233.0192, 190.9266, 261.9178]], device='cuda:0')
+ Loss: 5.117656707763672
+ IOU: [0.3793037016514292]
+Filename: ['cat_2008_007888.jpg']
+ Target: tensor([[  1.,   1., 500., 312.]], dtype=torch.float64)
+ Prediction: tensor([[-4.4155e-01, -5.0284e+00,  4.9938e+02,  3.1179e+02]], device='cuda:0')
+ Loss: 1.6707650726893917
+ IOU: [0.9763196279522944]
+Filename: ['aeroplane_2010_005184.jpg']
+ Target: tensor([[ 53., 120., 350., 242.]], dtype=torch.float64)
+ Prediction: tensor([[ 48.5053, 115.3850, 346.9540, 239.1427]], device='cuda:0')
+ Loss: 3.2532386779785156
+ IOU: [0.9180964758555944]
+Filename: ['bicycle_2008_005356.jpg']
+ Target: tensor([[ 61.,  18., 427., 365.]], dtype=torch.float64)
+ Prediction: tensor([[ 56.9401,  13.2197, 426.4401, 360.1628]], device='cuda:0')
+ Loss: 3.083517458755523
+ IOU: [0.9606827826712568]
+Filename: ['dog_2009_001224.jpg']
+ Target: tensor([[ 78.,  20., 242., 263.]], dtype=torch.float64)
+ Prediction: tensor([[ 73.1984,  24.2558, 238.1678, 264.9962]], device='cuda:0')
+ Loss: 3.221438407897949
+ IOU: [0.9252673860667762]
+Filename: ['cat_2010_002573.jpg']
+ Target: tensor([[ 63.,  79., 342., 352.]], dtype=torch.float64)
+ Prediction: tensor([[ 36.1791,  77.4933, 322.9495, 352.7666]], device='cuda:0')
+ Loss: 11.542969696340151
+ IOU: [0.8434201462255295]
+Filename: ['diningtable_2009_004562.jpg']
+ Target: tensor([[  1., 217., 219., 375.]], dtype=torch.float64)
+ Prediction: tensor([[ -3.2406, 228.1891, 209.5199, 374.2138]], device='cuda:0')
+ Loss: 5.92974515305832
+ IOU: [0.8684035819248379]
+Filename: ['cat_2009_000716.jpg']
+ Target: tensor([[ 65.,  69., 468., 332.]], dtype=torch.float64)
+ Prediction: tensor([[ 59.9965,  66.8543, 460.3727, 338.8616]], device='cuda:0')
+ Loss: 4.909512519836426
+ IOU: [0.9375338648575047]
+Filename: ['diningtable_2008_005348.jpg']
+ Target: tensor([[  5.,  58., 500., 287.]], dtype=torch.float64)
+ Prediction: tensor([[  2.8800,  45.7326, 498.1711, 289.6257]], device='cuda:0')
+ Loss: 4.210504412651062
+ IOU: [0.9316867131283474]
+Filename: ['dog_2010_000072.jpg']
+ Target: tensor([[117.,  58., 437., 375.]], dtype=torch.float64)
+ Prediction: tensor([[112.6935,  56.4249, 433.1051, 379.8003]], device='cuda:0')
+ Loss: 3.144190788269043
+ IOU: [0.9557207044521686]
+Filename: ['sofa_2010_006073.jpg']
+ Target: tensor([[112., 155., 358., 260.]], dtype=torch.float64)
+ Prediction: tensor([[109.4713, 154.6202, 355.1607, 261.5202]], device='cuda:0')
+ Loss: 1.3650784394994844
+ IOU: [0.9612065299173966]
+Filename: ['diningtable_2008_003534.jpg']
+ Target: tensor([[142., 225., 500., 375.]], dtype=torch.float64)
+ Prediction: tensor([[138.3632, 218.4199, 497.7294, 377.4881]], device='cuda:0')
+ Loss: 3.243896484375
+ IOU: [0.9279199840961359]
+Filename: ['aeroplane_2008_008300.jpg']
+ Target: tensor([[ 25., 129., 348., 206.]], dtype=torch.float64)
+ Prediction: tensor([[ 23.6742, 120.2985, 343.5244, 200.6159]], device='cuda:0')
+ Loss: 4.471776962280273
+ IOU: [0.8220581037268742]
+Filename: ['bicycle_2009_000445.jpg']
+ Target: tensor([[ 68.,  17., 458., 315.]], dtype=torch.float64)
+ Prediction: tensor([[ 63.7911,  11.4194, 458.1664, 306.8952]], device='cuda:0')
+ Loss: 4.102048509288579
+ IOU: [0.9446054434196113]
+Filename: ['aeroplane_2010_005022.jpg']
+ Target: tensor([[ 11.,  63., 491., 235.]], dtype=torch.float64)
+ Prediction: tensor([[  4.7039,  49.4859, 491.1159, 242.0952]], device='cuda:0')
+ Loss: 6.353018439491279
+ IOU: [0.881227852413214]
+Filename: ['aeroplane_2011_000531.jpg']
+ Target: tensor([[  1., 102., 500., 311.]], dtype=torch.float64)
+ Prediction: tensor([[  0.9144,  88.9817, 503.6326, 307.1600]], device='cuda:0')
+ Loss: 4.748644701909074
+ IOU: [0.9173506340364493]
+Filename: ['horse_2009_003565.jpg']
+ Target: tensor([[ 39.,  99., 353., 345.]], dtype=torch.float64)
+ Prediction: tensor([[ 33.5435,  87.4503, 356.4251, 342.1201]], device='cuda:0')
+ Loss: 5.327815055847168
+ IOU: [0.9182896095939387]
+Filename: ['bicycle_2008_005276.jpg']
+ Target: tensor([[  8., 361.,  77., 461.]], dtype=torch.float64)
+ Prediction: tensor([[  7.8768, 372.2206,  72.3861, 461.6024]], device='cuda:0')
+ Loss: 3.7558706879846113
+ IOU: [0.8224935131552167]
+Filename: ['cow_2010_002905.jpg']
+ Target: tensor([[ 58.,  65., 375., 500.]], dtype=torch.float64)
+ Prediction: tensor([[ 54.3977,  63.3236, 373.2574, 499.1252]], device='cuda:0')
+ Loss: 1.4759616908850148
+ IOU: [0.9776263286660735]
+Filename: ['bicycle_2008_008095.jpg']
+ Target: tensor([[286., 131., 423., 309.]], dtype=torch.float64)
+ Prediction: tensor([[273.2203, 132.5965, 421.5182, 317.8535]], device='cuda:0')
+ Loss: 5.677886962890625
+ IOU: [0.8552064996289676]
+Filename: ['dog_2010_004749.jpg']
+ Target: tensor([[  1.,   1., 500., 375.]], dtype=torch.float64)
+ Prediction: tensor([[ -0.9072,  -3.5987, 499.4196, 377.0204]], device='cuda:0')
+ Loss: 1.7987042955355719
+ IOU: [0.9777493046570667]
+Filename: ['cat_2008_001741.jpg']
+ Target: tensor([[  6., 102., 450., 292.]], dtype=torch.float64)
+ Prediction: tensor([[  5.1814,  95.5462, 443.9094, 292.8794]], device='cuda:0')
+ Loss: 3.0665388774870053
+ IOU: [0.9483655471672673]
+Filename: ['horse_2008_005791.jpg']
+ Target: tensor([[  5., 113., 417., 346.]], dtype=torch.float64)
+ Prediction: tensor([[  3.8616, 102.8788, 419.8740, 344.2357]], device='cuda:0')
+ Loss: 3.4744473695755005
+ IOU: [0.9420056581049818]
+Filename: ['dog_2009_000953.jpg']
+ Target: tensor([[140.,  26., 500., 333.]], dtype=torch.float64)
+ Prediction: tensor([[130.9583,  24.7976, 499.3043, 338.5665]], device='cuda:0')
+ Loss: 3.6381439198739827
+ IOU: [0.9526495180209144]
+Filename: ['cat_2009_005299.jpg']
+ Target: tensor([[ 27.,  56., 500., 289.]], dtype=torch.float64)
+ Prediction: tensor([[ 27.5111,  52.3431, 496.8742, 287.3195]], device='cuda:0')
+ Loss: 1.7734501803720377
+ IOU: [0.9700463572105282]
+Filename: ['cat_2011_001414.jpg']
+ Target: tensor([[  2.,  65., 275., 354.]], dtype=torch.float64)
+ Prediction: tensor([[ -2.2274,  67.0463, 266.8200, 350.0140]], device='cuda:0')
+ Loss: 4.109936833381653
+ IOU: [0.9356035056247164]
+Filename: ['motorbike_2011_000285.jpg']
+ Target: tensor([[274., 158., 337., 220.]], dtype=torch.float64)
+ Prediction: tensor([[271.3964, 160.4416, 332.5814, 220.2236]], device='cuda:0')
+ Loss: 1.99720299243927
+ IOU: [0.856252467971892]
+Filename: ['sofa_2010_000691.jpg']
+ Target: tensor([[391., 183., 500., 301.]], dtype=torch.float64)
+ Prediction: tensor([[378.2007, 186.1472, 501.1010, 306.4725]], device='cuda:0')
+ Loss: 5.130016326904297
+ IOU: [0.8273675779108225]
+Filename: ['motorbike_2011_002476.jpg']
+ Target: tensor([[292., 160., 359., 238.]], dtype=torch.float64)
+ Prediction: tensor([[295.2744, 162.1766, 357.3881, 242.1089]], device='cuda:0')
+ Loss: 2.2929420471191406
+ IOU: [0.8592384795092154]
+Filename: ['motorbike_2008_004703.jpg']
+ Target: tensor([[  1., 136., 158., 250.]], dtype=torch.float64)
+ Prediction: tensor([[-6.1890e-02,  1.2553e+02,  1.5668e+02,  2.4184e+02]], device='cuda:0')
+ Loss: 4.753889054991305
+ IOU: [0.8384476263093577]
+Filename: ['diningtable_2009_004032.jpg']
+ Target: tensor([[ 27., 219., 459., 375.]], dtype=torch.float64)
+ Prediction: tensor([[ 25.3048, 207.4256, 461.8628, 372.8926]], device='cuda:0')
+ Loss: 4.059927463531494
+ IOU: [0.9088851112935751]
+Filename: ['cow_2011_001708.jpg']
+ Target: tensor([[ 77., 180., 253., 420.]], dtype=torch.float64)
+ Prediction: tensor([[ 74.4144, 172.5540, 261.8459, 410.4875]], device='cuda:0')
+ Loss: 6.597501754760742
+ IOU: [0.8767110912015467]
+Filename: ['bicycle_2008_002894.jpg']
+ Target: tensor([[ 43., 154., 388., 332.]], dtype=torch.float64)
+ Prediction: tensor([[ 38.2680, 147.8284, 386.1684, 332.9439]], device='cuda:0')
+ Loss: 2.920171577599831
+ IOU: [0.9437056446134736]
+Filename: ['cat_2008_005309.jpg']
+ Target: tensor([[140.,   1., 500., 283.]], dtype=torch.float64)
+ Prediction: tensor([[113.1488,  -6.9206, 494.0291, 270.6726]], device='cuda:0')
+ Loss: 12.767517447471619
+ IOU: [0.8541224745400242]
+Filename: ['diningtable_2011_002933.jpg']
+ Target: tensor([[  1., 302., 154., 500.]], dtype=torch.float64)
+ Prediction: tensor([[ -0.7683, 315.7105, 143.6885, 491.0195]], device='cuda:0')
+ Loss: 8.192680358886719
+ IOU: [0.8173634392513065]
+Filename: ['aeroplane_2010_003723.jpg']
+ Target: tensor([[ 64.,  52., 462., 259.]], dtype=torch.float64)
+ Prediction: tensor([[ 65.0286,  48.5251, 461.0354, 254.8990]], device='cuda:0')
+ Loss: 1.892433682573028
+ IOU: [0.9592571634873435]
+Filename: ['diningtable_2010_005884.jpg']
+ Target: tensor([[ 14., 234., 500., 333.]], dtype=torch.float64)
+ Prediction: tensor([[ 10.3830, 218.4543, 498.3985, 333.4532]], device='cuda:0')
+ Loss: 4.841722013428807
+ IOU: [0.8520898224807186]
+Filename: ['dog_2008_003645.jpg']
+ Target: tensor([[  5.,  63., 436., 470.]], dtype=torch.float64)
+ Prediction: tensor([[  4.4726,  60.5908, 422.7692, 478.3853]], device='cuda:0')
+ Loss: 5.6661270038677
+ IOU: [0.9438516241405958]
+Filename: ['horse_2009_004606.jpg']
+ Target: tensor([[  1.,  59., 305., 500.]], dtype=torch.float64)
+ Prediction: tensor([[  1.3716,  58.9017, 304.4987, 506.6373]], device='cuda:0')
+ Loss: 1.5841976919850982
+ IOU: [0.9821705442128433]
+Filename: ['aeroplane_2010_005632.jpg']
+ Target: tensor([[ 50., 120., 402., 237.]], dtype=torch.float64)
+ Prediction: tensor([[ 41.5696, 109.0165, 405.6036, 236.4201]], device='cuda:0')
+ Loss: 5.421395627112361
+ IOU: [0.8797109687580426]
+Filename: ['boat_2008_003989.jpg']
+ Target: tensor([[136., 109., 381., 271.]], dtype=torch.float64)
+ Prediction: tensor([[130.9068, 104.7709, 381.6821, 268.4124]], device='cuda:0')
+ Loss: 2.6606347858905792
+ IOU: [0.93724257991102]
+Filename: ['boat_2009_005268.jpg']
+ Target: tensor([[ 48., 412.,  86., 457.]], dtype=torch.float64)
+ Prediction: tensor([[ 43.3253, 408.4576,  89.5019, 451.5872]], device='cuda:0')
+ Loss: 3.7829456329345703
+ IOU: [0.6846303711467692]
+Filename: ['dog_2010_004461.jpg']
+ Target: tensor([[210.,   1., 500., 354.]], dtype=torch.float64)
+ Prediction: tensor([[208.5215,  -4.1778, 506.5543, 353.8315]], device='cuda:0')
+ Loss: 2.931198575068265
+ IOU: [0.9585352973365818]
+Filename: ['cow_2010_001692.jpg']
+ Target: tensor([[173., 120., 450., 337.]], dtype=torch.float64)
+ Prediction: tensor([[173.2535, 113.7889, 449.8088, 339.6584]], device='cuda:0')
+ Loss: 1.9799980461830273
+ IOU: [0.9592494644699339]
+Filename: ['dog_2010_003884.jpg']
+ Target: tensor([[  7., 208., 375., 500.]], dtype=torch.float64)
+ Prediction: tensor([[  7.8674, 189.8642, 366.3420, 487.8129]], device='cuda:0')
+ Loss: 9.46426476836885
+ IOU: [0.8802059649428804]
+Filename: ['bicycle_2011_003003.jpg']
+ Target: tensor([[ 39., 116., 421., 353.]], dtype=torch.float64)
+ Prediction: tensor([[ 34.3644, 105.6602, 421.8924, 346.1234]], device='cuda:0')
+ Loss: 5.187526379246265
+ IOU: [0.9174859591082564]
+Filename: ['boat_2008_001516.jpg']
+ Target: tensor([[ 49.,   1., 442., 333.]], dtype=torch.float64)
+ Prediction: tensor([[ 40.7433,  -5.8924, 440.8300, 325.3561]], device='cuda:0')
+ Loss: 5.490719437599182
+ IOU: [0.9351109273189568]
+Filename: ['diningtable_2011_002348.jpg']
+ Target: tensor([[ 53., 262., 499., 375.]], dtype=torch.float64)
+ Prediction: tensor([[ 40.3745, 244.5292, 499.6637, 368.0747]], device='cuda:0')
+ Loss: 8.935436799307354
+ IOU: [0.7907057534024208]
+Filename: ['diningtable_2010_001181.jpg']
+ Target: tensor([[  3.,  20., 500., 375.]], dtype=torch.float64)
+ Prediction: tensor([[ -0.5735,  12.3531, 500.4193, 373.6696]], device='cuda:0')
+ Loss: 2.784687953069806
+ IOU: [0.9675007734295524]
+Filename: ['motorbike_2009_001151.jpg']
+ Target: tensor([[ 79., 100., 443., 317.]], dtype=torch.float64)
+ Prediction: tensor([[ 75.9530,  91.6324, 442.3161, 316.8935]], device='cuda:0')
+ Loss: 2.6635443462291732
+ IOU: [0.9526858654985518]
+Filename: ['dog_2009_000410.jpg']
+ Target: tensor([[  1.,  79., 244., 397.]], dtype=torch.float64)
+ Prediction: tensor([[ -1.6558,  83.1603, 241.0124, 394.4731]], device='cuda:0')
+ Loss: 2.5826569497585297
+ IOU: [0.9566987549343622]
+Filename: ['sofa_2009_001241.jpg']
+ Target: tensor([[  4., 212., 250., 375.]], dtype=torch.float64)
+ Prediction: tensor([[-2.8900e-01,  2.1364e+02,  2.4815e+02,  3.7718e+02]], device='cuda:0')
+ Loss: 1.9892075955867767
+ IOU: [0.9531806397071033]
+Filename: ['motorbike_2010_003635.jpg']
+ Target: tensor([[ 38.,  32., 440., 273.]], dtype=torch.float64)
+ Prediction: tensor([[ 32.2453,  25.5153, 437.9024, 273.0702]], device='cuda:0')
+ Loss: 3.2098448295146227
+ IOU: [0.9549042821768259]
+Filename: ['bicycle_2008_001914.jpg']
+ Target: tensor([[154., 265., 474., 375.]], dtype=torch.float64)
+ Prediction: tensor([[139.5452, 249.9308, 471.2993, 375.3071]], device='cuda:0')
+ Loss: 7.692973010707647
+ IOU: [0.8331805991833093]
+Filename: ['dog_2009_004581.jpg']
+ Target: tensor([[125., 112., 339., 215.]], dtype=torch.float64)
+ Prediction: tensor([[123.0792, 111.5688, 339.1270, 218.8298]], device='cuda:0')
+ Loss: 1.2129070876399055
+ IOU: [0.9511726756855892]
+Filename: ['boat_2010_000679.jpg']
+ Target: tensor([[ 79., 113., 161., 169.]], dtype=torch.float64)
+ Prediction: tensor([[ 78.1860, 112.6308, 160.2584, 170.2832]], device='cuda:0')
+ Loss: 0.3644177387250238
+ IOU: [0.953337135179359]
+Filename: ['boat_2008_000235.jpg']
+ Target: tensor([[111., 171., 488., 278.]], dtype=torch.float64)
+ Prediction: tensor([[108.5218, 155.1400, 489.5671, 272.5749]], device='cuda:0')
+ Loss: 5.832582473754883
+ IOU: [0.8183602265787637]
+Filename: ['motorbike_2009_004801.jpg']
+ Target: tensor([[277., 145., 361., 220.]], dtype=torch.float64)
+ Prediction: tensor([[269.8992, 140.1866, 363.0616, 218.5183]], device='cuda:0')
+ Loss: 3.3643417358398438
+ IOU: [0.8320561084766338]
+Filename: ['dog_2010_005434.jpg']
+ Target: tensor([[103.,  18., 500., 374.]], dtype=torch.float64)
+ Prediction: tensor([[ 88.6428,   5.2767, 506.9095, 379.8338]], device='cuda:0')
+ Loss: 9.455940246582031
+ IOU: [0.9021301856352498]
+Filename: ['diningtable_2009_004847.jpg']
+ Target: tensor([[ 38.,  91., 375., 500.]], dtype=torch.float64)
+ Prediction: tensor([[ 35.0390,  86.7268, 375.5154, 500.7607]], device='cuda:0')
+ Loss: 1.6640997381182387
+ IOU: [0.9777554915195098]
+---------------------------EVAL on ALL 124 overfit-train-images---------------------------
+
+Transformer accuracy with PASCAL-criterium on overfit set: 122/124, percentage: 0.9838709677419355
+
+Mean model accuracy with PASCAL-criterium on overfit set: 28/124, percentage: 0.22580645161290322
+
+Median model accuracy with PASCAL-criterium on overfit set: 41/124, percentage: 0.33064516129032256
+
+Mean IOU is 0.89476394630245
+
+   Results saved to file:  /zhome/ba/f/147212/BA/eyeFormer_ViT_t/timm_scripts/all_classes/L_124_nL_3_nH_1/all_classes/all_classes_test_on_train_results.pth
+FOUND DEVICE:  cuda:0
+Total length is:  6270
+Overwrote trainloader with overfit-set of length 204
+Valloader of constant length 60
+-----------------------------------------------------------------------------
+Model parameters:
+ tL: 204
+ vL: 60
+lrf: 1
+NEPOCHS: 500
+ num_warmup: 33200
+ Dropout: 0.0
+ Beta: 1
+ NHEADS: 1
+ NLAYERS: 3 
+ BATCH-SIZE: 1
+ACTUAL TRAINLOADER LENS 204 204

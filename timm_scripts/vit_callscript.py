@@ -8,8 +8,8 @@ import math
 L = [30,60,120,200]#[2,4,8,16,32]
 EPOCHS = 500
 
-num_layers = 6
-num_heads = 2
+num_layers = 3
+num_heads = 1
 EVAL = 0
 
 #length = L[classOC]

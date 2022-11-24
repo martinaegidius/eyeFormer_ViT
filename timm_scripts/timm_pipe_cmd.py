@@ -54,7 +54,7 @@ def generate_DS(dataFrame,classes=[x for x in range(10)]):
             A tensor containing image-dimensions
     """
     dataFrame.loadmat()
-    dataFrame.convert_eyetracking_data(CLEANUP=True,STATS=True)
+    dataFrame.convert_eyetracking_data(CLEANUP=True,STATS=True,mode="mean") #MEAN FIXATION EXPERIMENT 
     NUMCLASSES = len(classes) 
     
     
@@ -108,7 +108,7 @@ def generate_DS(dataFrame,classes=[x for x in range(10)]):
         for j in range(dataFrame.NUM_TRACKERS):
             sliceShape = dataFrame.eyeData[classes[k]][idx][j][0].shape
             df[i,3+j] = dataFrame.eyeData[classes[k]][idx][j][0] #list items
-            if(sliceShape != (2,0)): #for all non-empty
+            if(sliceShape != (2,0) and sliceShape != (0,) and sliceShape != (2,)): #for all non-empty
                 eyes[i,j,:sliceShape[0],:] = torch.from_numpy(dataFrame.eyeData[classes[k]][idx][j][0][-32:].astype(np.int32)) #some entries are in uint16, which torch does not support
             else: 
                 eyes[i,j,:,:] = 0.0

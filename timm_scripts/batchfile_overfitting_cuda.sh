@@ -32,6 +32,6 @@
 # here follow the commands you want to execute
 module load python3/3.10.2
 source $HOME/bachelroenv/bin/activate
-python3 vit_callscript.py 0 >> overfittingExp/ALLCLASSES.log
+python3 vit_callscript.py 0 >> overfittingExp/ALLCLASSES_FASTER.log
 
 
