@@ -288,7 +288,7 @@ elif(len(classesOC)==10):
 else: 
     classString = classes[classesOC[0]]
 
-BATCH_SZ = 1
+BATCH_SZ = 2
 # #RUN_FROM_COMMANDLINE. Class at top of programme.
 NUM_IN_OVERFIT = int(sys.argv[2]) #NUM-IN-OVERFIT EQUALS LEN(TRAIN) IF OVERFIT == False
 NLAYERS = int(sys.argv[3])
@@ -664,6 +664,10 @@ def train_one_epoch_w_val(model,loss,trainloader,valloader,negative_print=False,
         #print("Train target: \n",target)
         #print("TRAIN output: \n",outputs)
         #PASCAL CRITERIUM
+        if(DEBUG==True):
+            print("OUTPUT BECOMES: ",outputs)
+            print("TARGET BECOMES: ",target)
+            
         noTrue,noFalse,IOUli_t = vm.pascalACC(outputs,target)
         #print("\nScaled pascalACC returns:\n",pascalACC(sOutputs,sTargets))
         #print("\nOriginal pascalACC returns:\n",pascalACC(outputs,target))
@@ -675,16 +679,19 @@ def train_one_epoch_w_val(model,loss,trainloader,valloader,negative_print=False,
         
         
         loss = loss_fn(outputs,target) #SMOOTH L1. Mode: mean
+        if(DEBUG==True):
+            print("LOSS BECOMES: ",loss)
         #loss = ops.generalized_box_iou(outputs.to(dtype=torch.float64),target.to(dtype=torch.float64))
         running_loss += loss.item() #is complete EPOCHLOSS
         loss.backward()
         nn.utils.clip_grad_value_(model.parameters(), clip_value=0.5) #experimentary
         model_opt.step()
     
-    #if(DEBUG==True):
-        #print("t holder becomes: \n",tIOUli_holder)
-        #print("\nsum becomes",sum(tIOUli_holder))
-        #print("\nLen becomes",len(tIOUli_holder))
+    if(DEBUG==True):
+        print("t holder becomes: \n",tIOUli_holder)
+        print("\nsum becomes",sum(tIOUli_holder))
+        print("\nLen becomes",len(tIOUli_holder))
+        print("\n Train MEAN BECOMES: ",sum(tIOUli_holder)/len(tIOUli_holder))
     IOU_mt = sum(tIOUli_holder)/len(tIOUli_holder)        
     
     
@@ -694,6 +701,7 @@ def train_one_epoch_w_val(model,loss,trainloader,valloader,negative_print=False,
         print("v holder becomes: \n",vIOUli_holder)
         print("\nsum becomes",sum(vIOUli_holder))
         print("\nLen becomes{}".format(len(vIOUli_holder)))
+        print("\n VAL MEAN BECOMES: ",sum(vIOUli_holder)/len(vIOUli_holder))
     IOU_mv = sum(vIOUli_holder)/len(vIOUli_holder)
     
     epochLoss = running_loss/len(trainloader.dataset) 
@@ -728,7 +736,7 @@ for epoch in (pbar:=tqdm(range(EPOCHS))):
     try:        
         if(OVERFIT):
             if(epoch==0):
-                epochLoss, correct_count, false_count,target,signal,mask,epochAcc,model,valLoss,valAcc,IOU_t,IOU_v = train_one_epoch_w_val(model,loss_fn,trainloader,valloader,negative_print=False,DEBUG=True)
+                epochLoss, correct_count, false_count,target,signal,mask,epochAcc,model,valLoss,valAcc,IOU_t,IOU_v = train_one_epoch_w_val(model,loss_fn,trainloader,valloader,negative_print=False,DEBUG=False)
             else: 
                 epochLoss, correct_count, false_count,target,signal,mask,epochAcc,model,valLoss,valAcc,IOU_t,IOU_v = train_one_epoch_w_val(model,loss_fn,trainloader,valloader,negative_print=False)
             tmpStr = f" | avg train loss {epochLoss:.4f} | train acc: {epochAcc:.4f} | avg val loss: {valLoss:.4f} | avg val acc: {valAcc:.4f} | Mean Train IOU: {IOU_t:.4f} | Mean Val IOU: {IOU_v:.4f} |"
