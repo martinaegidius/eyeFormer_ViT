@@ -19,6 +19,7 @@ from tqdm import tqdm
 import sys
 #import handle_pascal as hdl
 from load_POET_timm import pascalET
+import box_operations as boxops
 
 ###CALL WITH SYSTEM ARGUMENTS
 #arg 1: classChoice
@@ -126,11 +127,12 @@ def generate_DS(dataFrame,classes=[x for x in range(10)]):
     return df,filenames,eyes,targetsTensor,classlabelsTensor,imdimsTensor,dslen
 
 class PASCALdataset(Dataset):
-    def __init__(self,pascalobj,root_dir,classes,sTransform=None,imTransform = None):
+    def __init__(self,pascalobj,root_dir,classes,sTransform=None,imTransform = None,coordTransform = None):
         self.ABDset,self.filenames,self.eyeData,self.targets,self.classlabels,self.imdims,self.length = generate_DS(pascalobj,classes)
         self.root_dir = root_dir
         self.sTransform = sTransform
         self.imTransform = imTransform
+        self.coordTransform = coordTransform
         self.deep_representation = None
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.ViT_model = timm.create_model('vit_base_patch16_224',pretrained=True,num_classes=0, global_pool='')
@@ -161,13 +163,16 @@ class PASCALdataset(Dataset):
         targets = self.targets[idx,:]
         size = self.imdims[idx]
         
-        sample = {"signal": signals,"target": targets,"file": filename, "index": idx,"size":size,"class":classL,"mask":None,"image":image,"orgimage":image}
+        sample = {"signal": signals,"target": targets,"file": filename, "index": idx,"size":self.imdims[idx],"class":self.classlabels[idx],"mask":None,"image":image,"orgimage":image,"scaled_signal":None,"scaled_target":None,"target_centered":None}
         
         if self.sTransform: 
             sample = self.sTransform(sample)
         if self.imTransform:
             sample["orgimage"] = self.imTransform(sample["image"]) #only shoot through image 
         
+        if self.coordTransform:
+            sample = self.coordTransform(sample)
+
         if sample["orgimage"].dim()==3:
             sample["image"] = sample["orgimage"].unsqueeze(0)
             
@@ -262,97 +267,6 @@ def load_split(className,root_dir):
     test = torch.load(tmp_root+className+"Test.pt")
     return train,test
 
-#model = timm.create_model('vit_base_patch16_224',pretrained=True,num_classes=0, global_pool='')
-#model.eval()
-def rescale_coordsO(eyeCoords,imdims,bbox):
-    """
-    Args: 
-        eyeCoords: Tensor
-        imdims: [1,2]-tensor with [height,width] of image
-        imW: int value with width of image 
-        imH: int value of height of image 
-    Returns: 
-        Rescaled eyeCoords (inplace) from [0,1].
-    """
-    outCoords = torch.zeros_like(eyeCoords)
-    outCoords[:,0] = eyeCoords[:,0]/imdims[1]
-    outCoords[:,1] = eyeCoords[:,1]/imdims[0]
-    
-    tbox = torch.zeros_like(bbox)
-    #transform bounding-box to [0,1]
-    tbox[0] = bbox[0]/imdims[1]
-    tbox[1] = bbox[1]/imdims[0]
-    tbox[2] = bbox[2]/imdims[1]
-    tbox[3] = bbox[3]/imdims[0]
-    
-    
-    return outCoords,tbox
-   
-
-class tensorPad(object):
-    """
-    Object-function which pads a batch of different sized tensors to all have [bsz,32,2] with value -999 for padding
-
-    Parameters
-    ----------
-    object : lambda, only used for composing transform.
-    sample : with a dict corresponding to dataset __getitem__
-
-    Returns
-    -------
-    padded_batch : tensor with dimensions [batch_size,32,2]
-
-    """
-    def __call__(self,sample):
-        x = sample["signal"]
-        xtmp = torch.zeros(32,2)
-        numel = x.shape[0]
-        xtmp[:numel,:] = x[:,:]
-        
-        maskTensor = (xtmp[:,0]==0)    
-        sample["signal"] = xtmp
-        sample["mask"] = maskTensor
-        return sample
-        
-class rescale_coords(object):
-    """
-    Args: 
-        eyeCoords: Tensor
-        imdims: [1,2]-tensor with [height,width] of image
-        imW: int value with width of image 
-        imH: int value of height of image 
-    Returns: 
-        Rescaled eyeCoords (inplace) from [0,1].
-    """
-    
-    def __call__(self,sample):
-        eyeCoords,imdims,bbox = sample["signal"],sample["size"],sample["target"]
-        mask = sample["mask"]
-        outCoords = torch.ones(32,2)
-        
-        #old ineccesary #eyeCoords[inMask] = float('nan') #set nan for next calculation -> division gives nan. Actually ineccesary
-        #handle masking
-        #inMask = (eyeCoords==0.0) #mask-value
-        #calculate scaling
-        outCoords[:,0] = eyeCoords[:,0]/imdims[1]
-        outCoords[:,1] = eyeCoords[:,1]/imdims[0]
-        
-        #reapply mask
-        outCoords[mask] = 0.0 #reapply mask
-        
-        tbox = torch.zeros_like(bbox)
-        #transform bounding-box to [0,1]
-        tbox[0] = bbox[0]/imdims[1]
-        tbox[1] = bbox[1]/imdims[0]
-        tbox[2] = bbox[2]/imdims[1]
-        tbox[3] = bbox[3]/imdims[0]
-        
-        sample["signal"] = outCoords
-        sample["target"] = tbox
-        
-        return sample
-    
-        #return {"signal": outCoords,"size":imdims,"target":tbox}
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 classes = ["aeroplane","bicycle","boat","cat","cow","diningtable","dog","horse","motorbike","sofa"]
@@ -392,6 +306,8 @@ EPOCH_STEPS = NUM_IN_OVERFIT//BATCH_SZ
 if EPOCH_STEPS == 0: 
     EPOCH_STEPS = 1
 NUM_WARMUP = int(EPOCHS*(1/3))*EPOCH_STEPS #constant 30% warmup-rate
+if NUM_WARMUP == 0: #debugging cases
+    NUM_WARUP = 1
 
 BETA = 1
 OVERFIT=True
@@ -409,13 +325,16 @@ if(GENERATE_DATASET == True or GENERATE_DATASET==None):
     split_root_dir = os.path.join(os.path.expanduser('~'),"BA/eyeFormer")
     
     SignalTrans = torchvision.transforms.Compose(
-        [torchvision.transforms.Lambda(tensorPad())])
+        [torchvision.transforms.Lambda(boxops.tensorPad())])
         #,torchvision.transforms.Lambda(rescale_coords())]) #transforms.Lambda(tensor_pad() also a possibility, but is probably unecc.
     
     ImTrans = torchvision.transforms.Compose([torchvision.transforms.Resize((224,224),torchvision.transforms.InterpolationMode.BILINEAR),
                                               torchvision.transforms.ToTensor()]) #should be normalized and converted to 0,1. ToTensor always does this for PIL images
     
-    fullDataset = PASCALdataset(dataFrame, root_dir, classesOC,sTransform=SignalTrans,imTransform = ImTrans) #init dataset as torch.Dataset.
+    CoordTrans = torchvision.transforms.Compose([torchvision.transforms.Lambda(boxops.rescale_coords()),torchvision.transforms.Lambda(boxops.get_center())])
+    
+
+    fullDataset = PASCALdataset(dataFrame, root_dir, classesOC,sTransform=SignalTrans,imTransform = ImTrans,coordTransform = CoordTrans) #init dataset as torch.Dataset.
     
     trainLi,testLi,nsamples = get_split(split_root_dir,classesOC) #get Dimitrios' list of train/test-split.
     trainIDX = [fullDataset.filenames.index(i) for i in trainLi] #get indices of corresponding entries in data-structure
@@ -554,12 +473,14 @@ def get_deep_seq(sample,get_feature_map=False):
         holder_t[i,:,2:] = holder_slice
     #print("Shape after loop",holder_t.shape)    
     #concat CLS and normalized x,y
-    #normalize x and y to be between 0 and 1 
-    norm_sig = F.normalize(signal,p=2,dim=1) #each feature column is normalized per entry to fit in unit-interval. 
-    holder_t[:,:,0] = norm_sig[:,:,0] #fill in x-coords
-    holder_t[:,:,1] = norm_sig[:,:,1] #fill in y-coords aswell. Resultant format: channel 0: y, channel 1: x,[batch,y,x] 
-    #print("Shape after app. xy",holder_t.shape)
-    
+    #normalize x and y to be between 0 and 1. Worked fine with raw signal - but now we use signal normalized relative to image-size instead (still between 0,1 but relative to image)
+        #norm_sig = F.normalize(signal,p=2,dim=1) #each feature column is normalized per entry to fit in unit-interval. 
+        #holder_t[:,:,0] = norm_sig[:,:,0] #fill in x-coords
+        #holder_t[:,:,1] = norm_sig[:,:,1] #fill in y-coords aswell. Resultant format: channel 0: y, channel 1: x,[batch,y,x] 
+        #print("Shape after app. xy",holder_t.shape)
+    holder_t[:,:,0] = sample["scaled_signal"][:,:,0]
+    holder_t[:,:,1] = sample["scaled_signal"][:,:,1]
+        
     if(get_feature_map==True):
         return holder_t,featuremap_holder_l
     else:
@@ -641,16 +562,20 @@ def train_one_epoch(model,loss,trainloader,negative_print=False) -> float:
     for i, data in enumerate(trainloader):
         counter += 1
         model_opt.optimizer.zero_grad() #reset grads
-        target = data["target"].to(device)
         mask = data["mask"].to(device)
-        signal = data["signal"].to(device)
+        #signal = data["signal"].to(device)
         dSignal = get_deep_seq(data).to(device)
         #print("Mask:\n",data["mask"])
         #print("Input: \n",data["signal"])
         #print("Goal is: \n",data["target"])
         outputs = model(dSignal,mask)
-        
+        outputs = boxops.center_to_box(outputs)
         #PASCAL CRITERIUM
+        #get boxes in correct format (corners instead of cx,cy,w,h)
+        target = data["scaled_target"].to(device)
+        #target = boxops.center_to_box(target)
+
+        
         noTrue,noFalse,IOU_li = vm.pascalACC(outputs,target)
         tIOUli_holder = tIOUli_holder + IOU_li
         correct_count += noTrue
@@ -701,12 +626,15 @@ def train_one_epoch_w_val(model,loss,trainloader,valloader,negative_print=False,
     with torch.no_grad():
         for i, data in enumerate(valloader):
             counter += 1 
-            target = data["target"].to(device)
+            target = data["scaled_target"].to(device)
             mask = data["mask"].to(device)
-            signal = data["signal"].to(device)
+            #signal = data["signal"].to(device)
             dSignal = get_deep_seq(data).to(device)
-            outputs = model(dSignal,mask)
+            outputs = model(dSignal,mask).to(device)
             #sOutputs, sTargets = scaleBackCoords(outputs, target, imsz)
+            outputs = boxops.center_to_box(outputs).to(device)
+            #print("VAL Target: \n",target)
+            #print("VAL Output: \n",outputs)
             noTrue,noFalse,IOUli_v = vm.pascalACC(outputs,target)
             
             vIOUli_holder = vIOUli_holder+IOUli_v 
@@ -728,18 +656,14 @@ def train_one_epoch_w_val(model,loss,trainloader,valloader,negative_print=False,
     for i, data in enumerate(trainloader):
         counter += 1
         model_opt.optimizer.zero_grad() #reset grads
-        target = data["target"].to(device)
+        target = data["scaled_target"].to(device)
         mask = data["mask"].to(device)
         dSignal = get_deep_seq(data).to(device)
-        
-        #print("Mask:\n",data["mask"])
-        #print("Input: \n",data["signal"])
-        #print("Goal is: \n",data["target"])
         outputs = model(dSignal,mask)
-        
-        
+        outputs = boxops.center_to_box(outputs).to(device)
+        #print("Train target: \n",target)
+        #print("TRAIN output: \n",outputs)
         #PASCAL CRITERIUM
-        #sOutputs, sTargets = scaleBackCoords(outputs, target, imsz) #with rescaling. Proved to be uneccesarry
         noTrue,noFalse,IOUli_t = vm.pascalACC(outputs,target)
         #print("\nScaled pascalACC returns:\n",pascalACC(sOutputs,sTargets))
         #print("\nOriginal pascalACC returns:\n",pascalACC(outputs,target))
@@ -942,8 +866,8 @@ def get_mean_model(trainloader):
     """
     mean_vals = torch.zeros(1,4)
     for i, data in enumerate(trainloader): #get batch of training data
-        for j in range(data["target"].shape[0]): #loop over batch-dimension
-            mean_vals += data["target"][j]
+        for j in range(data["scaled_target"].shape[0]): #loop over batch-dimension
+            mean_vals += data["scaled_target"][j]
     mean_vals /= len(trainloader.dataset)
     return mean_vals
 
@@ -960,8 +884,8 @@ def get_median_model(trainloader): #NEED TO FIX FOR BATCHES
     holder_t = torch.zeros(len(trainloader.dataset),4)
     idx_space = 0
     for i, data in enumerate(trainloader):
-        for j in range(data["target"].shape[0]):
-            holder_t[j+idx_space] = data["target"][j]
+        for j in range(data["scaled_target"].shape[0]):
+            holder_t[j+idx_space] = data["scaled_target"][j]
         idx_space += j+1 #to ensure support for random and non-equal batch-sizes
     median_t,_ = torch.median(holder_t,dim=0,keepdim=True)
     #if want debug: return t_holder
@@ -1012,13 +936,14 @@ train_save_struct = []
 
 with torch.no_grad():
     for i, data in enumerate(trainloader):
-        signal = data["signal"].to(device)
+        #signal = data["signal"].to(device)
         dSignal = get_deep_seq(data).to(device)
-        target = data["target"].to(device)
+        target = data["scaled_target"].to(device)
         mask = data["mask"].to(device)
         size = data["size"]
         name = data["file"]
         output = model(dSignal,mask)
+        output = boxops.center_to_box(output).to(device) #STILL RELATIVE (percentage)
         batchloss = loss_fn(target,output) #L1 LOSS. Mode: "mean"
        # batchloss = ops.generalized_box_iou_loss(output.to(dtype=torch.float32),target.to(dtype=torch.float32))
         
@@ -1032,7 +957,7 @@ with torch.no_grad():
                 train_save_struct.append([name,str(1),IOU[i],target,output,size]) #filename, pred-status: correct(1):false(0), IOU-value, ground-truth, prediction-value 
             else:
                 train_save_struct.append([name,str(0),IOU[i],target,output,size])
-        print("Filename: {}\n Target: {}\n Prediction: {}\n Loss: {}\n IOU: {}".format(data["file"],data["target"],output,batchloss,IOU))
+        print("Filename: {}\n Target: {}\n Prediction: {}\n Loss: {}\n IOU: {}".format(data["file"],data["scaled_target"],output,batchloss,IOU))
         trainsettestLosses.append(batchloss)
         
         #fix meanModel to have as many entrys as target-tensor: 
@@ -1076,18 +1001,20 @@ testlosses = []
 correct_false_list = []
 IOU_te_li = []
 
-""" #freezes from here-on for some reason
+ #freezes from here-on for some reason
 model.eval()
 with torch.no_grad():
     running_loss = 0 
     for i, data in enumerate(testloader):
-        signal = data["signal"].to(device)
+        #signal = data["signal"].to(device)
         dSignal = get_deep_seq(data).to(device)
-        target = data["target"].to(device)
+        #target = data["target"].to(device)
+        target = data["scaled_target"].to(device)
         mask = data["mask"].to(device)
         name = data["file"]
         size = data["size"]
         output = model(dSignal,mask)
+        output = boxops.center_to_box(output).to(device)
         batchloss = loss_fn(target,output) #L1 Loss
         #batchloss = ops.generalized_box_iou_loss(output.to(dtype=torch.float32),target.to(dtype=torch.float32))
         running_loss += batchloss.item()
@@ -1108,6 +1035,11 @@ with torch.no_grad():
         n_in_batch = target.shape[0]
         meanModel_tmp = meanModel.repeat(n_in_batch,1).to(device) #make n_in_batch copies along batch-dimension
         medianModel_tmp = medianModel.repeat(n_in_batch,1).to(device)
+
+        #scale according to image-size - not necessary
+        #meanModel_tmp = boxops.scale_coords_to_image(meanModel_tmp,size)
+        #medianModel_tmp = boxops.scale_coords_to_image(medianModel_tmp,size)
+
         accScores = vm.pascalACC(meanModel_tmp,target)
         
         no_test_mean_correct += accScores[0]
@@ -1139,7 +1071,6 @@ else:
     torch.save(correct_false_list,paramsString+"eval/"+classString+"_"+"test_on_test_results.pth")
     print("\n   Results saved to file: ",paramsString+"eval/"+classString+"/"+classString+"_"+"test_on_test_results.pth")
 
-"""
 
 
 
@@ -1151,95 +1082,95 @@ else:
 
 
 
-"""
+
+
 ###-----------------------------------Plots from here------------------------------------------------
 
-full_embedded_im = output_no_cls.view(1,14,14,768)
-#SINGLE CHANNEL PLOT
-CH_NO = 0
-channel_N = full_embedded_im.squeeze(0)[:,:,CH_NO].detach().cpu().numpy()
-print(channel_N.shape)
-channel_N_T = channel_N.T
+# full_embedded_im = output_no_cls.view(1,14,14,768)
+# #SINGLE CHANNEL PLOT
+# CH_NO = 0
+# channel_N = full_embedded_im.squeeze(0)[:,:,CH_NO].detach().cpu().numpy()
+# print(channel_N.shape)
+# channel_N_T = channel_N.T
 
-size = (int(data["size"][0,1].item()),int(data["size"][0,0].item())) #sizes are saved as height,width - you need X,Y
-channel_N_im = Image.fromarray(channel_N_T)
-interp_im = np.array(channel_N_im.resize(size,Image.BILINEAR))
+# size = (int(data["size"][0,1].item()),int(data["size"][0,0].item())) #sizes are saved as height,width - you need X,Y
+# channel_N_im = Image.fromarray(channel_N_T)
+# interp_im = np.array(channel_N_im.resize(size,Image.BILINEAR))
 
-fig,(ax1,ax2) = plt.subplots(1,2)
-ax1.imshow(interp_im)
-fig.suptitle("Usampled deep-feature extraction for channel {}".format(CH_NO))
-ax2.imshow(sampled_back_image)
+# fig,(ax1,ax2) = plt.subplots(1,2)
+# ax1.imshow(interp_im)
+# fig.suptitle("Usampled deep-feature extraction for channel {}".format(CH_NO))
+# ax2.imshow(sampled_back_image)
 
-def get_first_n_features_plot(df_rep,im_rescaled,NO_CHANNELS):
-    size = im_rescaled.size
-    df_rep_s = df_rep.squeeze(0)
-    fig,axes = plt.subplots(int(math.sqrt(NO_CHANNELS)),int(math.sqrt(NO_CHANNELS)))
-    axes = axes.flatten()
-    #norm = mpl.colors.Normalize(vmin=-1, vmax=1)
-    channel_data = df_rep_s.detach().cpu().numpy()
-    print(channel_data.shape)
-    for i, a in enumerate(axes):
-        print("processing channel {}".format(i))
-        ch_tmp = channel_data[:,:,i]
-        print(ch_tmp.shape)
-        channel_N_im = Image.fromarray(ch_tmp)
-        interp_im_tmp = np.array(channel_N_im.resize(size,Image.BILINEAR))
-        print(interp_im_tmp.size)
-        a.set_xticks([]) #remove ticks
-        a.set_yticks([]) #remove ticks
-        a.imshow(interp_im_tmp)#norm=norm)
-    fig.suptitle("Unsampled deep-feature-extraction for first {} channels".format(NO_CHANNELS))
-    plt.show()
-    return None
+# def get_first_n_features_plot(df_rep,im_rescaled,NO_CHANNELS):
+#     size = im_rescaled.size
+#     df_rep_s = df_rep.squeeze(0)
+#     fig,axes = plt.subplots(int(math.sqrt(NO_CHANNELS)),int(math.sqrt(NO_CHANNELS)))
+#     axes = axes.flatten()
+#     #norm = mpl.colors.Normalize(vmin=-1, vmax=1)
+#     channel_data = df_rep_s.detach().cpu().numpy()
+#     print(channel_data.shape)
+#     for i, a in enumerate(axes):
+#         print("processing channel {}".format(i))
+#         ch_tmp = channel_data[:,:,i]
+#         print(ch_tmp.shape)
+#         channel_N_im = Image.fromarray(ch_tmp)
+#         interp_im_tmp = np.array(channel_N_im.resize(size,Image.BILINEAR))
+#         print(interp_im_tmp.size)
+#         a.set_xticks([]) #remove ticks
+#         a.set_yticks([]) #remove ticks
+#         a.imshow(interp_im_tmp)#norm=norm)
+#     fig.suptitle("Unsampled deep-feature-extraction for first {} channels".format(NO_CHANNELS))
+#     plt.show()
+#     return None
         
     
     
-get_first_n_features_plot(full_embedded_im,sampled_back_image,9)
+# get_first_n_features_plot(full_embedded_im,sampled_back_image,9)
 
-def get_first_n_features_plot_dual_pane(df_rep,im_rescaled,NO_CHANNELS):
-    size = im_rescaled.size
-    df_rep_s = df_rep.squeeze(0)
-    channel_data = df_rep_s.detach().cpu().numpy()
-    fig = plt.figure(figsize=(14,5.9),constrained_layout=True)
-    subfigs = fig.subfigures(1,2,width_ratios=[1.5, 1.7])
-    ax_L = subfigs[0].subplots(int(math.sqrt(NO_CHANNELS)),int(math.sqrt(NO_CHANNELS)),sharey=True,sharex=True)
-    ax_L = ax_L.flatten()
-    for i, a in enumerate(ax_L):
-        ch_tmp = channel_data[:,:,i]
-        channel_N_im = Image.fromarray(ch_tmp)
-        interp_im_tmp = np.array(channel_N_im.resize(size,Image.BILINEAR))
-        a.set_xticks([]) #remove ticks
-        a.set_yticks([]) #remove ticks
-        a.set_title("{}".format(i),fontweight="bold", size=18,y=0.98)
-        a.imshow(interp_im_tmp)#,cmap='plasma')#norm=norm)
-    ax_R = subfigs[1].subplots(1,1)
-    ax_R.imshow(im_rescaled)
-    ax_R.set_xticks([])
-    ax_R.set_yticks([])
+# def get_first_n_features_plot_dual_pane(df_rep,im_rescaled,NO_CHANNELS):
+#     size = im_rescaled.size
+#     df_rep_s = df_rep.squeeze(0)
+#     channel_data = df_rep_s.detach().cpu().numpy()
+#     fig = plt.figure(figsize=(14,5.9),constrained_layout=True)
+#     subfigs = fig.subfigures(1,2,width_ratios=[1.5, 1.7])
+#     ax_L = subfigs[0].subplots(int(math.sqrt(NO_CHANNELS)),int(math.sqrt(NO_CHANNELS)),sharey=True,sharex=True)
+#     ax_L = ax_L.flatten()
+#     for i, a in enumerate(ax_L):
+#         ch_tmp = channel_data[:,:,i]
+#         channel_N_im = Image.fromarray(ch_tmp)
+#         interp_im_tmp = np.array(channel_N_im.resize(size,Image.BILINEAR))
+#         a.set_xticks([]) #remove ticks
+#         a.set_yticks([]) #remove ticks
+#         a.set_title("{}".format(i),fontweight="bold", size=18,y=0.98)
+#         a.imshow(interp_im_tmp)#,cmap='plasma')#norm=norm)
+#     ax_R = subfigs[1].subplots(1,1)
+#     ax_R.imshow(im_rescaled)
+#     ax_R.set_xticks([])
+#     ax_R.set_yticks([])
     
-    #fig.suptitle("Unsampled deep-feature-extraction for first {} channels".format(NO_CHANNELS))
+#     #fig.suptitle("Unsampled deep-feature-extraction for first {} channels".format(NO_CHANNELS))
     
-    plt.show()
-    #plt.savefig("deep_feature_representation2.pdf")
-    return None
+#     plt.show()
+#     #plt.savefig("deep_feature_representation2.pdf")
+#     return None
 
-def plot_mean_latent_space(df_rep,im_rescaled):
-    out = torch.mean(df_rep.squeeze(0),-1)
-    im = Image.fromarray(out.detach().cpu().numpy())
-    #fig = plt.figure(figsize=(14,8))
-    org_size = (500,375)
-    fig, (ax1,ax2) = plt.subplots(1,2,constrained_layout=True,figsize=(14,8))
-    interp_im = np.array(im.resize(org_size,Image.BILINEAR))
-    ax1.imshow(interp_im)
-    ax1.axis('off')
-    ax2.imshow(im_rescaled)
-    ax2.axis('off')
-    #plt.savefig("mean_feature_map.pdf")
+# def plot_mean_latent_space(df_rep,im_rescaled):
+#     out = torch.mean(df_rep.squeeze(0),-1)
+#     im = Image.fromarray(out.detach().cpu().numpy())
+#     #fig = plt.figure(figsize=(14,8))
+#     org_size = (500,375)
+#     fig, (ax1,ax2) = plt.subplots(1,2,constrained_layout=True,figsize=(14,8))
+#     interp_im = np.array(im.resize(org_size,Image.BILINEAR))
+#     ax1.imshow(interp_im)
+#     ax1.axis('off')
+#     ax2.imshow(im_rescaled)
+#     ax2.axis('off')
+#     #plt.savefig("mean_feature_map.pdf")
     
-    return None
+#     return None
     
 
-get_first_n_features_plot_dual_pane(full_embedded_im,sampled_back_image,9)
-plot_mean_latent_space(full_embedded_im,sampled_back_image)
+# get_first_n_features_plot_dual_pane(full_embedded_im,sampled_back_image,9)
+# plot_mean_latent_space(full_embedded_im,sampled_back_image)
 
-"""
