@@ -1,0 +1,3 @@
+FOUND DEVICE:  cuda:0
+Total length is:  6270
+Overwrote trainloader with overfit-set of length 441

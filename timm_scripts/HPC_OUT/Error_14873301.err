@@ -1,0 +1,13 @@
+Loaded dependency [python3/3.10.2]: gcc/10.3.0-binutils-2.36.1
+Loaded module: python3/3.10.2
+
+Loading python3/3.10.2
+  Loading requirement: gcc/10.3.0-binutils-2.36.1
+Traceback (most recent call last):
+  File "/zhome/ba/f/147212/BA/eyeFormer_ViT_t/timm_scripts/timm_pipe_cmd.py", line 386, in <module>
+    valloader = DataLoader(valSet,batch_size=BATCH_SZ,shuffle=True,num_workers=0,generator=g)
+  File "/zhome/ba/f/147212/bachelroenv/lib/python3.10/site-packages/torch/utils/data/dataloader.py", line 344, in __init__
+    sampler = RandomSampler(dataset, generator=generator)  # type: ignore[arg-type]
+  File "/zhome/ba/f/147212/bachelroenv/lib/python3.10/site-packages/torch/utils/data/sampler.py", line 107, in __init__
+    raise ValueError("num_samples should be a positive integer "
+ValueError: num_samples should be a positive integer value, but got num_samples=0

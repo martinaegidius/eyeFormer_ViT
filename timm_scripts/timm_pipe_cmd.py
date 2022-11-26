@@ -288,7 +288,7 @@ elif(len(classesOC)==10):
 else: 
     classString = classes[classesOC[0]]
 
-BATCH_SZ = 2
+BATCH_SZ = 8
 # #RUN_FROM_COMMANDLINE. Class at top of programme.
 NUM_IN_OVERFIT = int(sys.argv[2]) #NUM-IN-OVERFIT EQUALS LEN(TRAIN) IF OVERFIT == False
 NLAYERS = int(sys.argv[3])
