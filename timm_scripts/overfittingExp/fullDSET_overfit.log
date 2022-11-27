@@ -1,3 +1,21 @@
 FOUND DEVICE:  cuda:0
 Total length is:  6270
 Overwrote trainloader with overfit-set of length 441
+FOUND DEVICE:  cuda:0
+Total length is:  6270
+-----------------------------------------------------------------------------
+Model parameters:
+ tL: 441 
+ 
+lrf: 1
+NEPOCHS: 1000
+ num_warmup: 20646
+ Dropout: 0.0
+ Beta: 1
+ NHEADS: 1
+ NLAYERS: 1
+ BATCH-SIZE: 8
+Manual early stopping triggered
+Saved loss results to:  /zhome/ba/f/147212/BA/eyeFormer_ViT_t/timm_scripts/all_classes/L_441_nL_1_nH_1/all_classes_result_losses.pth
+Saved accuracy results to:  /zhome/ba/f/147212/BA/eyeFormer_ViT_t/timm_scripts/all_classes/L_441_nL_1_nH_1/all_classes_result_acc.pth
+Wrote epoch IOU's to scratch in : /zhome/ba/f/147212/BA/eyeFormer_ViT_t/timm_scripts/all_classes/L_441_nL_1_nH_1/result/

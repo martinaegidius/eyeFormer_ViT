@@ -1,0 +1,38 @@
+/bin/bash: ./bsub_small_models.sh: Permission denied
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@hpc.dtu.dk>
+Subject: Job 14895005: <NONAME> in cluster <dcc> Exited
+
+Job <NONAME> was submitted from host <n-62-20-1> by user <s194119> in cluster <dcc> at Sun Nov 27 12:49:25 2022
+Job was executed on host(s) <n-62-31-3>, in queue <hpc>, as user <s194119> in cluster <dcc> at Sun Nov 27 12:49:26 2022
+</zhome/ba/f/147212> was used as the home directory.
+</zhome/ba/f/147212/BA/eyeFormer_ViT_t/timm_scripts> was used as the working directory.
+Started at Sun Nov 27 12:49:26 2022
+Terminated at Sun Nov 27 12:49:27 2022
+Results reported at Sun Nov 27 12:49:27 2022
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+bsub_small_models.sh
+------------------------------------------------------------
+
+Exited with exit code 126.
+
+Resource usage summary:
+
+    CPU time :                                   0.33 sec.
+    Max Memory :                                 -
+    Average Memory :                             -
+    Total Requested Memory :                     1024.00 MB
+    Delta Memory :                               -
+    Max Swap :                                   -
+    Max Processes :                              -
+    Max Threads :                                -
+    Run time :                                   18 sec.
+    Turnaround time :                            2 sec.
+
+The output (if any) is above this job summary.
+

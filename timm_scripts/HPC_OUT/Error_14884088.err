@@ -1,0 +1,7 @@
+Loaded dependency [python3/3.10.2]: gcc/10.3.0-binutils-2.36.1
+Loaded module: python3/3.10.2
+
+Loading python3/3.10.2
+  Loading requirement: gcc/10.3.0-binutils-2.36.1
+  0%|          | 0/1000 [00:00<?, ?it/s]  0%|          | 0/1000 [02:14<?, ?it/s,  | avg train loss 0.03 | train acc: 0.00 | Epoch train IOU 0.00 |]  0%|          | 1/1000 [02:14<37:22:10, 134.67s/it,  | avg train loss 0.03 | train acc: 0.00 | Epoch train IOU 0.00 |]  0%|          | 1/1000 [04:17<37:22:10, 134.67s/it,  | avg train loss 0.02 | train acc: 0.00 | Epoch train IOU 0.00 |]  0%|          | 2/1000 [04:17<35:22:22, 127.60s/it,  | avg train loss 0.02 | train acc: 0.00 | Epoch train IOU 0.00 |]  0%|          | 2/1000 [05:09<42:55:57, 154.87s/it,  | avg train loss 0.02 | train acc: 0.00 | Epoch train IOU 0.00 |]
+Terminated

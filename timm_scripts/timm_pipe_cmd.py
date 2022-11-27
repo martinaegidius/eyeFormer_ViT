@@ -448,7 +448,7 @@ def get_deep_seq(sample,get_feature_map=False):
     featuremap_holder_l: a list
     """
     signal = sample["signal"].to(device)
-    if signal.ndim==2: #fix single batches which come without batch. Should not be an issue using trainloader
+    if signal.ndim==2: #fix single batches which come without batch. Should not be an issue using trainloader, only when debugging
         signal = signal.unsqueeze(0)
         
     BSZ = signal.shape[0]
@@ -462,22 +462,30 @@ def get_deep_seq(sample,get_feature_map=False):
     featuremap_holder_l = []
     for i in range(BSZ):
         sizes = (int(size[i][1].item()),int(size[i][0].item())) #x,y. Remember data["batch"] is h,w
-        featuremap_intpl = F.interpolate(featuremap_perm[i].unsqueeze(0),sizes,mode='bilinear') #interpolate tensor. Sadly cant be done outside of loop, as sizes to interpolate to have to be constant (cant be tensor)
-        featuremap_intpl = featuremap_intpl.permute(0,2,3,1) #get back to format [batch_sz,x,y,embed_dim]
-        featuremap_holder_l.append(featuremap_intpl)
-        #now get indices by slicing 
-        x = signal[i,:,0].to(dtype=torch.long)
-        y = signal[i,:,1].to(dtype=torch.long)
-        holder_slice = featuremap_intpl[(slice(None),x,y,slice(None))] #returns sliced featuremap. Format: [1,(seq_len),768]
-     #   print(holder_t.shape)
-        holder_t[i,:,2:] = holder_slice
-    #print("Shape after loop",holder_t.shape)    
-    #concat CLS and normalized x,y
-    #normalize x and y to be between 0 and 1. Worked fine with raw signal - but now we use signal normalized relative to image-size instead (still between 0,1 but relative to image)
-        #norm_sig = F.normalize(signal,p=2,dim=1) #each feature column is normalized per entry to fit in unit-interval. 
-        #holder_t[:,:,0] = norm_sig[:,:,0] #fill in x-coords
-        #holder_t[:,:,1] = norm_sig[:,:,1] #fill in y-coords aswell. Resultant format: channel 0: y, channel 1: x,[batch,y,x] 
-        #print("Shape after app. xy",holder_t.shape)
+        if sizes != (0,0):    #interpolate function fails for uninitialized lenghts 
+            featuremap_intpl = F.interpolate(featuremap_perm[i].unsqueeze(0),sizes,mode='bilinear') #interpolate tensor. Sadly cant be done outside of loop, as sizes to interpolate to have to be constant (cant be tensor)
+            featuremap_intpl = featuremap_intpl.permute(0,2,3,1) #get back to format [batch_sz,x,y,embed_dim]
+            featuremap_holder_l.append(featuremap_intpl)
+            #now get indices by slicing 
+            x = signal[i,:,0].to(dtype=torch.long)
+            y = signal[i,:,1].to(dtype=torch.long)
+            xslice = x-1
+            yslice = y-1
+            holder_slice = featuremap_intpl[(slice(None),xslice,yslice,slice(None))] #returns sliced featuremap. Format: [1,(seq_len),768]
+        #   print(holder_t.shape)
+            holder_t[i,:,2:] = holder_slice
+        #print("Shape after loop",holder_t.shape)    
+        #concat CLS and normalized x,y
+        #normalize x and y to be between 0 and 1. Worked fine with raw signal - but now we use signal normalized relative to image-size instead (still between 0,1 but relative to image)
+            #norm_sig = F.normalize(signal,p=2,dim=1) #each feature column is normalized per entry to fit in unit-interval. 
+            #holder_t[:,:,0] = norm_sig[:,:,0] #fill in x-coords
+            #holder_t[:,:,1] = norm_sig[:,:,1] #fill in y-coords aswell. Resultant format: channel 0: y, channel 1: x,[batch,y,x] 
+            #print("Shape after app. xy",holder_t.shape)
+        else: 
+            print("Discovered empty shape-array for sample {} i in batch!. Filename: {}".format(i,sample["file"]))
+            featuremap_holder_l.append(None)
+
+
     holder_t[:,:,0] = sample["scaled_signal"][:,:,0]
     holder_t[:,:,1] = sample["scaled_signal"][:,:,1]
         
@@ -568,8 +576,8 @@ def train_one_epoch(model,loss,trainloader,negative_print=False) -> float:
         #print("Mask:\n",data["mask"])
         #print("Input: \n",data["signal"])
         #print("Goal is: \n",data["target"])
-        outputs = model(dSignal,mask)
-        outputs = boxops.center_to_box(outputs)
+        outputs = model(dSignal,mask).to(device)
+        outputs = boxops.center_to_box(outputs).to(device)
         #PASCAL CRITERIUM
         #get boxes in correct format (corners instead of cx,cy,w,h)
         target = data["scaled_target"].to(device)
@@ -714,11 +722,12 @@ def train_one_epoch_w_val(model,loss,trainloader,valloader,negative_print=False,
     return epochLoss,correct_count,false_count,target,data["signal"],mask,epochAcc,model,epochValLoss,epochValAcc, IOU_mt, IOU_mv
 
 print("-----------------------------------------------------------------------------")
+NPARAMS = vm.get_n_params(model)
 if(OVERFIT):
-    print("Model parameters:\n tL: {}\n vL: {}\nlrf: {}\nNEPOCHS: {}\n num_warmup: {}\n Dropout: {}\n Beta: {}\n NHEADS: {}\n NLAYERS: {} \n BATCH-SIZE: {}".format(NUM_IN_OVERFIT,len(valIDX),LR_FACTOR,EPOCHS,NUM_WARMUP,DROPOUT,BETA,NHEADS,NLAYERS,BATCH_SZ))
+    print("Model parameters:\n tL: {}\n vL: {}\nlrf: {}\nNEPOCHS: {}\n num_warmup: {}\n Dropout: {}\n Beta: {}\n NHEADS: {}\n NLAYERS: {} \n BATCH-SIZE: {} \n PARAMS: {}".format(NUM_IN_OVERFIT,len(valIDX),LR_FACTOR,EPOCHS,NUM_WARMUP,DROPOUT,BETA,NHEADS,NLAYERS,BATCH_SZ,NPARAMS))
     print("ACTUAL TRAINLOADER LENS",len(trainloader),len(trainloader.dataset))
 else:
-    print("Model parameters:\n tL: {}\n \nlrf: {}\nNEPOCHS: {}\n num_warmup: {}\n Dropout: {}\n Beta: {}\n NHEADS: {}\n NLAYERS: {}\n BATCH-SIZE: {}".format(NUM_IN_OVERFIT,LR_FACTOR,EPOCHS,NUM_WARMUP,DROPOUT,BETA,NHEADS,NLAYERS,BATCH_SZ))
+    print("Model parameters:\n tL: {} \n \nlrf: {}\nNEPOCHS: {}\n num_warmup: {}\n Dropout: {}\n Beta: {}\n NHEADS: {}\n NLAYERS: {}\n BATCH-SIZE: {}, PARAMS: {}".format(len(trainloader.dataset),LR_FACTOR,EPOCHS,NUM_WARMUP,DROPOUT,BETA,NHEADS,NLAYERS,BATCH_SZ,NPARAMS))
     
 #def train_number_of_epochs(EPOCHS,model,loss,trainloader,oTrainLoader,overfit=False,negative_print=False):
 epoch_number = 0
@@ -997,7 +1006,7 @@ with torch.no_grad():
 
         
     
-
+print("Evaluating overfit on ALL {} test instances".format(len(testloader.dataset)))
 #2. TEST-LOOP ON TEST-SET
 no_test_correct = 0 
 no_test_false = 0

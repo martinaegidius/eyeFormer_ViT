@@ -5,10 +5,10 @@ import math
 #exp for checking overfitting on full set
 
 
-L = [350] #[300] #[30,60,120,200]#[2,4,8,16,32]
-EPOCHS = 500
+L = [375] #[300] #[30,60,120,200]#[2,4,8,16,32]
+EPOCHS = 350
 
-num_layers = [1,3,5,6,9]
+num_layers = [3,5]
 num_heads = 1
 EVAL = 0
 
