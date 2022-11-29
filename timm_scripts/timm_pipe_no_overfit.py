@@ -920,9 +920,9 @@ def get_median_model(trainloader): #NEED TO FIX FOR BATCHES
 
 #---------------------TEST AND EVAL -------------#
 if OVERFIT:
-    paramsString = timm_root +"/"+ classString + "/L_" +str(NUM_IN_OVERFIT) +"_nL_" + str(NLAYERS) +"_nH_" + str(NHEADS)+"/" #for saving to correct dirs
+    paramsString = timm_root +"/"+ classString + "/L_" + str(NUM_IN_OVERFIT) + "_nL_" + str(NLAYERS) +"_nH_" + str(NHEADS)+"/" #for saving to correct dirs
 else:
-    paramsString = timm_root +"/"+ classString + "/nL_" + str(NLAYERS) +"_nH_" + str(NHEADS)+"/" #for saving to correct dirs
+    paramsString = timm_root +"/"+ classString + "/L_" + str(NUM_IN_OVERFIT) + "_nL_" + str(NLAYERS) +"_nH_" + str(NHEADS)+"/" #for saving to correct dirs
 
 #1. TEST-LOOP ON TRAIN-SET
 trainsettestLosses = []
@@ -990,7 +990,7 @@ with torch.no_grad():
         no_med_correct += accScores[0]
         no_med_false += accScores[1]
         
-    print("---------------------------EVAL on ALL {} overfit-train-images---------------------------".format(len(trainloader.dataset)))    
+    print("---------------------------EVAL on ALL {} USED train-images---------------------------".format(len(trainloader.dataset)))    
     print("\nTransformer accuracy with PASCAL-criterium on overfit set: {}/{}, percentage: {}".format(no_overfit_correct,no_overfit_false+no_overfit_correct,no_overfit_correct/(no_overfit_false+no_overfit_correct)))    
     print("\nMean model accuracy with PASCAL-criterium on overfit set: {}/{}, percentage: {}".format(no_mean_correct,no_mean_false+no_mean_correct,no_mean_correct/(no_mean_false+no_mean_correct)))
     print("\nMedian model accuracy with PASCAL-criterium on overfit set: {}/{}, percentage: {}".format(no_med_correct,no_med_false+no_med_correct,no_med_correct/(no_med_false+no_med_correct)))
@@ -1001,8 +1001,16 @@ with torch.no_grad():
         torch.save(train_save_struct,paramsString+classString+"_"+"test_on_train_results.pth")
         print("\n   Results saved to file: ",paramsString+classString+"/"+classString+"_"+"test_on_train_results.pth")
     else: 
-        torch.save(train_save_struct,paramsString+"eval/"+classString+"_"+"test_on_train_results.pth")
-        print("\n   Results saved to file: ",paramsString+"eval/"+classString+"/"+classString+"_"+"test_on_train_results.pth")
+        spath = paramsString#+"eval/"
+        if not os.path.exists(spath):
+            os.mkdir(spath)
+            print("Made dir in: ",spath)
+        spath += "eval/"
+        if not os.path.exists(spath):
+            os.mkdir(spath)
+            print("Made dir in: ",spath)
+        torch.save(train_save_struct,spath+classString+"_"+"test_on_train_results.pth")
+        print("\n   Results saved to file: ",spath+classString+"/"+classString+"_"+"test_on_train_results.pth")
 
         
     
@@ -1022,7 +1030,7 @@ IOU_te_li = []
 model.eval()
 with torch.no_grad():
     running_loss = 0 
-    for i, data in enumerate(testloader):
+    for i, data in enumerate(tqdm(testloader)):
         #signal = data["signal"].to(device)
         dSignal = get_deep_seq(data).to(device)
         #target = data["target"].to(device)
@@ -1085,8 +1093,17 @@ if(EVAL==0):
     torch.save(correct_false_list,paramsString+classString+"_"+"test_on_test_results.pth")
     print("\n   Results saved to file: ",paramsString+classString+"/"+classString+"_"+"test_on_test_results.pth")
 else:    
-    torch.save(correct_false_list,paramsString+"eval/"+classString+"_"+"test_on_test_results.pth")
-    print("\n   Results saved to file: ",paramsString+"eval/"+classString+"/"+classString+"_"+"test_on_test_results.pth")
+    if not os.path.exists(spath):
+        os.mkdir(spath)
+        print("Made dir in: ",spath)
+    spath += "eval/"
+    if not os.path.exists(spath):
+        os.mkdir(spath)
+        print("Made dir in: ",spath)
+    torch.save(train_save_struct,spath+classString+"_"+"test_on_train_results.pth")
+    print("\n   Results saved to file: ",spath+classString+"/"+classString+"_"+"test_on_train_results.pth")
+    torch.save(correct_false_list,spath+classString+"_"+"test_on_test_results.pth")
+    print("\n   Results saved to file: ",spath+classString+"/"+classString+"_"+"test_on_test_results.pth")
 
 
 
