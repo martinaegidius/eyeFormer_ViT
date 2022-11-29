@@ -472,8 +472,8 @@ def get_deep_seq(sample,get_feature_map=False):
             #now get indices by slicing 
             x = signal[i,:,0].to(dtype=torch.long)
             y = signal[i,:,1].to(dtype=torch.long)
-            xslice = x
-            yslice = y
+            xslice = x-1
+            yslice = y-1
             holder_slice = featuremap_intpl[(slice(None),xslice,yslice,slice(None))] #returns sliced featuremap. Format: [1,(seq_len),768]
         #   print(holder_t.shape)
             holder_t[i,:,2:] = holder_slice

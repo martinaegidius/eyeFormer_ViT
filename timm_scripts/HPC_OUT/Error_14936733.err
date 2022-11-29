@@ -1,0 +1,9 @@
+Loaded dependency [python3/3.10.2]: gcc/10.3.0-binutils-2.36.1
+Loaded module: python3/3.10.2
+
+Loading python3/3.10.2
+  Loading requirement: gcc/10.3.0-binutils-2.36.1
+Traceback (most recent call last):
+  File "/zhome/ba/f/147212/BA/eyeFormer_ViT_t/timm_scripts/vit_callscript_larger_layers.py", line 18, in <module>
+    command = "python3 timm_pipe_cmd.py " + str(999) + " "+ str(length) + " " + str(NL) + " " + str(num_heads) + " " + str(epoch) + " " + str(EVAL)
+NameError: name 'length' is not defined
