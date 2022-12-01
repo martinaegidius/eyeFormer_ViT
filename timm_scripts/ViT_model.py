@@ -11,7 +11,7 @@ import torch.nn as nn
 from torchvision import ops
 
 class eyeFormer_ViT(nn.Module):
-        def __init__(self,input_dim=770,hidden_dim=2048,output_dim=4,dropout=0.0,n_layers = 3, num_heads = 1):
+        def __init__(self,input_dim=770,hidden_dim=2048,output_dim=4,dropout=0.0,n_layers = 3, num_heads = 1,num_participants = 1):
             self.d_model = input_dim
             super().__init__() #get class instance
             #self.embedding = nn.Embedding(32,self.d_model) #33 because cls needs embedding
@@ -20,7 +20,7 @@ class eyeFormer_ViT(nn.Module):
             #make encoder - 3 pieces
             self.cls_token = nn.Parameter(torch.zeros(1,self.d_model),requires_grad=True)
             #self.transformer_encoder = nn.TransformerEncoder(encoderLayers,num_layers = 1)
-            
+            self.NUM_PARTICIPANTS = num_participants
             
             #self.decoder = nn.Linear(64,4,bias=True) 
             self.clsdecoder = nn.Linear(self.d_model,4,bias=True)
@@ -45,33 +45,71 @@ class eyeFormer_ViT(nn.Module):
             #print("Registered batchsize: ",bs)
 
             if src_padding_mask==None: 
-                src_padding_mask = torch.zeros(bs,x.shape[1]).to(dtype=torch.bool)
-            
-            clsmask = torch.zeros(bs,1).to(dtype=torch.bool)
+                if(self.NUM_PARTICIPANTS==1):
+                    src_padding_mask = torch.zeros(bs,x.shape[1]).to(dtype=torch.bool)
+                else:
+                    src_padding_mask = torch.zeros(bs,self.NUM_PARTICIPANTS,x.shape[2]).to(dtype=torch.bool)
+                
+            if(self.NUM_PARTICIPANTS==1):
+                clsmask = torch.zeros(bs,1).to(dtype=torch.bool)
+                mask = torch.cat((clsmask,src_padding_mask[:,:].reshape(bs,32)),1) #unmask cls-token
+                x = x* math.sqrt(self.d_model) #as this in torch tutorial but dont know why
+                x = torch.cat((self.cls_token.expand(x.shape[0],1,self.d_model),x),1) #concat along sequence-dimension. Copy bs times
+                if self.DEBUG==True:
+                    print("2: scaled and cat with CLS:\n",x.shape)
+                x = self.pos_encoder(x)
+                if self.DEBUG==True:
+                    print("3: positionally encoded: \n",x.shape)
+                
+                #print("Src_padding mask is: ",src_padding_mask)
+                #print("pos encoding shape: ",x.shape)
+                output = self.encoder(x,mask)
+                if self.DEBUG==True:
+                    print("4: Transformer encoder output:\n",output.shape)
+                #print("encoder output:\n",output)
+                #print("Encoder output shape:\n",output.shape)
+                #print("Same as input :-)")
+               
+                output = self.clsdecoder(output[:,0,:]) #batch-first is true. Picks encoded cls-token-vals for the batch.
+                if self.DEBUG==True:
+                    print("5: linear layer based on CLS-token output: \n",output.shape)
+                
+            else:
+                clsmask = torch.zeros(bs,self.NUM_PARTICIPANTS,1).to(dtype=torch.bool)
+                if(self.DEBUG==True):
+                    print("clsmask shape: ",clsmask.shape)
+                    print("mask shape: ",src_padding_mask.shape)
+                mask = torch.cat((clsmask,src_padding_mask.reshape(bs,self.NUM_PARTICIPANTS,32)),2) #unmask cls-token
+                if(self.DEBUG==True):
+                    print("Mask after cat shape: ",mask.shape)
+                x = x* math.sqrt(self.d_model) #as this in torch tutorial but dont know why
+                x = torch.cat((self.cls_token.expand(x.shape[0],self.NUM_PARTICIPANTS,1,self.d_model),x),2) #concat along sequence-dimension. Copy bs times
+                if self.DEBUG==True:
+                    print("2: scaled and cat with CLS:\n",x.shape)
+                x = self.pos_encoder(x)
+                if self.DEBUG==True:
+                    print("3: positionally encoded: \n",x.shape)
+                
+                output = torch.zeros_like(x)
+                for BATCH in range(x.shape[0]):
+                    for PARTICIPANT in range(x.shape[1]):
+                        output += self.encoder(x[BATCH,PARTICIPANT,:,:],mask[BATCH,PARTICIPANT,:])
+                
+                if self.DEBUG==True:
+                    print("4: Transformer encoder output:\n",output.shape)
+                #print("encoder output:\n",output)
+                #print("Encoder output shape:\n",output.shape)
+                #print("Same as input :-)")
+                outCLS = torch.div(output[:,:,0,:],x.shape[0]) #get mean CLS-token across all participants
+                output = self.clsdecoder(outCLS) #batch-first is true. Picks encoded cls-token-vals for all participants in batch
+                
+                if self.DEBUG==True:
+                    print("5: linear layer based on CLS-token output: \n",output.shape)
+                
+                
             #print("\n Src_padding_mask shape: ",src_padding_mask.shape)
             #print("\n CLS-mask shape: ",clsmask.shape)
-            mask = torch.cat((clsmask,src_padding_mask[:,:].reshape(bs,32)),1) #unmask cls-token
-           
-            x = x* math.sqrt(self.d_model) #as this in torch tutorial but dont know why
-            x = torch.cat((self.cls_token.expand(x.shape[0],1,self.d_model),x),1) #concat along sequence-dimension. Copy bs times
-            if self.DEBUG==True:
-                print("2: scaled and cat with CLS:\n",x.shape)
-            x = self.pos_encoder(x)
-            if self.DEBUG==True:
-                print("3: positionally encoded: \n",x.shape)
             
-            #print("Src_padding mask is: ",src_padding_mask)
-            #print("pos encoding shape: ",x.shape)
-            output = self.encoder(x,mask)
-            if self.DEBUG==True:
-                print("4: Transformer encoder output:\n",output.shape)
-            #print("encoder output:\n",output)
-            #print("Encoder output shape:\n",output.shape)
-            #print("Same as input :-)")
-           
-            output = self.clsdecoder(output[:,0,:]) #batch-first is true. Picks encoded cls-token-vals for the batch.
-            if self.DEBUG==True:
-                print("5: linear layer based on CLS-token output: \n",output.shape)
             
             
             return output
@@ -126,6 +164,7 @@ class TransformerEncoder(nn.Module):
         return x 
     
     
+    
      
 class PositionalEncoding(nn.Module):
     ###Probably change max_len of pos-encoding
@@ -152,7 +191,10 @@ class PositionalEncoding(nn.Module):
         Returns: 
             PosEnc(x): Tensor, shape [batchsize,seq_len,embedding_dim]
         """
-        x = x + self.pe[:,:x.size(1),:] #[bs x seq_len x embedding dim]
+        if(x.ndim==3):
+            x = x + self.pe[:,:x.size(1),:] #[bs x seq_len x embedding dim]
+        elif(x.ndim==4):
+            x = x + self.pe[:,:x.size(2),:] #[bs x num_parts x seq_len x embedding dim]
         return self.dropout(x)
     
     
@@ -242,9 +284,40 @@ def pascalACC(preds,labels): #TODO: does not work for batched input. Fix
     return no_corr,no_false,IOU_li
 
 
+class get_center(object):
+    """
+    Gets center x, y and bbox w, h from a batched target sequence
+    Parameters
+    ----------
+    targets : batched torch tensor
+        contains batched target x0,y0,x1,y1.
+
+    Returns
+    -------
+    xywh : torch tensor
+        bbox cx,cy,w,h
+
+    """
+    def __call__(self,sample):
+        targets = sample["scaled_target"]
+        assert targets!=None, print("FOUND NO SCALED TARGET")
+        xywh = torch.zeros(4,dtype=torch.float32)
+        #w = torch.zeros(targets.shape[0],dtype=torch.int32)
+        #h = torch.zeros(targets.shape[0],dtype=torch.int32)
+        
+        xywh[0]  = torch.div(targets[2]+targets[0],2)
+        xywh[1] = torch.div(targets[-1]+targets[1],2)
+        xywh[2] = targets[2]-targets[0]
+        xywh[3] = targets[-1]-targets[1]
+        sample["target_centered"] = xywh
+        return sample
+
+
 if __name__ == "__main__":
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model = eyeFormer_ViT().to(device)
+    model = eyeFormer_ViT(num_participants=2).to(device)
     model.switch_debug()
-    deep_seq = torch.rand(2,32,770)
-    model(deep_seq)
+    deep_seq = torch.rand(2,2,32,770) #[bs,num_partc,seqlen,d_model]
+    mask = torch.zeros(2,2,32)
+    model(deep_seq,mask)
+    

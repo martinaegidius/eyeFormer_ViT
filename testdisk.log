@@ -1,0 +1,73 @@
+
+
+Thu Nov 17 10:34:49 2022
+Command line: TestDisk
+
+TestDisk 7.1, Data Recovery Utility, July 2019
+Christophe GRENIER <grenier@cgsecurity.org>
+https://www.cgsecurity.org
+OS: Linux, kernel 5.15.76-1-MANJARO (#1 SMP PREEMPT Sat Oct 29 14:22:16 UTC 2022) x86_64
+Compiler: GCC 11.2
+ext2fs lib: 1.46.5, ntfs lib: libntfs-3g, reiserfs lib: none, ewf lib: none, curses lib: ncurses 6.3
+User is not root!
+Hard disk list
+
+
+TestDisk exited normally.
+Using locale 'en_DK.UTF-8'.
+
+
+Thu Nov 17 10:34:51 2022
+Command line: TestDisk /debug
+
+TestDisk 7.1, Data Recovery Utility, July 2019
+Christophe GRENIER <grenier@cgsecurity.org>
+https://www.cgsecurity.org
+OS: Linux, kernel 5.15.76-1-MANJARO (#1 SMP PREEMPT Sat Oct 29 14:22:16 UTC 2022) x86_64
+Compiler: GCC 11.2
+ext2fs lib: 1.46.5, ntfs lib: libntfs-3g, reiserfs lib: none, ewf lib: none, curses lib: ncurses 6.3
+Warning: can't get size for Disk /dev/mapper/control - 0 B - 0 sectors, sector size=512
+Warning: can't get size for Disk /dev/loop12 - 0 B - 0 sectors, sector size=512
+Hard disk list
+Disk /dev/loop0 - 4096 B - 8 sectors (RO), sector size=512
+Disk /dev/loop1 - 58 MB / 55 MiB - 113792 sectors (RO), sector size=512
+Disk /dev/loop10 - 52 MB / 49 MiB - 101664 sectors (RO), sector size=512
+Disk /dev/loop11 - 50 MB / 47 MiB - 98280 sectors (RO), sector size=512
+Disk /dev/loop2 - 120 MB / 114 MiB - 235368 sectors (RO), sector size=512
+Disk /dev/loop3 - 120 MB / 114 MiB - 235496 sectors (RO), sector size=512
+Disk /dev/loop4 - 58 MB / 55 MiB - 113832 sectors (RO), sector size=512
+Disk /dev/loop5 - 590 MB / 562 MiB - 1152520 sectors (RO), sector size=512
+Disk /dev/loop6 - 172 MB / 164 MiB - 337424 sectors (RO), sector size=512
+Disk /dev/loop7 - 96 MB / 91 MiB - 187776 sectors (RO), sector size=512
+Disk /dev/loop8 - 12 MB / 11 MiB - 24064 sectors (RO), sector size=512
+Disk /dev/loop9 - 5955 KB / 5816 KiB - 11632 sectors (RO), sector size=512
+Disk /dev/nvme0n1 - 512 GB / 476 GiB - CHS 488386 64 32, sector size=512
+
+Partition table type (auto): EFI GPT
+Disk /dev/nvme0n1 - 512 GB / 476 GiB
+Partition table type: EFI GPT
+
+Interface Advanced
+hdr_size=92
+hdr_lba_self=1
+hdr_lba_alt=1000215215 (expected 1000215215)
+hdr_lba_start=34
+hdr_lba_end=1000215182
+hdr_lba_table=2
+hdr_entries=128
+hdr_entsz=128
+check_part_gpt failed for partition
+ 2 P MS Reserved               534528     567295      32768 [Microsoft reserved partition]
+ 1 P EFI System                  2048     534527     532480 [EFI system partition]
+ 2 P MS Reserved               534528     567295      32768 [Microsoft reserved partition]
+ 3 P MS Data                   567296  488559246  487991951 [Basic data partition] [OS]
+     NTFS, blocksize=4096, 249 GB / 232 GiB
+ 4 P Linux filesys. data    488560640  997244927  508684288 [root]
+ 5 P Windows Recovery Env   997244928 1000214527    2969600 [Basic data partition]
+gpt_change_part_type
+Change partition type:
+ 4 P Linux filesys. data    488560640  997244927  508684288 [root]
+Change partition type:
+ 4 P Unknown                488560640  997244927  508684288 [root]
+
+TestDisk exited normally.

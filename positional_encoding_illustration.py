@@ -35,19 +35,39 @@ P = getPosEnc()
 
 
 def illustratePos(matrix):
+    
     import matplotlib.pyplot as plt
+    #import matplotlib as mpl
     from mpl_toolkits.axes_grid1 import make_axes_locatable
-    fig, ax = plt.subplots()
+    #mpl.rcParams['axes.labelsize'] = 17
+    #mpl.rcParams['xtick.labelsize'] = 17
+    #mpl.rcParams['ytick.labelsize'] = 17
+    #mpl.rcParams['legend.fontsize'] = 10
+    fig, ax = plt.subplots(1,1,figsize=(17,9),dpi=120)
+    ax.grid(None)
     divider = make_axes_locatable(ax)
     cax = divider.append_axes('right', size='5%', pad=0.1)
-    im = ax.imshow(matrix,interpolation='nearest', aspect='auto')
-    fig.colorbar(im,cax=cax,orientation='vertical')
-    ax.set_ylabel("Position in sequence [idx]")
-    ax.set_xlabel("Embedded feature depth")
-    ax.xaxis.set_label_position('top') 
-    plt.show()
+    im = ax.imshow(matrix,interpolation='nearest', aspect='auto',cmap="viridis")
+    cbar = fig.colorbar(im,cax=cax,orientation='vertical')
+    for l in cbar.ax.yaxis.get_ticklabels():
+        l.set_weight("bold")
+        l.set_fontsize(17)
+    ax.set_ylabel("Position in sequence [idx]",fontsize=23,fontweight="bold")#,fontweight="bold")
+    ax.set_xlabel("Embedded feature depth",fontsize=23,fontweight="bold")#,fontweight="bold")
+    ax.xaxis.set_label_position('bottom') 
+    ax.tick_params(axis='both', which='major', labelsize=19)#,width=2)
+    for tick in ax.xaxis.get_major_ticks():
+        tick.label1.set_fontweight('bold')
+    for tick in ax.yaxis.get_major_ticks():
+        tick.label1.set_fontweight('bold')
+        
+    fig.show()
+    plt.grid(False)
+    fig.tight_layout()
+    fig.savefig("positional_encoding.pdf",dpi=fig.dpi)
     return None
 
-PE = efficientPosEnc(32,46,10000)
+#PE = efficientPosEnc(32,46,10000)
+PE = getPosEnc(32,50,10000)
 illustratePos(PE)
     

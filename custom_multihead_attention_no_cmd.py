@@ -23,12 +23,7 @@ import sys
 #arg 2: NUM_IN_OVERFIT
 #arg 3: NUM_LAYERS
 #arg 4: NUM_HEADS
- 
-try:
-    classChoice = int(sys.argv[1])
-except:
-    classChoice = None
-    pass
+classChoice = [0,1,2] #3 different ones 
 
 
 class AirplanesBoatsDataset(Dataset):
@@ -188,7 +183,7 @@ class rescale_coords(object):
     
     
 def generate_DS(dataFrame,classes=[x for x in range(10)]):
-    """ Note: as implemented now works for two classes only
+    """ Note: as implemented now works for two classes only. TODO: IMPLEMENT FOR VARIABLE LENGTH OF CLASSES
     Args
         classes: list of input-classes of interest {0:"aeroplane",1:"bicycle",2:"boat",3:"cat",4:"cow",5:"diningtable",6:"dog",7:"horse",8:"motorbike",9:"sofa"}   
         If none is provided, fetch all 9 classes
@@ -203,10 +198,18 @@ def generate_DS(dataFrame,classes=[x for x in range(10)]):
     """
     dataFrame.loadmat()
     dataFrame.convert_eyetracking_data(CLEANUP=True,STATS=True)
+    NUMCLASSES = len(classes) #TODO: IMPLEMENT GENERATE_DS FOR MORE THAN TWO CLASSES
+    
     
     dslen = 0
+    dslen_li = []
     for CN in classes: 
+        #print(CN)
         dslen += len(dataFrame.etData[CN])
+        dslen_li.append(len(dataFrame.etData[CN]))
+        #print("Total length is ",dslen)
+        
+    print(dslen_li)
     
     df = np.empty((dslen,8),dtype=object)
     
@@ -226,52 +229,37 @@ def generate_DS(dataFrame,classes=[x for x in range(10)]):
     datalist = []
     for CN in classes:
         datalist.append(dataFrame.etData[CN])
+        #print("DSET {} LENGTH is: ".format(CN),len(dataFrame.etData[CN]))
     
-    for i in range(dslen):
-        if(i<len(datalist[0])):
-            df[i,0] = [dataFrame.etData[classes[0]][i].filename+".jpg"]
-            filenames.append(dataFrame.classes[classes[0]]+"_"+dataFrame.etData[classes[0]][i].filename+".jpg")
-            df[i,1] = dataFrame.etData[classes[0]][i].gtbb
-            df[i,2] = classes[0]
-            targets[i] =  dataFrame.etData[classes[0]][i].gtbb
-            classlabels[i] = classes[0]
-            imdims[i] = dataFrame.etData[classes[0]][i].dimensions[:2] #some classes also have channel-dim
-            for j in range(dataFrame.NUM_TRACKERS):
-                sliceShape = dataFrame.eyeData[classes[0]][i][j][0].shape
-                df[i,3+j] = dataFrame.eyeData[classes[0]][i][j][0] #list items
-                if(sliceShape != (2,0)): #for all non-empty
-                    eyes[i,j,:sliceShape[0],:] = torch.from_numpy(dataFrame.eyeData[classes[0]][i][j][0][-32:].astype(np.int32)) #some entries are in uint16, which torch does not support
-                else: 
-                    eyes[i,j,:,:] = 0.0
-                    print("error-filled measurement [entryNo,participantNo]: ",i,",",j)
-                    print(eyes[i,j])
-                
-                    
-                #old: padding too early #eyes[i,j] = zero_pad(dataFrame.eyeData[classes[0]][i][j][0],num_points,-999) #list items
-                
-                
-        else: 
-            nextIdx = i-len(datalist[0])
-            df[i,0] = [dataFrame.etData[classes[1]][nextIdx].filename+".jpg"]
-            filenames.append(dataFrame.classes[classes[1]]+"_"+dataFrame.etData[classes[1]][nextIdx].filename+".jpg")
-            df[i,1] = dataFrame.etData[classes[1]][nextIdx].gtbb
-            targets[i] =  dataFrame.etData[classes[1]][nextIdx].gtbb
-            df[i,2] = classes[1]
-            classlabels[i] = classes[1]
-            imdims[i] = dataFrame.etData[classes[1]][nextIdx].dimensions
-            for j in range(dataFrame.NUM_TRACKERS):
-                sliceShape = dataFrame.eyeData[classes[1]][nextIdx][j][0].shape
-                df[i,3+j] = dataFrame.eyeData[classes[1]][nextIdx][j][0]
-                if(sliceShape != (2,0)): #for empty
-                    eyes[i,j,:sliceShape[0],:] = torch.from_numpy(dataFrame.eyeData[classes[1]][nextIdx][j][0][-32:]) #last 32 points
-                else:
-                    eyes[i,j,:,:] = 0.0
-                
-                #old: padding too early #eyes[i,j] = zero_pad(dataFrame.eyeData[classes[1]][nextIdx][j][0],num_points,-999) #list items
-                
+    idx = 0
+    IDXSHIFTER = 0
+    k = 0
+    for i in range(dslen): 
+        if((i==sum(dslen_li[:k+1])) and (i!=0)): #evaluates to true when class-set k is depleted
+            #print("depleted dataset {} at idx {}".format(k,i))
+            IDXSHIFTER += dslen_li[k]
+            k += 1
             
-        
-        
+        idx = i - IDXSHIFTER
+        df[i,0] = [dataFrame.etData[classes[k]][idx].filename+".jpg"]
+        filenames.append(dataFrame.classes[classes[k]]+"_"+dataFrame.etData[classes[k]][idx].filename+".jpg")
+        df[i,1] = dataFrame.etData[classes[k]][idx].gtbb
+        df[i,2] = classes[k]
+        targets[i] =  dataFrame.etData[classes[k]][idx].gtbb
+        classlabels[i] = classes[k]
+        imdims[i] = dataFrame.etData[classes[k]][idx].dimensions[:2] #some classes also have channel-dim
+        for j in range(dataFrame.NUM_TRACKERS):
+            sliceShape = dataFrame.eyeData[classes[k]][idx][j][0].shape
+            df[i,3+j] = dataFrame.eyeData[classes[k]][idx][j][0] #list items
+            if(sliceShape != (2,0)): #for all non-empty
+                eyes[i,j,:sliceShape[0],:] = torch.from_numpy(dataFrame.eyeData[classes[k]][idx][j][0][-32:].astype(np.int32)) #some entries are in uint16, which torch does not support
+            else: 
+                eyes[i,j,:,:] = 0.0
+                #print("error-filled measurement [entryNo,participantNo]: ",idx,",",j)
+                #print(eyes[i,j])
+            
+            
+            
     print("Total length is: ",dslen)
     
     targetsTensor = torch.from_numpy(targets)
@@ -279,6 +267,32 @@ def generate_DS(dataFrame,classes=[x for x in range(10)]):
     imdimsTensor = torch.from_numpy(imdims)
     
     return df,filenames,eyes,targetsTensor,classlabelsTensor,imdimsTensor,dslen
+
+                    #old: padding too early #eyes[i,j] = zero_pad(dataFrame.eyeData[classes[0]][i][j][0],num_points,-999) #list items
+""" 
+                else: 
+                nextIdx = i-len(datalist[0])
+                df[i,0] = [dataFrame.etData[classes[1]][nextIdx].filename+".jpg"]
+                filenames.append(dataFrame.classes[classes[1]]+"_"+dataFrame.etData[classes[1]][nextIdx].filename+".jpg")
+                df[i,1] = dataFrame.etData[classes[1]][nextIdx].gtbb
+                targets[i] =  dataFrame.etData[classes[1]][nextIdx].gtbb
+                df[i,2] = classes[1]
+                classlabels[i] = classes[1]
+                imdims[i] = dataFrame.etData[classes[1]][nextIdx].dimensions
+                for j in range(dataFrame.NUM_TRACKERS):
+                    sliceShape = dataFrame.eyeData[classes[1]][nextIdx][j][0].shape
+                    df[i,3+j] = dataFrame.eyeData[classes[1]][nextIdx][j][0]
+                    if(sliceShape != (2,0)): #for empty
+                        eyes[i,j,:sliceShape[0],:] = torch.from_numpy(dataFrame.eyeData[classes[1]][nextIdx][j][0][-32:]) #last 32 points
+                    else:
+                        eyes[i,j,:,:] = 0.0
+                    
+                    #old: padding too early #eyes[i,j] = zero_pad(dataFrame.eyeData[classes[1]][nextIdx][j][0],num_points,-999) #list items
+"""
+            
+        
+        
+    
    
 
 
@@ -308,16 +322,17 @@ def zero_pad(inArr: np.array,padto: int,padding: int):
     
 classes = ["aeroplane","bicycle","boat","cat","cow","diningtable","dog","horse","motorbike","sofa"]
 if(classChoice!=None):
-    classesOC = [classChoice]
+    classesOC = classChoice
+    
 else:
-    print("No selection of data provided. Used cats.")
-    classesOC = [3]
-    classChoice = 3
+    print("No selection of data provided. Used a selectionen.")
+    classesOC = [3,2,1]
+    #classChoice = 3
 #-------------------------------------SCRIPT PARAMETERS---------------------------------------#
 torch.manual_seed(9)
 CHECK_BALANCE = False
-GENERATE_DATASET = False
-OVERFIT = True
+GENERATE_DATASET = True
+OVERFIT = False
 
 
 # #RUN_FROM_COMMANDLINE. Class at top of programme.
@@ -328,9 +343,13 @@ NHEADS = 2
 #NUM_IN_OVERFIT = 1
 #NLAYERS = 1
 #NHEADS = 1
-
-classString = classes[classChoice]
-SAVEFIGS = True
+if((len(classesOC)>1) and (len(classesOC)<10)):
+    classString = "multiple_classes"
+elif(len(classesOC)==10):
+    classString = "all_classes"
+else: 
+    classString = classes[classesOC[0]]
+#SAVEFIGS = True
 #parameters
 BATCH_SZ = 1
 EPOCHS = 2000
@@ -390,6 +409,7 @@ def get_split(root_dir,classesOC):
     classlist = ["aeroplane","bicycle","boat","cat","cow","diningtable","dog","horse","motorbike","sofa"]
 
     training_data = []
+    nsamples = []
     for classes in classesOC: #loop saves in list of lists format
         train_filename = split_dir + classlist[classes]+"_Rbbfix.txt"
         with open(train_filename) as file:
@@ -399,6 +419,7 @@ def get_split(root_dir,classesOC):
             lines[i] = classlist[classes]+"_"+lines[i]+".jpg"
             
         training_data.append(lines)
+        nsamples.append(len(lines))
         
     test_data = []
     for classes in classesOC: 
@@ -410,6 +431,7 @@ def get_split(root_dir,classesOC):
             lines[i] = classlist[classes]+"_"+lines[i]+".jpg"
             
         test_data.append(lines)
+        nsamples.append(len(lines))
     
     #unpack lists of lists to single list for train and for test
     train = []
@@ -418,13 +440,13 @@ def get_split(root_dir,classesOC):
         train = [*train,*training_data[i]]
         test = [*test,*test_data[i]]        
          
-    return train,test
+    return train,test,nsamples
 
 
 
 root_dir = os.path.dirname(__file__) + "/Data/POETdataset/"
 if(GENERATE_DATASET == True):
-    trainLi,testLi = get_split(split_root_dir,classesOC) #get Dimitrios' list of train/test-split.
+    trainLi,testLi,nsamples = get_split(split_root_dir,classesOC) #get Dimitrios' list of train/test-split.
     trainIDX = [airplanesBoats.filenames.index(i) for i in trainLi] #get indices of corresponding entries in data-structure
     testIDX = [airplanesBoats.filenames.index(i) for i in testLi]
     #subsample based on IDX
@@ -989,7 +1011,11 @@ def train_one_epoch_w_val(model,loss,trainloader,valloader,negative_print=False,
     return epochLoss,correct_count,false_count,target,data["signal"],mask,epochAcc,model,epochValLoss,epochValAcc, IOU_mt, IOU_mv
 
 print("-----------------------------------------------------------------------------")
-print("Model parameters:\n tL: {}\n vL: {}\nlrf: {}\n num_warmup: {}\n Dropout: {}\n Beta: {}\n NHEADS: {}\n NLAYERS: {}".format(NUM_IN_OVERFIT,len(valIDX),LR_FACTOR,NUM_WARMUP,DROPOUT,BETA,NHEADS,NLAYERS))
+if(OVERFIT):
+    print("Model parameters:\n tL: {}\n vL: {}\nlrf: {}\n num_warmup: {}\n Dropout: {}\n Beta: {}\n NHEADS: {}\n NLAYERS: {}".format(NUM_IN_OVERFIT,len(valIDX),LR_FACTOR,NUM_WARMUP,DROPOUT,BETA,NHEADS,NLAYERS))
+else:
+    print("Model parameters:\n tL: {}\nlrf: {}\n num_warmup: {}\n Dropout: {}\n Beta: {}\n NHEADS: {}\n NLAYERS: {}".format(NUM_IN_OVERFIT,LR_FACTOR,NUM_WARMUP,DROPOUT,BETA,NHEADS,NLAYERS))
+    
 #def train_number_of_epochs(EPOCHS,model,loss,trainloader,oTrainLoader,overfit=False,negative_print=False):
 epoch_number = 0
 epochLoss = 0 

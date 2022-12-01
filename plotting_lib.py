@@ -17,9 +17,10 @@ import math
 DEBUG = True
 
 #-----------------------END>--------------------------#
-className = "diningtable"
+className = "motorbike"
 impath = os.path.dirname(__file__)+"/Data/POETdataset/" #path for image-data
-dpath = impath + className #path for saved model-results
+dpath = impath + "/Results/"+className+"/nL_6_nH_2" #path for saved model-results
+#dpath = os.path.dirname(__file__)+"/timm_scripts/"+className+"/nL_1_nH_1"
 impath += "/PascalImages/"
 
 
@@ -184,8 +185,160 @@ def plot_train_set(data,root_dir,classOC=0):
     plt.show()
     return None
 
+def plot_three_train_set(data,root_dir,classOC=0):
+    """Prints subset of data which is overfit upon
+    Args: 
+        input: 
+            data: saved list-of-list-of-list containing model-data and image-names
+                Format: [filename,class,IOU,target,output,size]
+            root_dir: imagedir
+            classOC: descriptor of class which is used
+        returns: 
+            None
+    """                  
+    meanBox = mean_model(data)
+    medianBox = median_model(data)          
+    NSAMPLES = 3
+    NCOLS = 1
+    
+     
+    data = sample(data,NSAMPLES)
+    NCOLS = NSAMPLES
+    
+    fig, ax = plt.subplots(math.ceil(NSAMPLES/NCOLS),NCOLS,figsize=(13,6))
+    col = 0
+    row = 0
+    for entry in range(NSAMPLES):
+        filename = data[entry][0][0]
+        im = plt.imread(root_dir+filename)
+        target,preds = bbox_for_plot(data[entry])
+        mean_box = single_format_bbox(meanBox, data[entry])
+        median_box = single_format_bbox(medianBox,data[entry])
+        rectT = patches.Rectangle((target[0],target[1]), target[2], target[3], linewidth=2, edgecolor='r', facecolor='none')
+        rectP = patches.Rectangle((preds[0],preds[1]), preds[2], preds[3], linewidth=2, edgecolor='m', facecolor='none')
+        rectM = patches.Rectangle((mean_box[0],mean_box[1]),mean_box[2],mean_box[3],linewidth=2,edgecolor='c',facecolor='none')
+        rectMed = patches.Rectangle((median_box[0],median_box[1]),median_box[2],median_box[3],linewidth=2,edgecolor='lightcoral',facecolor='none')
+        #if entry%NCOLS==0 and entry!=0: #NUMBER OF COLS
+        #    row += 1 
+        #    col = 0 
+        print("Col: ",col,"Row:",row)
+        ax[col].imshow(im)
+        ax[col].tick_params(left = False, right = False , labelleft = False ,labelbottom = False, bottom = False)
+        ax[col].add_patch(rectT)
+        ax[col].add_patch(rectP)
+        ax[col].add_patch(rectM)
+        ax[col].add_patch(rectMed)
+        
+        
+        #plt.text(target[0]+target[2]-10,target[1]+10, "IOU", bbox=dict(facecolor='red', alpha=0.5))
+        #ax[row,col].text(data[entry][4][0][2].item()-0.1,data[entry][4][0][1].item()+0.1,"IOU:{:.2f}".format(data[entry][2][0].item()),bbox=dict(facecolor='magenta', alpha=0.5),transform=ax[row,col].transAxes)
+        ax[col].text(0.02,0.05,"IOU:{:.2f}".format(data[entry][2]),bbox=dict(facecolor='magenta', alpha=0.75),transform=ax[col].transAxes)
+        ax[col].set_title(filename,fontweight="bold",size=8)
+        col += 1
+    plt.rcParams['legend.handlelength'] = 1
+    plt.rcParams['legend.handleheight'] = 1.125
+    fig.legend((rectT,rectP,rectM,rectMed),("Target","Prediction","Mean box","Median box"),loc="upper center",ncol=4,framealpha=0.0,bbox_to_anchor=(0.5, 0.95))
+    fig.suptitle("Predictions on subset of trainset")
+    plt.show()
+    plt.savefig("class_"+str(classOC)+"eval_on_trainset.pdf")
+    return None
 
-
+def plot_three_test_set(data,root_dir,classOC=0,meanBox=None,medianBox=None,mode=None):
+    """Prints subset of data which model is tested on
+    Args: 
+        input: 
+            data: saved list-of-list-of-list containing model-data and image-names
+                Format: [0: filename,
+                         1: prediction-result (0:false,1:correct),
+                         2: IOU-score
+                         4: target [tensor]
+                         5: prediction [tensor],
+                         6: image-dimensions in h,w]
+            root_dir: imagedir
+            classOC: descriptor of class which is used
+            meanBox: box with means of trainset
+            medianBox: box with medians of trainset
+        returns: 
+            None
+    """      
+            
+    NSAMPLES = 3
+    NCOLS = 3
+    if(mode!=None):
+        tmpData = []
+        for i in range(len(data)):
+            if(mode=="success"):
+                if(int(data[i][1])==1):
+                    tmpData.append(data[i])
+            elif(mode=="failure"):
+                if(int(data[i][1])==0):
+                    tmpData.append(data[i])
+        data = tmpData
+        del tmpData
+        
+        
+    data = sample(data,NSAMPLES)
+    NCOLS = 3
+    
+    fig, ax = plt.subplots(math.ceil(NSAMPLES/NCOLS),NCOLS,figsize=(13,6))
+    col = 0
+    row = 0
+    for entry in range(NSAMPLES):
+        filename = data[entry][0][0]
+        im = plt.imread(root_dir+filename)
+        target,preds = bbox_for_plot(data[entry])
+        if(meanBox!=None):
+            mean_box = single_format_bbox(meanBox, data[entry])
+            rectM = patches.Rectangle((mean_box[0],mean_box[1]),mean_box[2],mean_box[3],linewidth=2,edgecolor='c',facecolor='none')
+        if(medianBox!=None):
+            median_box = single_format_bbox(medianBox,data[entry])
+            rectMed = patches.Rectangle((median_box[0],median_box[1]),median_box[2],median_box[3],linewidth=2,edgecolor='lightcoral',facecolor='none')
+        rectT = patches.Rectangle((target[0],target[1]), target[2], target[3], linewidth=2, edgecolor='r', facecolor='none')
+        rectP = patches.Rectangle((preds[0],preds[1]), preds[2], preds[3], linewidth=2, edgecolor='m', facecolor='none')
+        
+        if entry%NCOLS==0 and entry!=0: #NUMBER OF COLS
+            row += 1 
+            col = 0 
+        print("Col: ",col,"Row:",row)
+        ax[col].imshow(im)
+        ax[col].tick_params(left = False, right = False , labelleft = False ,labelbottom = False, bottom = False)
+        ax[col].add_patch(rectT)
+        ax[col].add_patch(rectP)
+        legend_tuple = (rectT,rectP)
+        legend_name_tuple = ("Target","Prediction")
+        legend_ncol = 2
+        
+        if(meanBox!=None):
+            ax[col].add_patch(rectM)
+            new_legend_tuple = legend_tuple + (rectM,)
+            new_legend_name_tuple = legend_name_tuple + ("Mean box",)
+            legend_tuple = new_legend_tuple 
+            legend_name_tuple = new_legend_name_tuple
+            legend_ncol += 1
+            del new_legend_tuple,new_legend_name_tuple
+            
+        if(medianBox!=None):
+            ax[col].add_patch(rectMed)
+            new_legend_tuple = legend_tuple + (rectMed,)
+            new_legend_name_tuple = legend_name_tuple + ("Median box",)
+            legend_tuple = new_legend_tuple 
+            legend_name_tuple = new_legend_name_tuple
+            legend_ncol += 1
+            del new_legend_tuple,new_legend_name_tuple
+            
+        
+        ax[col].text(0.02,0.05,"IOU:{:.2f}".format(data[entry][2]),bbox=dict(facecolor='magenta', alpha=0.75),transform=ax[col].transAxes)
+        ax[col].set_title(filename,fontweight="bold",size=8)
+        #ax[row,col].text(preds[2],preds[3],"{:.2f}".format(data[entry][2][0].item()),bbox=dict(facecolor='magenta', alpha=0.5),transform=ax[row,col].transAxes)
+        col += 1
+    plt.rcParams['legend.handlelength'] = 1
+    plt.rcParams['legend.handleheight'] = 1.125
+    fig.legend(legend_tuple,legend_name_tuple,loc="upper center",ncol=legend_ncol,framealpha=0.0,bbox_to_anchor=(0.5, 0.95))
+    fig.suptitle("Predictions on subset of testset with mode: "+mode)
+    plt.show()
+    plt.savefig("class_"+str(classOC)+"eval_on_testnset"+mode+".pdf")
+    
+    return None
             
 def plot_test_set(data,root_dir,classOC=0,meanBox=None,medianBox=None,mode=None):
     """Prints subset of data which model is tested on
@@ -291,12 +444,15 @@ def plot_test_set(data,root_dir,classOC=0,meanBox=None,medianBox=None,mode=None)
     
 testdata = load_results(dpath,className,"test_on_test_results")
 testOnTrain = load_results(dpath,className,"test_on_train_results")
-plot_train_set(testOnTrain,impath)
+#plot_train_set(testOnTrain,impath)
 
 mean = mean_model(testOnTrain)
 median = median_model(testOnTrain)
-plot_test_set(testdata,impath,classOC=5,meanBox=mean,medianBox=median,mode="success")
-plot_test_set(testdata,impath,classOC=5,meanBox=mean,medianBox=median,mode="failure")
+#plot_test_set(testdata,impath,classOC=5,meanBox=mean,medianBox=median,mode="success")
+#plot_test_set(testdata,impath,classOC=5,meanBox=mean,medianBox=median,mode="failure")
+
+#plot_three_train_set(testOnTrain,impath,classOC=3)
+#plot_three_test_set(testdata,impath,classOC=3,meanBox=mean,medianBox=median,mode="failure")
 
 
 
@@ -304,6 +460,18 @@ mean = mean_model(testOnTrain)
 median = median_model(testOnTrain)
 
 
+def extract_specific_image_data(imagename,dataset):
+    for i, entry in enumerate(dataset):
+            try:
+                entry[0].index(imagename)
+                return entry
+            except ValueError:
+                pass
+    print("Not found in dataset")
+    return None
+        
+    
+extract_specific_image_data("motorbike_2008_002047.jpg",testdata)
 
        
       

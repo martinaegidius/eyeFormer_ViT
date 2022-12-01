@@ -14,6 +14,8 @@ import matplotlib.pyplot as plt
 from matplotlib import image
 import cv2
 import copy
+#from plotting_lib import extract_specific_image_data
+import torch
 
 DEBUG = True
 
@@ -280,7 +282,7 @@ class pascalET():
         plt.legend()
         plt.imshow(im)
         
-    def specific_plot(self,classOC,filename,resized=False,multiple=False,last32=False):
+    def specific_plot(self,classOC,filename,resized=False,multiple=False,last32=False,colorcoded = False,pred_box = None,imdims = None):
         from matplotlib.patches import Rectangle
         classdict = {0:"aeroplane",1:"bicycle",2:"boat",3:"cat",4:"cow",5:"diningtable",6:"dog",7:"horse",8:"motorbike",9:"sofa"}    
         self.chosen_class = classdict[classOC]
@@ -296,46 +298,136 @@ class pascalET():
         else:
             path = self.p + "/Data/POETdataset/PascalImages/Resized/"+self.chosen_class+"_"+filename
             
-        fig = plt.figure(3201)
-        im = image.imread(path)
-        plt.title("{}:{}".format(self.chosen_class,filename))
-        #now for eye-tracking-data
         
-        ax = plt.gca()
-        lol = self.bbox[idx]
-        print(self.bbox[idx])
         #single box: 
         if(multiple==False):
             x,y,w,h = self.get_bounding_box(self.bbox[idx])
         else:
             pass
+                    
+        im = image.imread(path)
+        
+        savename = filename.replace(".jpg","")
+        
+        rect = Rectangle((x,y),w,h,linewidth=4, edgecolor='r', facecolor='none')
+        if not (colorcoded):
+            fig = plt.figure(3201,figsize=(14,11))
+            #plt.title("{}:{}".format(self.chosen_class,filename))
+            #now for eye-tracking-data
+            ax = plt.gca()
+            ax.add_patch(rect)
+            for i in range(self.NUM_TRACKERS):
+                color = next(ax._get_lines.prop_cycler)['color']
+                mylabel = str(i+1)
+                num_fix = int(self.eyeData[classOC,idx,i][0].shape[0]/2) #get #no of rows
+                print(num_fix) #number of fixations on img
+                #Left eye
+                """plt.scatter(self.eyeData[idx,i][0][:,0],self.eyeData[idx,i][0][:,1],alpha=0.8,label=mylabel,color = color) #format: [classNo,file in class No, tracker No, listindex (always 0)]
+                plt.plot(self.eyeData[idx,i][0][0:num_fix,0],self.eyeData[idx,i][0][0:num_fix,1],label=str(),color= color)
+                plt.plot(self.eyeData[idx,i][0][num_fix:,0],self.eyeData[idx,i][0][num_fix:,1],label=str(),color = color)
+                """
+                if(last32==False):
+                    plt.scatter(self.eyeData[classOC,idx,i][0][:,0],self.eyeData[classOC,idx,i][0][:,1],alpha=0.8,label=mylabel,facecolors='none',edgecolors = color,s=450,linewidths=5) #format: [classNo,file in class No, tracker No, listindex (always 0)]
+                    plt.plot(self.eyeData[classOC,idx,i][0][0:num_fix,0],self.eyeData[classOC,idx,i][0][0:num_fix,1],label=str(),color= color,linewidth=4)
+                    plt.plot(self.eyeData[classOC,idx,i][0][num_fix:,0],self.eyeData[classOC,idx,i][0][num_fix:,1],label=str(),color = color,linewidth=4)
+                else: 
+                    plt.scatter(self.eyeData[classOC,idx,i][0][-32:,0],self.eyeData[classOC,idx,i][0][-32:,1],alpha=0.8,label=mylabel,facecolors='none',edgecolors = color,linewidths=5) #format: [classNo,file in class No, tracker No, listindex (always 0)]
+                    plt.plot(self.eyeData[classOC,idx,i][0][-32:,0],self.eyeData[classOC,idx,i][0][-32:,1],label=str(),color= color)
+                    plt.plot(self.eyeData[classOC,idx,i][0][-32:,0],self.eyeData[classOC,idx,i][0][-32:,1],label=str(),color = color)
             
-        #all boxes: 
-        
-        rect = Rectangle((x,y),w,h,linewidth=2, edgecolor='r', facecolor='none')
-        ax.add_patch(rect)
-        
-        for i in range(self.NUM_TRACKERS):
-            color = next(ax._get_lines.prop_cycler)['color']
-            mylabel = str(i+1)
-            num_fix = int(self.eyeData[classOC,idx,i][0].shape[0]/2) #get #no of rows
-            print(num_fix) #number of fixations on img
-            #Left eye
-            """plt.scatter(self.eyeData[idx,i][0][:,0],self.eyeData[idx,i][0][:,1],alpha=0.8,label=mylabel,color = color) #format: [classNo,file in class No, tracker No, listindex (always 0)]
-            plt.plot(self.eyeData[idx,i][0][0:num_fix,0],self.eyeData[idx,i][0][0:num_fix,1],label=str(),color= color)
-            plt.plot(self.eyeData[idx,i][0][num_fix:,0],self.eyeData[idx,i][0][num_fix:,1],label=str(),color = color)
-            """
+            legendtuple = (rect,)
+            legendnametuple = ("Target",)
+            legend_ncol = 1
+            if pred_box!=None:
+                predrect = Rectangle(pred_box[:2],pred_box[2],pred_box[3],linewidth=4, edgecolor='magenta', facecolor='none')
+                ax.add_patch(predrect)
+                legendtuple += (predrect,)
+                legendnametuple += ("Prediction",)
+                legend_ncol += 1
+            
+            leg_1 = plt.legend(prop={'size': 25,'weight':'bold'})
+            leg_2 = plt.legend(legendtuple,legendnametuple,loc="upper center",prop={'size': 25,'weight':'bold'},ncol=legend_ncol,framealpha=0.0,bbox_to_anchor=(0.5, 1.09))
+            plt.imshow(im)
+            ax.add_artist(leg_1)
+            if pred_box!=None:
+                ax.add_artist(leg_2)
+            ax.axis('off')
+            plt.savefig(savename+"standard_fix_plot.pdf")
+            plt.close(fig)
+            
+                
+            
+        else:
+            
+            #make a colormap which is relative to index 
+            #print(seqpos)
+            mylabel = str(1)
+            num_fix_li = []
+            
             if(last32==False):
-                plt.scatter(self.eyeData[classOC,idx,i][0][:,0],self.eyeData[classOC,idx,i][0][:,1],alpha=0.8,label=mylabel,color = color) #format: [classNo,file in class No, tracker No, listindex (always 0)]
-                plt.plot(self.eyeData[classOC,idx,i][0][0:num_fix,0],self.eyeData[classOC,idx,i][0][0:num_fix,1],label=str(),color= color)
-                plt.plot(self.eyeData[classOC,idx,i][0][num_fix:,0],self.eyeData[classOC,idx,i][0][num_fix:,1],label=str(),color = color)
+                import math
+                plt.figure()
+                fig, axes = plt.subplots(1,1,figsize=(14,11))
+                color = next(axes._get_lines.prop_cycler)['color']
+                for i in range(self.NUM_TRACKERS):#self.NUM_TRACKERS):
+                    if self.eyeData[classOC,idx,i][0].shape[0]%2 != 0: #if the complete length modulo 2 is not zero, different signal length for left eye and right eye exist. We discard last signal. This *may* be erroneus, as it might aswell be first one.
+                        num_fix = math.floor(self.eyeData[classOC,idx,i][0].shape[0]/2)
+                        correction = -1
+                    else: 
+                        correction = None
+                        num_fix = int(self.eyeData[classOC,idx,i][0].shape[0]/2)
+                    if self.eyeData[classOC,idx,i][0].shape[0]==0: #invalid fixes
+                        pass
+                    else:
+                        num_fix_li.append(num_fix)
+                        norm = plt.Normalize(0,1)
+                        seqpos = np.arange(num_fix)
+                        if(max(seqpos)!=0):
+                            seqpos = seqpos/max(seqpos) #normalize to unit-interval, ie. last fixation always 1 and first always 0 
+                            seqpos = np.concatenate((seqpos,seqpos),axis=0)
+                            #,alpha=0.8,label=mylabel,cmap=plt.get_cmap('brg')) #format: [classNo,file in class No, tracker No, listindex (always 0)]
+                            #following two lines are for lines
+                            #axes.plot(self.eyeData[classOC,idx,i][0][0:num_fix,0],self.eyeData[classOC,idx,i][0][0:num_fix,1],alpha=0.6,label=str(),color = color) #lines 
+                            #axes.plot(self.eyeData[classOC,idx,i][0][num_fix:correction,0],self.eyeData[classOC,idx,i][0][num_fix:correction,1],alpha=0.6,label=str(),color = color) #lines
+                            sc = axes.scatter(x=self.eyeData[classOC,idx,i][0][:correction,0],y=self.eyeData[classOC,idx,i][0][:correction,1],s=400,alpha=0.65,marker="o",c=seqpos,cmap=("cool"),norm=norm)
+                        else:
+                            pass
+                smap = plt.cm.ScalarMappable(cmap='cool', norm=norm)
+                cbar = fig.colorbar(smap, ax=axes, fraction=0.046,pad=0.04)#shrink=1)# fraction=0.046,pad=0.04)#, shrink = 0.8)
+                cbar.ax.tick_params(labelsize=25)
+                for tick in cbar.ax.yaxis.get_major_ticks():
+                    tick.label2.set_fontweight('bold')
+                cbar.ax.set_ylabel('Sequence position', rotation=90, labelpad = 12, fontdict = {"size":25,'weight':'bold'})
+                axes.add_patch(rect)
+                legendtuple = (rect,)
+                legendnametuple = ("Target",)
+                legend_ncol = 1
+                if pred_box!=None:
+                    predrect = Rectangle(pred_box[:2],pred_box[2],pred_box[3],linewidth=4, edgecolor='magenta', facecolor='none')
+                    axes.add_patch(predrect)
+                    legendtuple += (predrect,)
+                    legendnametuple += ("Prediction",)
+                    legend_ncol += 1
+                
+                plt.legend(legendtuple,legendnametuple,loc="upper center",prop={'size': 25,'weight':'bold'},ncol=legend_ncol,framealpha=0.0,bbox_to_anchor=(0.5, 1.15))
+                plt.imshow(im)
+                plt.grid(None)
+                plt.savefig(savename + "sequence_plot.pdf")
+                plt.close()
             else: 
-                plt.scatter(self.eyeData[classOC,idx,i][0][-32:,0],self.eyeData[classOC,idx,i][0][-32:,1],alpha=0.8,label=mylabel,color = color) #format: [classNo,file in class No, tracker No, listindex (always 0)]
-                plt.plot(self.eyeData[classOC,idx,i][0][-32:,0],self.eyeData[classOC,idx,i][0][-32:,1],label=str(),color= color)
-                plt.plot(self.eyeData[classOC,idx,i][0][-32:,0],self.eyeData[classOC,idx,i][0][-32:,1],label=str(),color = color)
-        plt.legend()
-        plt.imshow(im)
-        plt.savefig("after_cleanup.png")
+                for i in range(self.NUM_TRACKERS):
+                    plt.scatter(self.eyeData[classOC,idx,i][0][-32:,0],self.eyeData[classOC,idx,i][0][-32:,1],alpha=0.8,label=mylabel,color = color) #format: [classNo,file in class No, tracker No, listindex (always 0)]
+                    plt.plot(self.eyeData[classOC,idx,i][0][-32:,0],self.eyeData[classOC,idx,i][0][-32:,1],label=str(),color= color)
+                    plt.plot(self.eyeData[classOC,idx,i][0][-32:,0],self.eyeData[classOC,idx,i][0][-32:,1],label=str(),color = color)
+                plt.imshow(im)
+                plt.legend()
+                plt.savefig(savename+"no_32_.pdf")
+                plt.close()
+#        plt.legend()
+        #plt.legend(legendtuple,legendnametuple,loc="upper center",ncol=legend_ncol,framealpha=0.0,bbox_to_anchor=(0.5, 0.95))
+        #plt.imshow(im)
+        
+        #plt.savefig("after_cleanup.png")
        
         
         
@@ -474,7 +566,6 @@ class pascalET():
             plt.plot(self.eyeData[classOC,idx,i][0][0:num_fix,0],self.eyeData[classOC,idx,i][0][0:num_fix,1],label=str(),color= color)
             plt.plot(self.eyeData[classOC,idx,i][0][num_fix:,0],self.eyeData[classOC,idx,i][0][num_fix:,1],label=str(),color = color)
             
-                
                  
         plt.imshow(im)
         plt.legend()
@@ -482,18 +573,82 @@ class pascalET():
         
         
 if __name__ == "__main__":
-    """dset = pascalET()
-    dset.loadmat()
-    dset.convert_eyetracking_data(CLEANUP=False, STATS=False)
-    dset.load_images_for_class(0)
+    #dset = pascalET()
+    #dset.loadmat()
+    #dset.convert_eyetracking_data(CLEANUP=False, STATS=False)
+    #dset.load_images_for_class(0)
     #dset.specific_plot(0,"2008_003475")
-    dset.specific_plot_multiple_boxes(0,"2008_003475.jpg")
-    dset.convert_eyetracking_data(CLEANUP=True, STATS=True)
-    del dset """
+    #dset.specific_plot_multiple_boxes(0,"2008_003475.jpg")
+    #dset.convert_eyetracking_data(CLEANUP=True, STATS=True)
+    #del dset """
     dset = pascalET()
     dset.loadmat()
-    dset.convert_eyetracking_data(CLEANUP=True, STATS=True)
-    dset.load_images_for_class(0)
-    dset.specific_plot(0,"2008_003475.jpg",last32=False)
+    dset.convert_eyetracking_data(CLEANUP=True, STATS=True) #this script runs without mean. It runs BP - no issue.
     
+    #FOR SEQUENCE-FIXATION-PLOT
+    #get pred bbox: atm manually. Go to plotting_lib.py and use extract_specific_image_data(filename,dataset) and take out bounding box data
+    pred_box = torch.tensor([0.2214, 0.2976, 0.5340, 0.6835])
+    imdims = torch.tensor([375, 500])
+    pred_box[0::2] = pred_box[0::2]*imdims[1].to(dtype=torch.int16)
+    pred_box[1::2] = pred_box[1::2]*imdims[0].to(dtype=torch.int16)
+    w = int(pred_box[2]-pred_box[0].item())
+    h = int(pred_box[-1]-pred_box[1].item())
+    x = int(pred_box[0].item())
+    y = int(pred_box[1].item())
+    #dset.specific_plot(8,"2008_002047.jpg",last32=False,colorcoded = False)#,pred_box=(x,y,w,h))
+    #dset.specific_plot(8,"2008_002047.jpg",last32=False,colorcoded = True,pred_box=(x,y,w,h))
+    
+    #GENERATE ALL PLOTS OF INTEREST
+    filenames = ["2011_003134.jpg","2008_004979.jpg","2011_002803.jpg","2010_004714.jpg"]
+    pred_boxes = [torch.tensor([0.1572, 0.2672, 0.6670, 0.7373]),torch.tensor([0.2292, 0.2544, 1.0626, 0.9171]),torch.tensor([0.1591, 0.5225, 0.7960, 0.9533]),torch.tensor([0.4740, 0.5294, 0.9060, 0.6551]),torch.tensor([0.2214, 0.2976, 0.5340, 0.6835])]
+    imdims = [torch.tensor([333,500]),torch.tensor([375,500]),torch.tensor([375,500]),torch.tensor([374,500]),torch.tensor([375,500])]
+    classNo = [2,5,5,2,8]
+    for i,_ in enumerate(filenames):
+        dset.load_images_for_class(classNo[i])
+        pred_box = pred_boxes[i]
+        pred_box[0::2] = pred_box[0::2]*imdims[1].to(dtype=torch.int16)
+        pred_box[1::2] = pred_box[1::2]*imdims[0].to(dtype=torch.int16)
+        w = int(pred_box[2]-pred_box[0].item())
+        h = int(pred_box[-1]-pred_box[1].item())
+        x = int(pred_box[0].item())
+        y = int(pred_box[1].item())
+        dset.specific_plot(classNo[i],filenames[i],last32=False,colorcoded = False)#,pred_box=(x,y,w,h))
+        dset.specific_plot(classNo[i],filenames[i],last32=False,colorcoded = True,pred_box=(x,y,w,h))
+        
+        
+        
+        
+        
+    
+    #images used 
+    #1. small boat with big nile ship, class 2, file 2011_003134.jpg
+    #pred_box = torch.tensor([0.1572, 0.2672, 0.6670, 0.7373])
+    #target_box = torch.tensor([0.3200, 0.4865, 0.4760, 0.5495])
+    #imdims = torch.tensor([333, 500])
+    
+    #2. diningtable with person upper right, class 5, filename 2008_004979.jpg
+    # pred_box = torch.tensor([0.2292, 0.2544, 1.0626, 0.9171])
+    # target_box = torch.tensor([0.0020, 0.3493, 0.9900, 1.0000])
+    # imdims = torch.tensor([375, 500])
+    
+    #3. diningtable with two persons left right, class 5, 2011_002803.jpg
+    #pred_box = torch.tensor([0.1591, 0.5225, 0.7960, 0.9533])
+    #imdims = torch.tensor([375, 500])
+    
+    #4. boat hidden behind bushes, class 2, filename 2010_004714.jpg
+    #pred_box =  tensor([[0.4740, 0.5294, 0.9060, 0.6551]], dtype=torch.float64),
+    #tensor([[0.1520, 0.0831, 0.7774, 0.7681]]),
+    #tensor([[374., 500.]], dtype=torch.float64)]
+    
+    #5. motorbike with two persons in foreground, class  8
+    # [['motorbike_2008_002047.jpg'],
+    #  tensor([[0.2214, 0.2976, 0.5340, 0.6835]]),
+    #  tensor([[375., 500.]], dtype=torch.float64)]
+    
+    
+    #for normal plot
+    #dset.specific_plot(5,"2011_003134.jpg",last32=False,colorcoded=False)
+    #dset.specific_plot_multiple_boxes(2,"2011_003134.jpg")#,last32=False)
+    
+    #dset.specific_plot(3,"2010_002137.jpg",last32=False)
     
