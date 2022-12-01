@@ -789,8 +789,7 @@ for epoch in (pbar:=tqdm(range(EPOCHS))):
         epochLossLI.append(epochLoss)
         epochAccLI.append(epochAcc)
         trainIOU.append(IOU_t)
-        epoch_number += 1 
-        
+        epoch_number += 1         
         
     except KeyboardInterrupt:
         print("Manual early stopping triggered")
