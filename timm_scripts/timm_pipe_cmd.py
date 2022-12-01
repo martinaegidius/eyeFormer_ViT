@@ -20,6 +20,7 @@ import sys
 #import handle_pascal as hdl
 from load_POET_timm import pascalET
 import box_operations as boxops
+from copy import deepcopy
 
 ###CALL WITH SYSTEM ARGUMENTS
 #arg 1: classChoice
@@ -288,7 +289,7 @@ elif(len(classesOC)==10):
 else: 
     classString = classes[classesOC[0]]
 
-BATCH_SZ = 8
+BATCH_SZ = 1
 # #RUN_FROM_COMMANDLINE. Class at top of programme.
 NUM_IN_OVERFIT = int(sys.argv[2]) #NUM-IN-OVERFIT EQUALS LEN(TRAIN) IF OVERFIT == False
 NLAYERS = int(sys.argv[3])
@@ -721,6 +722,29 @@ def train_one_epoch_w_val(model,loss,trainloader,valloader,negative_print=False,
     epochValAcc = correct_val_count/len(valloader.dataset)
     return epochLoss,correct_count,false_count,target,data["signal"],mask,epochAcc,model,epochValLoss,epochValAcc, IOU_mt, IOU_mv
 
+def save_model(model,classString,root_dir,params,mode,epochNo):
+    path = root_dir + "/" + classString+"/"
+    if not os.path.exists(path):
+        os.mkdir(path)
+        print("Created dir in: ",path)
+    path += "L_"+str(params[-1]) +"_nL_" + str(params[0]) +"_nH_" + str(params[1]) +"/" +mode+"/"
+    if not os.path.exists(path):
+        os.makedirs(path, exist_ok=True)
+        print("Created subdir in: ",path)
+    torch.save(model,path+"model.pth")
+    print("Wrote model from epoch {} to scratch in : {}".format(epoch,path))
+    torch.save(epoch,path+"epoch_no.pth")
+    return None
+
+def load_best_model(classString,root_dir,params,mode):
+    path = root_dir +"/" + classString +"/"
+    path += "L_"+str(params[-1]) +"_nL_" + str(params[0]) +"_nH_" + str(params[1]) +"/" +mode+"/"
+    epoch_no = torch.load(path+"epoch_no.pth")
+    model = torch.load(path+"model.pth")
+    print("Loaded model from epoch {}".format(epoch_no))
+    return model
+    
+
 print("-----------------------------------------------------------------------------")
 NPARAMS = vm.get_n_params(model)
 if(OVERFIT):
@@ -745,14 +769,18 @@ for epoch in (pbar:=tqdm(range(EPOCHS))):
     try:        
         if(OVERFIT):
             if(epoch==0):
+                BEST_MODEL = False
                 epochLoss, correct_count, false_count,target,signal,mask,epochAcc,model,valLoss,valAcc,IOU_t,IOU_v = train_one_epoch_w_val(model,loss_fn,trainloader,valloader,negative_print=False,DEBUG=False)
             else: 
                 epochLoss, correct_count, false_count,target,signal,mask,epochAcc,model,valLoss,valAcc,IOU_t,IOU_v = train_one_epoch_w_val(model,loss_fn,trainloader,valloader,negative_print=False)
+                if(valLoss < min(epochValLossLI)):
+                    print("Lower validation loss encountered in EPOCH {}, with current loss {} and earlier minimal loss {}".format(epoch,valLoss,min(epochValLossLI)))
+                    best_model = deepcopy(model)
+                    BEST_MODEL = True
             tmpStr = f" | avg train loss {epochLoss:.4f} | train acc: {epochAcc:.4f} | avg val loss: {valLoss:.4f} | avg val acc: {valAcc:.4f} | Mean Train IOU: {IOU_t:.4f} | Mean Val IOU: {IOU_v:.4f} |"
             epochValAccLI.append(valAcc)
             epochValLossLI.append(valLoss)
             valIOU.append(IOU_v)
-            
         else:
             epochLoss, correct_count, false_count,target,signal,mask,epochAcc,model,IOU_t = train_one_epoch(model,loss_fn,trainloader,negative_print=False)
             tmpStr = f" | avg train loss {epochLoss:.2f} | train acc: {epochAcc:.2f} | Epoch train IOU {IOU_t:.2f} |"
@@ -768,6 +796,10 @@ for epoch in (pbar:=tqdm(range(EPOCHS))):
         print("Manual early stopping triggered")
         break
     
+if(BEST_MODEL):
+    save_model(best_model,classString,timm_root,params=[NLAYERS,NHEADS],mode="val",epochNo=epoch)
+    del model
+    print("Cleared current trained sub-optimal model")
 
 
 def save_split(trainloader,valloader,classString,root_dir,params):
@@ -844,18 +876,6 @@ def save_IOU(IOU_li,classString,root_dir,params,mode):
     print("Wrote epoch IOU's to scratch in :",path)
     return None
 
-def save_model(model,classString,root_dir,params,mode):
-    path = root_dir + "/" + classString+"/"
-    if not os.path.exists(path):
-        os.mkdir(path)
-        print("Created dir in: ",path)
-    path += "L_"+str(params[-1]) +"_nL_" + str(params[0]) +"_nH_" + str(params[1]) +"/" +mode+"/"
-    if not os.path.exists(path):
-        os.mkdir(path)
-        print("Created subdir in: ",path)
-    torch.save(model.state_dict(),path+"model.pth")
-    print("Wrote finished model to scratch in :",path)
-    return None
 
 if(EVAL==0):
     save_epochs(epochLossLI,epochAccLI,classString,timm_root,mode="result",params=[NLAYERS,NHEADS,len(trainloader.dataset)])
@@ -918,7 +938,7 @@ def get_median_model(trainloader): #NEED TO FIX FOR BATCHES
 
 
 
-#---------------------TEST AND EVAL -------------#
+#---------------------TEST AND EVAL OF BEST MODEL FOUND-------------#
 if OVERFIT:
     paramsString = timm_root +"/"+ classString + "/L_" +str(NUM_IN_OVERFIT) +"_nL_" + str(NLAYERS) +"_nH_" + str(NHEADS)+"/" #for saving to correct dirs
 else:
@@ -932,9 +952,14 @@ IOU_tr_li = []
 meanModel = get_mean_model(trainloader)
 medianModel = get_median_model(trainloader)
 
-model.eval()
+if(BEST_MODEL==True):
+    model = load_best_model(classString,timm_root,params=[NLAYERS,NHEADS],mode="val")
+else: 
+    print("Best model was last model. Using model with training epochs {}".format(len(epochValLossLI)))
+
 
 print("Entered evaluation-phase.")
+model.eval()
 if(OVERFIT):
     print("Model parameters:\n tL: {}\n vL: {}\nlrf: {}\n num_warmup: {}\n Dropout: {}\n Beta: {}\n NHEADS: {}\n NLAYERS: {}\n BATCH-SIZE: {}".format(NUM_IN_OVERFIT,len(valIDX),LR_FACTOR,NUM_WARMUP,DROPOUT,BETA,NHEADS,NLAYERS,BATCH_SZ))
     #print("Model parameters:\n tL: {} \nlrf: {}\n num_warmup: {}\n Dropout: {}\n Beta: {}\n NHEADS: {}\n NLAYERS: {}".format(NUM_IN_OVERFIT,LR_FACTOR,NUM_WARMUP,DROPOUT,BETA,NHEADS,NLAYERS)) #running overfit-set without validation for speediness
